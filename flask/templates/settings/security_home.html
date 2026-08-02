@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+{% block content %}
+<nav>
+    <ul>
+        <li><a href="{{ url_for('settings.settings_home') }}">Back to Settings</a></li>
+    </ul>
+</nav>
+
+<h2>Security Settings</h2>
+<div class="post">
+
+{% if user_has_email %}
+<p>Your email: <strong>{{ email }}</strong></p>
+
+    {% if email_verified %}
+        <p>Your email is verified</p>
+    {% else %}
+        <p>Your email isn't verified - <a href="{{ url_for('auth.two_factor_authentication') }}">Verify-it</a></p>
+    {% endif %}
+{% else %}
+<p>No email has been added - <a href="{{ url_for('settings.account_change_email') }}">Add an Email</a></li></p>
+{% endif %}
+
+    <hr>
+    
+    <div class="form-actions">
+        <script src="{{ url_for('static', filename='js/auto_submit_checkbox.js') }}" defer></script>
+        
+        <h3>Account Security</h3>
+        <p>Your IP address {{ ip_address }} - {{ session_location }}</p>
+        <form action="{{ url_for('main.logout') }}" method="get">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" class="button_red">Log out</button>
+        </form>
+
+        <hr>
+
+        <h4>Authentication</h4>
+        <form action="{{ url_for('settings.settings_switch_2fa') }}" method="post" class="auto-submit-form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <label>
+                <input type="checkbox" name="enable_2fa" class="auto-submit-checkbox"
+                    {% if twofa_enabled %}checked{% endif %}>
+                {% if twofa_enabled %}
+                Disable Two-Factor Authentication
+                {% else %}
+                Enable Two-Factor Authentication
+                {% endif %}
+                
+            </label>
+        </form>
+
+        <h4>Sessions and devices</h4>
+        <p>See and manage active sessions.</p>
+
+        {% for session in sessions %}
+        <div class="post">
+            <h5>Session : {{ session['session_id_hash'] }}</h5>
+            <br>
+            <p>
+                Created at   : {{ format_datetime(session['created_at']) }}<br>
+                Expires at   : {{ format_datetime(session['expires_at']) }}<br>
+                Last used at : {{ format_datetime(session['last_used_at']) }}<br>
+
+                {% if session['session_id_hash'] == session_id_hash %}
+                <br>Your IP address {{ ip_address }} - {{ session_location }}
+                {% endif %}
+            </p>
+
+            {% if session['is_revoked'] %}
+                <p>Session is not active</p>
+                <form action="{{ url_for('settings.settings_delete_session', session_id_hash=session['session_id_hash']) }}" method="post">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="button">Delete this session</button>
+                </form>
+            {% else %}
+                <p>Session is active</p>
+                <form action="{{ url_for('settings.settings_logout_session', session_id_hash=session['session_id_hash']) }}" method="post">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="button">Log out this session</button>
+                </form>
+            {% endif %}
+
+        </div>
+        {% endfor %}
+
+        <form action="{{ url_for('settings.settings_logout_all') }}" method="post">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" class="button_red">Log out from all devices</button>
+        </form>
+       
+        <hr>
+        
+        <p>Delete your account</p>
+        <form action="{{ url_for('settings.delete_account') }}" method="post" class="delete-action">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button class="button_red" type="submit" onclick="return confirm('Are you sure? This action cannot be undone.')">Delete Account</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

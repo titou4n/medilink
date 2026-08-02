@@ -1,0 +1,27 @@
+{% extends 'base_login_register.html' %}
+{% block content %}
+<div class="little_post">
+    <h2>{% block title %} Login {% endblock %}</h2>
+    <form method="post">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <label for="email">E-mail</label>
+        <br>
+        <input class="input" type="text" name="email"
+            placeholder="E-mail"
+            value="{{ request.form['email'] }}" required></input>
+        <br>
+        <br>
+        <label for="password">Password</label>
+        <br>
+        <input class="input" type="password" name="password"
+            placeholder="Password"
+            value="{{ request.form['password'] }}" required></input>
+        <br>
+        <p>I don't have an account ? <a href="{{ url_for('auth.register') }}">Register</a></p>
+        <br>
+        <p><a href="{{ url_for('auth.forgot_password') }}">Forgot my password ?</a></p>
+        <br>
+        <button class="button" type="submit">Submit</button>
+    </form>
+</div>
+{% endblock %}

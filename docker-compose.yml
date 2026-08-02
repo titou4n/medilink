@@ -1,0 +1,110 @@
+services:
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: medilink-cloudflared
+    restart: unless-stopped
+    user: "0:0"
+    command: tunnel --no-autoupdate run --token-file /run/secrets/cloudflare_tunnel_token
+    depends_on:
+      - nginx
+    networks:
+      - medilink-edge-network
+    secrets:
+      - cloudflare_tunnel_token
+
+  flask:
+    image: titou4n/medilink-flask:latest
+    container_name: medilink-flask
+    restart: unless-stopped
+
+    environment:
+      ENV_PROD: "true"
+      FLASK_ENV: "production"
+      RATELIMIT_STORAGE_URI: redis://redis:6379/0
+      PROXY_TRUSTED_HOP_COUNT: "2"
+
+    volumes:
+      - db-data:/app/Data/db
+
+    expose:
+      - "5000"
+
+    depends_on:
+      redis:
+        condition: service_healthy
+
+    networks:
+      - medilink-network
+
+    secrets:
+      - secret_key
+      - email_app_password
+
+  redis:
+    image: redis:7-alpine
+    container_name: medilink-redis
+    restart: unless-stopped
+
+    command:
+      - redis-server
+      - --appendonly
+      - yes
+
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+    volumes:
+      - redis-data:/data
+
+    networks:
+      - medilink-network
+
+  nginx:
+    image: nginx:latest
+    container_name: medilink-nginx
+    restart: unless-stopped
+
+    # No `ports:` - not published on the host at all. The only path in is
+    # Cloudflare Tunnel -> cloudflared -> this container, over the internal
+    # medilink-edge-network below. Nothing to scan/bypass from the public internet.
+
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./certs:/etc/nginx/ssl:ro
+
+    depends_on:
+      - flask
+
+    networks:
+      # Sits on both tiers: reachable from cloudflared (medilink-edge-network) and
+      # able to reach flask (medilink-network) - the only bridge
+      # between the two.
+      - medilink-edge-network
+      - medilink-network
+
+networks:
+  # Public-facing tier: only cloudflared and nginx live here.
+  medilink-edge-network:
+    driver: bridge
+
+  # Backend tier: flask, redis and nginx (as the bridge). No fixed subnet
+  # pinning needed anymore - that was only there to match Nginx Proxy
+  # Manager's gateway address, which no longer applies now that NPM is out
+  # of the chain (see audits/).
+  medilink-network:
+    driver: bridge
+
+volumes:
+  db-data:
+  redis-data:
+
+secrets:
+  secret_key:
+    file: ./secrets/secret_key.txt
+  email_app_password:
+    file: ./secrets/email_app_password.txt
+  cloudflare_tunnel_token:
+    file: ./secrets/cloudflare_tunnel_token.txt

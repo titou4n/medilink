@@ -1,0 +1,11 @@
+# ===== Local scratch dir, not needed in the image =====
+tmp/
+
+# ===== VCS / editor / OS cruft =====
+.git/
+.gitignore
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db

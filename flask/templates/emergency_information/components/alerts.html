@@ -1,0 +1,25 @@
+<div class="ei-alert ei-alert--{{ category | default('info') }}"
+     role="alert"
+     aria-live="polite"
+     aria-atomic="true">
+
+  <span class="ei-alert__icon" aria-hidden="true">
+    {% set icons = {
+      'success': '✅',
+      'error': '❌',
+      'warning': '⚠️',
+      'info': 'ℹ️'
+    } %}
+    {{ icons.get(category, 'ℹ️') }}
+  </span>
+
+  <span class="ei-alert__message">{{ message }}</span>
+
+  <button type="button"
+          class="ei-alert__close"
+          aria-label="Dismiss notification"
+          onclick="this.closest('.ei-alert').remove()">
+    ×
+  </button>
+
+</div>

@@ -1,0 +1,123 @@
+{% extends "emergency_information/base_emergency_information.html" %}
+{% block page_content %}
+
+{% if not record %}
+
+<div class="ei-dashboard">
+  <div class="ei-card" style="text-align:center; padding: 3.5rem 2rem;">
+    <div style="font-size:3rem; margin-bottom:1rem; opacity:.4;">🏥</div>
+    <h2 class="ei-empty__title" style="font-size:1.25rem; font-weight:700; color:var(--ei-text-primary); margin-bottom:.5rem;">
+      No Medical Profile Found
+    </h2>
+    <p class="ei-empty__description" style="color:var(--ei-text-secondary); font-size:.9375rem; max-width:42ch; margin:0 auto 1.5rem;">
+      Create your emergency profile so first responders can access critical information instantly.
+    </p>
+    <a href="{{ url_for('emergency_information.edit') }}"
+      class="ei-btn ei-btn--primary ei-btn--large">
+      Create My Emergency Profile
+    </a>
+  </div>
+</div>
+
+{% else %}
+
+<div class="ei-dashboard">
+
+  <div style="display:flex; align-items:flex-start; justify-content:space-between; flex-wrap:wrap; gap:1rem; margin-bottom:.25rem;">
+    <div>
+      <h1 style="font-size:1.625rem; font-weight:700; letter-spacing:-.025em; color:var(--ei-text-primary); margin-bottom:.25rem;">
+        My Emergency Medical Profile
+      </h1>
+      <p style="color:var(--ei-text-secondary); font-size:.9375rem;">
+        This profile is accessible to emergency responders via a secure link. Keep your information up to date.
+      </p>
+    </div>
+  </div>
+
+  <!-- STATUS -->
+  <section class="ei-card ei-card--status">
+    <h2 class="ei-card__title">Profile Status</h2>
+
+    <div class="ei-status-badge {% if record.is_active %}ei-status-badge--active{% else %}ei-status-badge--inactive{% endif %}">
+      {% if record.is_active %}
+        ✅ Active — Publicly Accessible
+      {% else %}
+        ❌ Disabled — Not Publicly Accessible
+      {% endif %}
+    </div>
+
+    <dl class="ei-meta">
+      <div class="ei-meta__item">
+        <dt>Last Updated</dt>
+        <dd>{{ format_datetime(record.updated_at) or "-" }}</dd>
+      </div>
+      <div class="ei-meta__item">
+        <dt>Last Accessed by Rescuers</dt>
+        <dd>{{ format_datetime(record.last_public_access) or "-" }}</dd>
+      </div>
+    </dl>
+  </section>
+
+  <!-- PUBLIC LINK -->
+  <section class="ei-card ei-card--link">
+    <h2 class="ei-card__title">🔗 Your Emergency Link</h2>
+    <p class="ei-card__description">Share this link, print it as a QR code, or insert it in your emergency card.</p>
+
+    {% set public_url = base_url ~ url_for('emergency_information.public_view', token=record.public_token) %}
+
+    <div class="ei-token-box">
+      <input
+        id="public-url"
+        class="ei-token-box__input"
+        type="text"
+        readonly
+        value="{{ public_url }}"
+        aria-label="Public emergency URL"
+      />
+      <button
+        type="button"
+        class="ei-btn ei-btn--secondary ei-btn--small"
+        data-copy-target="public-url"
+      >
+        Copy
+      </button>
+    </div>
+
+    <form method="POST"
+          action="{{ url_for('emergency_information.regenerate_token') }}"
+          class="ei-token-form">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <button
+        type="submit"
+        class="ei-btn ei-btn--danger-outline ei-btn--small"
+        data-confirm-message="Regenerating the link will invalidate the current one. Continue?"
+      >
+        🔄 Regenerate Link
+      </button>
+    </form>
+  </section>
+
+  {% include "emergency_information/components/medical_card.html" %}
+  {% include "emergency_information/components/emergency_contact.html" %}
+
+</div>
+
+<div class="ei-actions">
+  <a href="{{ url_for('emergency_information.edit') }}" class="ei-btn ei-btn--primary">✏️ Edit My Profile</a>
+
+  <form method="POST"
+        action="{{ url_for('emergency_information.delete') }}"
+        class="ei-actions__form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <button
+      type="submit"
+      class="ei-btn ei-btn--danger"
+      data-confirm-message="This will permanently delete your emergency medical information. Are you sure?">
+      🗑️ Delete My Profile
+    </button>
+  </form>
+</div>
+
+{% endif %}
+
+{% endblock %}

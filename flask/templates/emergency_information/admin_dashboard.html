@@ -1,0 +1,168 @@
+{% extends "emergency_information/base_emergency_information.html" %}
+{% block page_content %}
+
+<div class="ei-admin">
+
+  {# ========================= HEADER ========================= #}
+  <section class="ei-admin__header">
+    <div class="ei-admin__header-content">
+      <h1>Emergency Information — Admin</h1>
+      <h2 class="ei-admin__heading">
+        Medical Profiles
+        <span style="font-size:1rem; font-weight:500; color:var(--ei-text-secondary); margin-left:.5rem;">
+          {{ pagination.total }} {{ "profile" if pagination.total == 1 else "profiles" }}
+        </span>
+      </h2>
+      <p class="ei-admin__description">Manage emergency medical profiles, access status, and public visibility.</p>
+    </div>
+  </section>
+
+  {# ========================= TABLE ========================= #}
+  <section class="ei-card ei-admin__card">
+
+    <table class="ei-admin__table"
+           role="grid"
+           aria-label="Emergency information profiles">
+
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Patient</th>
+          <th>Status</th>
+          <th>Last Access</th>
+          <th>Updated</th>
+          <th class="ei-admin__actions-column">View</th>
+          <th class="ei-admin__actions-column">Disable / Enable</th>
+          <th class="ei-admin__actions-column">Delete</th>
+        </tr>
+      </thead>
+
+      <tbody>
+
+        {% for record in records %}
+
+        <tr class="{% if not record.is_active %}ei-admin__row--inactive{% endif %}">
+
+          <!-- ID -->
+          <td class="ei-admin__id">#{{ record.id }}</td>
+
+          <!-- PATIENT -->
+          <td>
+            <div class="ei-admin__patient">
+              <strong class="ei-admin__patient-name">
+                {{ record.first_name }} {{ record.last_name }}
+              </strong>
+            </div>
+          </td>
+
+          <!-- STATUS -->
+          <td>
+            {% if record.is_active %}
+            <span class="ei-badge ei-badge--active">Active</span>
+            {% else %}
+            <span class="ei-badge ei-badge--inactive">Disabled</span>
+            {% endif %}
+          </td>
+
+          <!-- LAST ACCESS -->
+          <td class="ei-admin__date">
+            {{ format_datetime(record.last_public_access) if record.last_public_access else "—" }}
+          </td>
+
+          <!-- UPDATED -->
+          <td class="ei-admin__date">
+            {{ format_datetime(record.updated_at) if record.updated_at else "—" }}
+          </td>
+
+          <!-- VIEW -->
+          <td class="ei-admin__actions">
+            <a class="ei-btn ei-btn--outline ei-btn--small"
+               href="{{ url_for('emergency_information.admin_view', record_id=record.id) }}"
+               aria-label="View {{ record.full_name }}">
+              👁️
+            </a>
+          </td>
+
+          <!-- ENABLE / DISABLE -->
+          <td class="ei-admin__actions">
+            <form method="POST"
+                  action="{{ url_for('emergency_information.admin_toggle', record_id=record.id) }}"
+                  class="ei-admin__inline-form">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button type="submit"
+                      class="ei-btn ei-btn--outline ei-btn--small"
+                      aria-label="{{ 'Disable' if record.is_active else 'Enable' }} {{ record.full_name }}">
+                {{ "🔒 Disable" if record.is_active else "🔓 Enable" }}
+              </button>
+            </form>
+          </td>
+
+          <!-- DELETE -->
+          <td class="ei-admin__actions">
+            <form method="POST"
+                  action="{{ url_for('emergency_information.admin_delete', record_id=record.id) }}"
+                  class="ei-admin__inline-form"
+                  onsubmit="return confirm('This will permanently delete the profile. Continue?');">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button type="submit"
+                      class="ei-btn ei-btn--danger ei-btn--small"
+                      aria-label="Delete {{ record.full_name }}">
+                🗑️
+              </button>
+            </form>
+          </td>
+
+        </tr>
+
+        {% else %}
+
+        <tr>
+          <td colspan="8" class="ei-admin__empty">
+            <div class="ei-admin__empty-content">
+              <div class="ei-admin__empty-icon">🏥</div>
+              <h3 class="ei-admin__empty-title">No Emergency Profiles</h3>
+              <p class="ei-admin__empty-text">
+                No emergency medical profiles were found in the database.
+              </p>
+            </div>
+          </td>
+        </tr>
+
+        {% endfor %}
+
+      </tbody>
+
+    </table>
+
+  </section>
+
+  {# ========================= PAGINATION ========================= #}
+  {% if pagination.pages > 1 %}
+  <nav class="ei-pagination" aria-label="Pagination">
+
+    {% if pagination.has_prev %}
+      <a class="ei-pagination__link"
+         href="?page={{ pagination.prev_num }}"
+         rel="prev">
+        ← Previous
+      </a>
+    {% endif %}
+
+    <span class="ei-pagination__info">
+      Page {{ pagination.page }} of {{ pagination.pages }}
+    </span>
+
+    {% if pagination.has_next %}
+      <a class="ei-pagination__link"
+         href="?page={{ pagination.next_num }}"
+         rel="next">
+        Next →
+      </a>
+    {% endif %}
+
+  </nav>
+  {% endif %}
+
+</div>
+
+{% endblock %}

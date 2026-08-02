@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% block content %}
+<nav>
+    <ul>
+        <li><a href="{{ url_for('admin.admin_panel') }}">Back to Admin Panel</a></li>
+    </ul>
+</nav>
+
+<div class="little_post">
+
+    <script src="{{ url_for('static', filename='js/permissions.js') }}"></script>
+    <form method="post">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+        <p>Current role name : {{ current_role_name }}</p>
+
+        <label>Role Name</label>
+        <input class="input" type="text" name="role_name" placeholder="Enter role name" value="{{ request.form['role_name'] }}" required>
+        <br>
+        
+        <!-----------------Permission---------------->
+        {% if dict_permissions %}
+            {% for type, list_permissions in dict_permissions.items() %}
+                <br>
+                <h5>
+                    <label>
+                        <input type="checkbox" class="parent-checkbox" data-type="{{ type }}">
+                        {{ type }}
+                    </label>
+                </h5>
+
+                {% if list_permissions %}
+                    {% for permission in list_permissions %}
+                        <label style="margin-left:20px;">
+                            <input type="checkbox" name="permissions" value="{{ permission }}" class="child-checkbox" data-type="{{ type }}">
+                            {{ permission }}
+                        </label>
+                    {% endfor %}
+                {% else %}
+                    <div class="post">
+                        <p>No Permissions</p>
+                    </div>
+                {% endif %}
+            {% endfor %}
+        {% endif %}
+        <!------------------------------------------->
+
+        <br>
+        <button class="button" type="submit">Create Role</button>
+        
+    </form>
+</div>
+{% endblock %}

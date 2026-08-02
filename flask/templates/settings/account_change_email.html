@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block content %}
+<nav>
+    <ul>
+        <li><a href="{{ url_for('settings.account_home') }}">Personal Information</a></li>
+        <li><a class="active" href="{{ url_for('settings.account_change_email') }}">Change Email</a></li>
+        <li><a href="{{ url_for('main.home') }}">Back to Home</a></li>
+    </ul>
+</nav>
+
+<h2>Change Your Email</h2>
+<div class="little_post">
+    {% if user_has_email %}
+        <p style="margin-bottom: 20px;">Your current email: <strong>{{ email }}</strong></p>
+    {% endif %}
+    
+    <form method="post">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <label for="email">New email</label>
+        <input class="input" type="email" name="email" placeholder="Enter an email" value="{{ request.form['email'] }}" required>
+        
+        <button class="button" type="submit">Update Email</button>
+    </form>
+</div>
+{% endblock %}

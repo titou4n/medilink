@@ -1,0 +1,25 @@
+{% extends 'base_login_register.html' %}
+{% block content %}
+<div class="little_post">
+    <script src="{{ url_for('static', filename='js/two_factor.js') }}"></script>
+    <h2>Two-step verification</h2>
+    <p>Enter the 6-digit code received by email.</p>
+    <br>
+
+    <form method="post">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="code-inputs">
+            <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]*">
+            <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]*">
+            <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]*">
+            <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]*">
+            <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]*">
+            <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]*">
+        </div>
+
+        <input value="{{ request.form['code'] }}" type="hidden" name="code" id="code">
+
+        <button class="button" type="submit">Submit</button>
+    </form>
+</div>
+{% endblock %}

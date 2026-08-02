@@ -1,0 +1,100 @@
+<section class="ei-card ei-card--medical"
+         aria-label="Medical summary">
+
+  <h2 class="ei-card__title">🏥 Medical Summary</h2>
+
+  <dl class="ei-summary">
+
+    <!-- IDENTITY -->
+    <div class="ei-summary__row ei-summary__row--identity">
+      <div class="ei-summary__item">
+        <dt>Name</dt>
+        <dd>{{ record.full_name }}</dd>
+      </div>
+      {% if record.age %}
+      <div class="ei-summary__item">
+        <dt>Age</dt>
+        <dd>{{ record.age }} years</dd>
+      </div>
+      {% endif %}
+      {% if record.gender %}
+      <div class="ei-summary__item">
+        <dt>Gender</dt>
+        <dd>{{ record.gender }}</dd>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- PHYSICAL -->
+    <div class="ei-summary__row">
+      <div class="ei-summary__item">
+        <dt>Blood Type</dt>
+        <dd>{{ record.blood_type or "—" }}</dd>
+      </div>
+      {% if record.height_cm %}
+      <div class="ei-summary__item">
+        <dt>Height</dt>
+        <dd>{{ record.height_cm }} cm</dd>
+      </div>
+      {% endif %}
+      {% if record.weight_kg %}
+      <div class="ei-summary__item">
+        <dt>Weight</dt>
+        <dd>{{ record.weight_kg }} kg</dd>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- ALLERGIES -->
+    {% if record.allergies %}
+    <div class="ei-summary__row ei-summary__row--critical">
+      <div class="ei-summary__item ei-summary__item--full">
+        <dt>⚠️ Allergies</dt>
+        <dd class="ei-summary__text--critical">{{ record.allergies }}</dd>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- CRITICAL INFO -->
+    {% if record.critical_info %}
+    <div class="ei-summary__row ei-summary__row--warning">
+      <div class="ei-summary__item ei-summary__item--full">
+        <dt>🔴 Critical Information</dt>
+        <dd>{{ record.critical_info }}</dd>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- CONDITIONS -->
+    {% if record.medical_conditions %}
+    <div class="ei-summary__row">
+      <div class="ei-summary__item ei-summary__item--full">
+        <dt>Conditions</dt>
+        <dd>{{ record.medical_conditions }}</dd>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- MEDICATIONS -->
+    {% if record.current_medications %}
+    <div class="ei-summary__row">
+      <div class="ei-summary__item ei-summary__item--full">
+        <dt>Medications</dt>
+        <dd>{{ record.current_medications }}</dd>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- ORGAN DONOR -->
+    <div class="ei-summary__row">
+      <div class="ei-summary__item">
+        <dt>🫀 Organ Donor</dt>
+        <dd>
+          {% if record.organ_donor %}✅ Yes{% else %}❌ No{% endif %}
+        </dd>
+      </div>
+    </div>
+
+  </dl>
+
+</section>

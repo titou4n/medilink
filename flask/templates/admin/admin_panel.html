@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% block content %}
+<nav>
+    <ul>
+        <li><a href="{{ url_for('main.home') }}">Back to Home</a></li>
+    </ul>
+</nav>
+
+<section id="intro" class="mid">
+  <div id="not-media">
+    <h3>Hi {{ name }}, Welcome on Admin Panel ⚙️</h3>
+    <p>Flask environnement : {{ flask_env }}</p>
+  </div>
+</section>
+
+
+<section id="first-row" class="mid">
+
+  <div class="finz">
+    <h4>Role and permission</h4>
+    <p>Role and permission manager</p>
+    <form action="{{ url_for('admin.role_permission_manager') }}" method="get">
+      <button class="button" type="submit">Role and permission</button>
+    </form>
+  </div>
+
+  <div class="finz">
+    <h4>Admin Panel</h4>
+    <p>Go to the Admin Panel</p>
+    <form action="{{ url_for('admin.admin_panel') }}" method="get">
+      <button class="button" type="submit">Admin Panel</button>
+    </form>
+  </div>
+
+  <div class="finz">
+    <h4>Admin Panel</h4>
+    <p>Go to the Admin Panel</p>
+    <form action="{{ url_for('admin.admin_panel') }}" method="get">
+      <button class="button" type="submit">Admin Panel</button>
+    </form>
+  </div>
+
+</section>
+{% endblock %}

@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+{% block content %}
+<nav>
+    <ul>
+        <li><a href="{{ url_for('admin.admin_panel') }}">Back to Admin Panel</a></li>
+    </ul>
+</nav>
+
+<section id="intro" class="mid">
+  <div id="not-media">
+    <h3>Welcome on Role and permission manager - Admin Panel ⚙️</h3>
+    <p>See and change : Role and permission</p>
+  </div>
+</section>
+
+
+<section id="first-row" class="mid">
+
+  <div class="finz">
+    <h4>Assign Role</h4>
+    <p>Assign Role</p>
+    <form action="{{ url_for('admin.assign_role') }}" method="get">
+      <button class="button" type="submit">Assign Role</button>
+    </form>
+  </div>
+
+  <div class="finz">
+    <h4>Create Role</h4>
+    <p>Create Role</p>
+    <form action="{{ url_for('admin.create_role') }}" method="get">
+      <button class="button" type="submit">Create Role</button>
+    </form>
+  </div>
+
+</section>
+
+<!-----------------Role/Permission---------------->
+<h3 class="balance-label">Roles & Permissions</h3>
+{% if dict_role_permission %}
+    {% for role_name, permissions in dict_role_permission.items() %}
+    <div class="post">
+      {% if role_name %}
+        <h4>{{ role_name }}</h4>
+      {% endif %}
+      <p>
+          {% if permissions %}
+              {% for perm in permissions %}
+                  {{ perm }}<br>
+              {% endfor %}
+          {% else %}
+              No permissions
+          {% endif %}
+      </p>
+      {% if role_name %}
+      
+        <form action="{{ url_for('admin.edit_role', role_name=role_name) }}" method="get">
+          <button class="button" type="submit">Edit</button>
+        </form>
+
+        <form action="{{ url_for('admin.delete_role', role_name=role_name) }}" method="post">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button class="button_red" type="submit" onclick="return confirm('Are you sure? This action cannot be undone.');">Delete</button>
+        </form>
+
+      {% endif %}
+    </div>
+    {% endfor %}
+{% else %}
+<div class="post">
+    <p>No Role and Permissions</p>
+</div>
+{% endif %}
+<!------------------------------------------------->
+
+
+{% endblock %}

@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% block content %}
+<!--<header>-->
+<nav>
+  <ul>
+    <li><a class="active" href="{{ url_for('main.home') }}">Home</a></li>
+    <li><a href="{{ url_for('settings.settings_home') }}">Settings</a></li>
+    {% if access_admin_panel %}
+    <li><a href="{{ url_for('admin.admin_panel') }}">Admin Panel</a></li>
+    {% endif %}
+    <li><a href="{{ url_for('main.logout') }}">Log Out</a></li>
+  </ul>
+</nav>
+<!--</header>-->
+
+<section id="intro" class="mid">
+  <div id="not-media">
+    <h3>Welcome, {{name}}!</h3>
+    <p>MediLink is a platform built to provide quality services 100% free. All your passwords are stored encrypted in our secure database for your protection.</p>
+  </div>
+</section>
+
+<section id="first-row" class="mid">
+
+  <div class="finz">
+    <h4>Your Profile</h4>
+    <p>View and manage your account. You can update your profile details, change your name, password.</p>
+    <form action="{{ url_for('settings.settings_home') }}" method="get">
+      <button class="button" type="submit">View Profile</button>
+    </form>
+  </div>
+
+</section>
+
+
+<section id="first-row" class="mid">
+  
+  <div class="finz">
+    <h4>Emergency Information</h4>
+    <p>Emergency Information is a centralized module that allows you to quickly view, manage, and update essential information in the event of an emergency.</p>
+    <form action="{{ url_for('emergency_information.dashboard') }}" method="get">
+      <button class="button" type="submit">See module</button>
+    </form>
+  </div>
+
+</section>
+
+
+
+{% endblock %}

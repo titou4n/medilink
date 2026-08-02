@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+{% block content %}
+<nav>
+    <ul>
+        <li><a href="{{ url_for('main.home') }}">Back to Home</a></li>
+    </ul>
+</nav>
+
+<section id="intro" class="mid">
+  <div id="not-media">
+    <h3>Hi {{ name }}, Welcome on your settings ⚙️</h3>
+    <p>From here, you can manage your account, security, privacy and application preferences.</p>
+  </div>
+</section>
+
+
+<section id="first-row" class="mid">
+
+  <div class="finz">
+    <h4>Your account</h4>
+    <p>Manage your personal information, account details and main preferences.</p>
+    <form action="{{ url_for('settings.account_home') }}" method="get">
+      <button class="button" type="submit">Go to my Account</button>
+    </form>
+  </div>
+
+  <div class="finz">
+    <h4>Security</h4>
+    <p>Configure security options like password, two-factor authentication and active sessions.</p>
+    <form action="{{ url_for('settings.security_home') }}" method="get">
+      <button class="button" type="submit">Security</button>
+    </form>
+  </div>
+
+  <div class="finz">
+    <h4>Notifications</h4>
+    <p>Choose how and when you want to receive notifications and alerts.</p>
+    <form action="{{ url_for('settings.notifications_home') }}" method="get">
+      <button class="button" type="submit">Notifications</button>
+    </form>
+  </div>
+
+  <div class="finz">
+    <h4>Appearance</h4>
+    <p>Customize the look and feel of the application to match your preferences.</p>
+    <form action="{{ url_for('settings.appearance_home') }}" method="get">
+      <button class="button" type="submit">Security</button>
+    </form>
+  </div>
+
+  <div class="finz">
+    <h4>Privacy</h4>
+    <p>Control your data, visibility settings and privacy-related options.</p>
+    <form action="{{ url_for('settings.privacy_home') }}" method="get">
+      <button class="button" type="submit">Security</button>
+    </form>
+  </div>
+
+  <div class="finz">
+    <h4>About/Support</h4>
+    <p>Find information about the application, updates and get help if needed.</p>
+    <form action="{{ url_for('settings.about_support_home') }}" method="get">
+      <button class="button" type="submit">About/Support</button>
+    </form>
+  </div>
+
+</section>
+{% endblock %}

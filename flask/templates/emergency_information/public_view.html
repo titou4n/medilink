@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="description" content="Emergency Medical Information for Responders">
+  <title>🚨 Emergency Medical Information — {{ record.first_name }} {{ record.last_name }}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style_emergency_information.css') }}">
+</head>
+
+<body class="pv-body">
+
+<header class="pv-header" role="banner">
+  <div class="pv-header__inner">
+    <div class="pv-header__icon" aria-hidden="true">🚨</div>
+    <div>
+      <h1 class="pv-header__title">EMERGENCY MEDICAL INFORMATION</h1>
+      <p class="pv-header__subtitle">For emergency responders only — Do not share</p>
+    </div>
+  </div>
+</header>
+
+<main class="pv-main" id="main-content" role="main">
+
+  <!-- IDENTITY -->
+  <section class="pv-identity" aria-label="Patient identity">
+    <div class="pv-identity__name">
+      {{ record.first_name }} {{ record.last_name }}
+    </div>
+    <div class="pv-identity__meta">
+      {% if record.age %}
+        <span class="pv-identity__tag">Age: {{ record.age }}</span>
+      {% endif %}
+      {% if record.gender %}
+        <span class="pv-identity__tag">{{ record.gender }}</span>
+      {% endif %}
+      {% if record.date_of_birth %}
+        <span class="pv-identity__tag">DOB / Né(e) le : {{ record.date_of_birth }}</span>
+      {% endif %}
+      {% if record.blood_type %}
+        <span class="pv-identity__tag pv-identity__tag--blood">🩸 Blood type / Groupe sanguin : {{ record.blood_type }}</span>
+      {% endif %}
+      {% if record.height_cm %}
+        <span class="pv-identity__tag">Height: {{ record.height_cm }} cm</span>
+      {% endif %}
+      {% if record.weight_kg %}
+        <span class="pv-identity__tag">Weight: {{ record.weight_kg }} kg</span>
+      {% endif %}
+    </div>
+  </section>
+
+  <!-- ALLERGIES -->
+  {% if record.allergies %}
+  <section class="pv-section pv-section--allergy">
+    <h2 class="pv-section__title pv-section__title--allergy">
+      ⚠️ ALLERGIES — READ FIRST / À LIRE EN PREMIER
+    </h2>
+    <ul class="pv-list pv-list--allergy">
+      {% for item in record.allergies.split('\n') if item.strip() %}
+        <li class="pv-list__item">{{ item.strip() }}</li>
+      {% else %}
+        <li class="pv-list__item">{{ record.allergies }}</li>
+      {% endfor %}
+    </ul>
+  </section>
+  {% endif %}
+
+  <!-- CRITICAL INFO -->
+  {% if record.critical_info %}
+  <section class="pv-section pv-section--critical">
+    <h2 class="pv-section__title">
+      🔴 Critical Information / Informations essentielles
+    </h2>
+    <ul class="pv-list">
+      {% for item in record.critical_info.split('\n') if item.strip() %}
+        <li class="pv-list__item">{{ item.strip() }}</li>
+      {% else %}
+        <li class="pv-list__item">{{ record.critical_info }}</li>
+      {% endfor %}
+    </ul>
+  </section>
+  {% endif %}
+
+  <!-- GRID SECTIONS -->
+  <div class="pv-grid">
+
+    {% if record.medical_conditions %}
+    <section class="pv-section">
+      <h2 class="pv-section__title">🏥 Medical Conditions / Problèmes de santé</h2>
+      <ul class="pv-list">
+        {% for item in record.medical_conditions.split('\n') if item.strip() %}
+          <li class="pv-list__item">{{ item.strip() }}</li>
+        {% else %}
+          <li class="pv-list__item">{{ record.medical_conditions }}</li>
+        {% endfor %}
+      </ul>
+    </section>
+    {% endif %}
+
+    {% if record.current_medications %}
+    <section class="pv-section">
+      <h2 class="pv-section__title">💊 Medications / Médicaments</h2>
+      <ul class="pv-list">
+        {% for item in record.current_medications.split('\n') if item.strip() %}
+          <li class="pv-list__item">{{ item.strip() }}</li>
+        {% else %}
+          <li class="pv-list__item">{{ record.current_medications }}</li>
+        {% endfor %}
+      </ul>
+    </section>
+    {% endif %}
+
+    {% if record.emergency_contact_name %}
+    <section class="pv-section">
+      <h2 class="pv-section__title">📞 Emergency Contact / Contact en cas d'urgence</h2>
+      <dl class="pv-dl">
+        <dt>Name / Nom</dt>
+        <dd>{{ record.emergency_contact_name }}</dd>
+        {% if record.emergency_contact_relation %}
+        <dt>Relation</dt>
+        <dd>{{ record.emergency_contact_relation }}</dd>
+        {% endif %}
+        {% if record.emergency_contact_phone %}
+        <dt>Phone / Téléphone</dt>
+        <dd>
+          <a class="pv-phone-link" href="tel:{{ record.emergency_contact_phone }}">
+            {{ record.emergency_contact_phone }}
+          </a>
+        </dd>
+        {% endif %}
+      </dl>
+    </section>
+    {% endif %}
+
+    {% if record.doctor_name %}
+    <section class="pv-section">
+      <h2 class="pv-section__title">🩺 Healthcare Provider / Professionnel de santé</h2>
+      <dl class="pv-dl">
+        <dt>Doctor / Docteur</dt>
+        <dd>{{ record.doctor_name }}</dd>
+        {% if record.doctor_phone %}
+        <dt>Phone / Téléphone</dt>
+        <dd>
+          <a class="pv-phone-link" href="tel:{{ record.doctor_phone }}">
+            {{ record.doctor_phone }}
+          </a>
+        </dd>
+        {% endif %}
+      </dl>
+    </section>
+    {% endif %}
+
+  </div>
+
+  <!-- ADDITIONAL NOTES -->
+  {% if record.medical_notes %}
+  <section class="pv-section">
+    <h2 class="pv-section__title">📋 Additional Notes</h2>
+    <p class="pv-text">{{ record.medical_notes }}</p>
+  </section>
+  {% endif %}
+
+  <!-- ORGAN DONOR -->
+  <section class="pv-section">
+    <h2 class="pv-section__title">🫀 Organ Donor Status</h2>
+    <div class="pv-organ-badge pv-organ-badge--{% if record.organ_donor %}yes{% else %}no{% endif %}">
+      {% if record.organ_donor %}
+        ✅ Registered organ donor
+      {% else %}
+        ❌ Not a registered organ donor
+      {% endif %}
+    </div>
+  </section>
+
+</main>
+
+<footer class="pv-footer" role="contentinfo">
+  <p class="pv-footer__notice">
+    This information is for emergency use only.<br>
+    Last updated:
+    <time datetime="{{ record.updated_at if record.updated_at else '' }}">
+      {% if record.updated_at %}
+        {{ format_datetime(record.updated_at) }}
+      {% else %}
+        —
+      {% endif %}
+    </time>
+  </p>
+</footer>
+
+<script src="{{ url_for('static', filename='js/public_view.js') }}"></script>
+
+</body>
+</html>

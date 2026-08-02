@@ -1,0 +1,76 @@
+{% extends 'base_index.html' %}
+{% block content %}
+<header>
+    <ul>
+        <li><a href="{{ url_for('auth.login') }}" class="button">Sign In</a></li>
+        <li><a href="{{ url_for('auth.register') }}" class="button">Sign Up</a></li>
+        <li>
+            <form action="{{ url_for('auth.continue_as_a_visitor') }}" method="post" style="display:inline;">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="button">Continue as a visitor</button>
+            </form>
+        </li>
+    </ul>
+</header>
+
+<div class="content">
+    <section id="hero">
+        <h1>Welcome to MediLink</h1>
+        <a href="#services" class="button">Explore Services</a>
+        <br><br>
+        <a href="{{ url_for('auth.register') }}" class="button">Get Started</a>
+    </section>
+
+    <section id="services">
+        <h2>Our Services</h2>
+        <div id="first-row">
+            <div class="finz">
+                <h3>Emergency Information</h3>
+                <p>Keep your critical medical information, allergies, and emergency contacts up to date and available at all times through a secure, shareable public link.</p>
+            </div>
+            <div class="finz">
+                <h3>Account Security</h3>
+                <p>Two-factor authentication by email, active session management, and full control over your personal data from a single security dashboard.</p>
+            </div>
+            <div class="finz">
+                <h3>Role-based Administration</h3>
+                <p>Fine-grained roles and permissions let administrators manage accounts and access safely across the whole platform.</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="about" class="mid">
+        <div>
+            <h2>About MediLink</h2>
+            <p>
+                Hello, I'm Titouan, the creator of MediLink, a service platform designed to help me practice web development and the use of Flask.
+                From web development to software programming, database implementation, and application security, each service is designed to be reliable, clear, and tailored to the real needs of users.
+                MediLink makes it a point of honor to offer effective, understandable, and evolutive solutions, while focusing on transparency, rigour, and customer satisfaction. Each project is a collaboration with a simple goal: to transform an idea into a functional and high-performance tool.
+                MediLink is a platform built to provide quality services 100% free.
+                We believe in offering modern tools and services while maintaining the highest standards of security and user experience.
+                Every password is encrypted and stored securely in our protected database.
+            </p>
+            <p>
+                Our mission is to create an intuitive, user-friendly platform that brings together various services in one place,
+                making it easier for users to manage their digital life.
+            </p>
+        </div>
+    </section>
+
+    <section id="features">
+        <h2>Why Choose MediLink?</h2>
+        <ul>
+            <li>Modern, sleek design with interactions</li>
+            <li>Bank-level security for your data</li>
+            <li>Many services</li>
+            <li>Because if you're reading this, it means you're at least a little bit interested.</li>
+            <li>I don't know what to put here anymore, but five ideas is more stylish.</li>
+        </ul>
+    </section>
+
+</div>
+
+<footer>
+    <p>&copy; 2026 MediLink. All rights reserved. | <a href="{{ url_for('main.conditions_uses') }}">Terms & Conditions</a></p>
+</footer>
+{% endblock %}

@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block content %}
+<nav>
+    <ul>
+        <li><a href="{{ url_for('settings.settings_home') }}">Back to Settings</a></li>
+    </ul>
+</nav>
+<h2>Privacy</h2>
+<div class="post">
+
+    <p>Export your Data</p>
+    <form action="{{ url_for('settings.export_data') }}" method="post">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button class="button" type="submit">Export Data</button>
+    </form>
+
+    <hr>
+
+    <p class="terms-footer">Je souhaites accéder au <a href="{{ url_for('main.conditions_uses') }}" target="_blank">CGU</a></p>
+    
+</div>
+{% endblock %}

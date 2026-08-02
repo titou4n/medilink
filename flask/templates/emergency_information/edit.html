@@ -1,0 +1,243 @@
+{% extends "emergency_information/base_emergency_information.html" %}
+{% block page_content %}
+
+<div class="ei-form-container">
+
+  <h2>{% if record %}Edit{% else %}Create{% endif %} Emergency Medical Profile</h2>
+
+  <form method="POST"
+        action="{{ url_for('emergency_information.edit') }}"
+        class="ei-form">
+
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+    {# ========================= IDENTITY ========================= #}
+    <fieldset class="ei-form__section">
+      <legend class="ei-form__section-title">Identity</legend>
+
+      <div class="ei-form__row ei-form__row--2col">
+        <div class="ei-form__group">
+          <label for="first_name" class="ei-form__label">First Name</label>
+          <input type="text"
+                 id="first_name"
+                 name="first_name"
+                 class="ei-form__input"
+                 value="{{ record.first_name or '' }}"
+                 placeholder="John"
+                 autocomplete="given-name">
+        </div>
+        <div class="ei-form__group">
+          <label for="last_name" class="ei-form__label">Last Name</label>
+          <input type="text"
+                 id="last_name"
+                 name="last_name"
+                 class="ei-form__input"
+                 value="{{ record.last_name or '' }}"
+                 placeholder="Doe"
+                 autocomplete="family-name">
+        </div>
+      </div>
+
+      <div class="ei-form__row ei-form__row--2col">
+        <div class="ei-form__group">
+          <label for="date_of_birth" class="ei-form__label">Date of Birth</label>
+          <input type="date"
+                 id="date_of_birth"
+                 name="date_of_birth"
+                 class="ei-form__input"
+                 value="{{ record.date_of_birth if record and record.date_of_birth else '' }}">
+        </div>
+        <div class="ei-form__group">
+          <label for="gender" class="ei-form__label">Gender</label>
+          <select id="gender" name="gender" class="ei-form__select">
+            <option value="">— Select —</option>
+            {% for value, label in gender_options %}
+              <option value="{{ value }}"
+                {% if record and record.gender == value %}selected{% endif %}>
+                {{ label }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+    </fieldset>
+
+    {# ========================= PHYSICAL ========================= #}
+    <fieldset class="ei-form__section">
+      <legend class="ei-form__section-title">Physical Information</legend>
+
+      <div class="ei-form__row ei-form__row--3col">
+        <div class="ei-form__group">
+          <label class="ei-form__label">Height (cm)</label>
+          <input type="number"
+                 name="height_cm"
+                 class="ei-form__input"
+                 value="{{ record.height_cm or '' }}"
+                 min="50"
+                 max="280"
+                 placeholder="170">
+        </div>
+        <div class="ei-form__group">
+          <label class="ei-form__label">Weight (kg)</label>
+          <input type="number"
+                 name="weight_kg"
+                 class="ei-form__input"
+                 value="{{ record.weight_kg or '' }}"
+                 min="1"
+                 max="700"
+                 step="0.1"
+                 placeholder="75.5">
+        </div>
+        <div class="ei-form__group">
+          <label class="ei-form__label">Blood Type</label>
+          <select name="blood_type" class="ei-form__select">
+            <option value="">— Unknown —</option>
+            {% for bt in blood_types %}
+              <option value="{{ bt }}"
+                {% if record and record.blood_type == bt %}selected{% endif %}>
+                {{ bt }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+    </fieldset>
+
+    {# ========================= CRITICAL ========================= #}
+    <fieldset class="ei-form__section ei-form__section--critical">
+      <legend class="ei-form__section-title">⚠️ Critical Information</legend>
+      <p class="ei-form__hint">
+        Provide essential information clearly and concisely for emergency responders.
+      </p>
+
+      <div class="ei-form__group" style="margin-bottom:1rem;">
+        <label class="ei-form__label ei-form__label--critical">Allergies</label>
+        <textarea name="allergies"
+                  class="ei-form__textarea ei-form__textarea--critical"
+                  rows="4"
+                  placeholder="Penicillin, Latex, Bee stings">{{ record.allergies or '' }}</textarea>
+      </div>
+
+      <div class="ei-form__group">
+        <label class="ei-form__label">Critical Notes</label>
+        <textarea name="critical_info"
+                  class="ei-form__textarea"
+                  rows="4"
+                  placeholder="Pacemaker, Diabetes, etc.">{{ record.critical_info or '' }}</textarea>
+      </div>
+    </fieldset>
+
+    {# ========================= MEDICAL ========================= #}
+    <fieldset class="ei-form__section">
+      <legend class="ei-form__section-title">Medical Information</legend>
+
+      <div class="ei-form__group" style="margin-bottom:1rem;">
+        <label class="ei-form__label">Medical Conditions</label>
+        <textarea name="medical_conditions"
+                  class="ei-form__textarea"
+                  rows="4"
+                  placeholder="Asthma, Diabetes">{{ record.medical_conditions or '' }}</textarea>
+      </div>
+
+      <div class="ei-form__group" style="margin-bottom:1rem;">
+        <label class="ei-form__label">Current Medications</label>
+        <textarea name="current_medications"
+                  class="ei-form__textarea"
+                  rows="4"
+                  placeholder="Metformin, Insulin">{{ record.current_medications or '' }}</textarea>
+      </div>
+
+      <div class="ei-form__group">
+        <label class="ei-form__label">Additional Notes</label>
+        <textarea name="medical_notes"
+                  class="ei-form__textarea"
+                  rows="4">{{ record.medical_notes or '' }}</textarea>
+      </div>
+    </fieldset>
+
+    {# ========================= EMERGENCY CONTACT ========================= #}
+    <fieldset class="ei-form__section">
+      <legend class="ei-form__section-title">Emergency Contact</legend>
+
+      <div class="ei-form__row ei-form__row--3col">
+        <div class="ei-form__group">
+          <label class="ei-form__label">Full Name</label>
+          <input type="text"
+                 name="emergency_contact_name"
+                 class="ei-form__input"
+                 value="{{ record.emergency_contact_name or '' }}">
+        </div>
+        <div class="ei-form__group">
+          <label class="ei-form__label">Phone</label>
+          <input type="tel"
+                 name="emergency_contact_phone"
+                 class="ei-form__input"
+                 value="{{ record.emergency_contact_phone or '' }}">
+        </div>
+        <div class="ei-form__group">
+          <label class="ei-form__label">Relationship</label>
+          <select name="emergency_contact_relation" class="ei-form__select">
+            <option value="">— Select —</option>
+            {% for rel in relation_options %}
+              <option value="{{ rel }}"
+                {% if record and record.emergency_contact_relation == rel %}selected{% endif %}>
+                {{ rel }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+    </fieldset>
+
+    {# ========================= DOCTOR ========================= #}
+    <fieldset class="ei-form__section">
+      <legend class="ei-form__section-title">Healthcare Provider</legend>
+
+      <div class="ei-form__row ei-form__row--2col">
+        <div class="ei-form__group">
+          <label class="ei-form__label">Doctor</label>
+          <input type="text"
+                 name="doctor_name"
+                 class="ei-form__input"
+                 value="{{ record.doctor_name or '' }}">
+        </div>
+        <div class="ei-form__group">
+          <label class="ei-form__label">Doctor Phone</label>
+          <input type="tel"
+                 name="doctor_phone"
+                 class="ei-form__input"
+                 value="{{ record.doctor_phone or '' }}">
+        </div>
+      </div>
+    </fieldset>
+
+    {# ========================= ORGAN DONATION ========================= #}
+    <fieldset class="ei-form__section ei-form__section--inline">
+      <legend class="ei-form__section-title">Organ Donation</legend>
+
+      <label class="ei-form__checkbox-label">
+        <input type="checkbox"
+               name="organ_donor"
+               value="1"
+               class="ei-form__checkbox"
+               {% if record and record.organ_donor %}checked{% endif %}>
+        I am a registered organ donor
+      </label>
+    </fieldset>
+
+    {# ========================= ACTIONS ========================= #}
+    <div class="ei-form__actions">
+      <button type="submit" class="ei-btn ei-btn--primary ei-btn--large">
+        💾 Save Profile
+      </button>
+      <a href="{{ url_for('emergency_information.dashboard') }}"
+         class="ei-btn ei-btn--ghost ei-btn--large">
+        Cancel
+      </a>
+    </div>
+
+  </form>
+
+</div>
+
+{% endblock %}

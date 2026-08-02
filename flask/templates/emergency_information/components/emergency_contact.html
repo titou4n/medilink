@@ -1,0 +1,73 @@
+<section class="ei-card ei-card--contact"
+         aria-label="Emergency contact information">
+
+  <h2 class="ei-card__title">📞 Emergency Contact</h2>
+
+  <!-- PRIMARY CONTACT -->
+  {% if record.emergency_contact_name %}
+
+  <div class="ei-contact-block">
+    <h3 class="ei-contact-block__title">Primary Contact</h3>
+    <dl class="ei-contact-list">
+
+      <div class="ei-contact-list__item">
+        <dt>Name</dt>
+        <dd>{{ record.emergency_contact_name }}</dd>
+      </div>
+
+      {% if record.emergency_contact_relation %}
+      <div class="ei-contact-list__item">
+        <dt>Relationship</dt>
+        <dd>{{ record.emergency_contact_relation }}</dd>
+      </div>
+      {% endif %}
+
+      {% if record.emergency_contact_phone %}
+      <div class="ei-contact-list__item">
+        <dt>Phone</dt>
+        <dd>
+          <a class="ei-contact-list__link"
+             href="tel:{{ record.emergency_contact_phone }}">
+            {{ record.emergency_contact_phone }}
+          </a>
+        </dd>
+      </div>
+      {% endif %}
+
+    </dl>
+  </div>
+
+  {% else %}
+    <p class="ei-card__empty">No emergency contact defined.</p>
+  {% endif %}
+
+  <!-- HEALTHCARE PROVIDER -->
+  {% if record.doctor_name %}
+
+  <div class="ei-contact-block">
+    <h3 class="ei-contact-block__title">🩺 Healthcare Provider</h3>
+    <dl class="ei-contact-list">
+
+      <div class="ei-contact-list__item">
+        <dt>Doctor</dt>
+        <dd>{{ record.doctor_name }}</dd>
+      </div>
+
+      {% if record.doctor_phone %}
+      <div class="ei-contact-list__item">
+        <dt>Phone</dt>
+        <dd>
+          <a class="ei-contact-list__link"
+             href="tel:{{ record.doctor_phone }}">
+            {{ record.doctor_phone }}
+          </a>
+        </dd>
+      </div>
+      {% endif %}
+
+    </dl>
+  </div>
+
+  {% endif %}
+
+</section>

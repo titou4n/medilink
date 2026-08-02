@@ -1,0 +1,231 @@
+================================================================================
+                    FICHE RÉCAP - COMMANDES DOCKER
+                       docker-compose Project
+================================================================================
+
+## 1. GESTION DES CONTENEURS
+================================================================================
+
+# Créer et démarrer les conteneurs
+docker-compose up -d
+docker-compose up
+
+# Démarrer (conteneurs existants)
+docker-compose start
+
+# Arrêter les conteneurs
+docker-compose stop
+
+# Arrêter et supprimer les conteneurs
+docker-compose down
+
+# Redémarrer les conteneurs
+docker-compose restart
+
+# Voir l'état des conteneurs
+docker-compose ps
+
+# Supprimer les volumes aussi
+docker-compose down -v
+
+
+## 2. LOGS & DEBUGGING
+================================================================================
+
+# Voir tous les logs en temps réel
+docker-compose logs -f
+
+# Logs d'un seul conteneur
+docker-compose logs -f flask
+docker-compose logs -f nginx
+
+# Voir les 50 dernières lignes
+docker-compose logs --tail=50
+
+# Sans suivi (affiche juste)
+docker-compose logs
+
+
+## 3. ACCÈS AUX CONTENEURS
+================================================================================
+
+# Ouvrir un shell dans le conteneur Flask
+docker exec -it medilink-flask /bin/bash
+
+# Ouvrir un shell dans Nginx
+docker exec -it medilink-nginx /bin/sh
+
+# Exécuter une commande sans shell
+docker exec medilink-flask python -c "print('test')"
+
+# Copier un fichier du conteneur à la machine
+docker cp medilink-flask:/app/file.txt ./file.txt
+
+# Copier un fichier de la machine au conteneur
+docker cp ./file.txt medilink-flask:/app/file.txt
+
+
+## 4. BUILD & IMAGES
+================================================================================
+
+# Reconstruire les images (sans cache)
+docker-compose up -d --build
+
+# Reconstruire sans utiliser le cache
+docker-compose build --no-cache
+
+# Voir les images locales
+docker images
+
+# Supprimer une image
+docker rmi medilink-flask:latest
+
+# Supprimer les images non utilisées
+docker image prune -a
+
+
+## 5. RÉSEAUX
+================================================================================
+
+# Voir tous les réseaux
+docker network ls
+
+# Inspécter un réseau
+docker network inspect medilink-network
+
+# Tester la connectivité entre conteneurs
+docker exec medilink-nginx ping medilink-flask
+
+# Tester une URL depuis un conteneur
+docker exec medilink-nginx curl http://medilink-flask:5000/
+
+
+## 6. VOLUMES
+================================================================================
+
+# Lister les volumes
+docker volume ls
+
+# Inspecter un volume
+docker volume inspect volumename
+
+# Supprimer les volumes non utilisés
+docker volume prune
+
+# Supprimer un volume spécifique
+docker volume rm volumename
+
+
+## 7. INSPECTION & DIAGNOSTIC
+================================================================================
+
+# Voir les ressources utilisées
+docker stats
+
+# Voir les processus en cours
+docker ps
+
+# Voir tous les conteneurs (arrêtés inclus)
+docker ps -a
+
+# Inspecter un conteneur
+docker inspect medilink-flask
+
+# Voir les modifications dans un conteneur
+docker diff medilink-flask
+
+# Voir l'historique des images
+docker history medilink-flask:latest
+
+
+## 8. NETTOYAGE
+================================================================================
+
+# Arrêter et supprimer tout
+docker-compose down
+
+# Supprimer les conteneurs arrêtés
+docker container prune
+
+# Supprimer les images non utilisées
+docker image prune
+
+# Supprimer les volumes non utilisés
+docker volume prune
+
+# Nettoyage COMPLET (⚠️ attention !)
+docker system prune -a --volumes
+
+
+## 9. TESTS & VÉRIFICATION
+================================================================================
+
+# Tester la santé de l'application
+curl http://localhost:8080/health
+
+# Tester via Nginx
+curl http://localhost:8080/
+
+# Tester directement Flask
+curl http://localhost:5000/
+
+# Voir les logs Nginx
+docker exec medilink-nginx tail -f /var/log/nginx/access.log
+
+# Voir les logs erreurs Nginx
+docker exec medilink-nginx tail -f /var/log/nginx/error.log
+
+
+## 10. COMMANDES AVANCÉES
+================================================================================
+
+# Afficher le contenu d'un fichier dans le conteneur
+docker exec medilink-flask cat /app/app.py
+
+# Vérifier la configuration Docker Compose
+docker-compose config
+
+# Valider le fichier docker-compose
+docker-compose config --quiet
+
+# Voir l'ordre de démarrage des services
+docker-compose up -d --no-start
+docker-compose start
+
+# Exécuter une commande one-shot
+docker-compose run flask python manage.py migrate
+
+
+## RACCOURCIS UTILES
+================================================================================
+
+# Alias pour raccourcir (ajouter au .bashrc ou profile)
+alias dc='docker-compose'
+
+# Utilisation :
+dc up -d
+dc logs -f
+dc down
+
+
+================================================================================
+                         💡 TIPS & ASTUCES
+================================================================================
+
+1. Toujours vérifier les logs avant de redémarrer
+   -> docker-compose logs -f
+
+2. Accéder à Flask en développement
+   -> docker exec -it medilink-flask /bin/bash
+
+3. Forcer la reconstruction complète
+   -> docker-compose down -v && docker-compose up -d --build
+
+4. Tester la communication entre conteneurs
+   -> docker exec medilink-nginx curl http://medilink-flask:5000/
+
+5. Sauvegarder l'état des conteneurs
+   -> docker-compose stop (sauvegarde tout)
+
+================================================================================
+================================================================================

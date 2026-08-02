@@ -1,0 +1,39 @@
+{% extends 'base_login_register.html' %}
+{% block content %}
+<div class="little_post">
+       <h2>{% block title %} Sign up {% endblock %}</h2>
+       <form method="post">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <label for="email">E-mail</label>
+              <br>
+              <input class="input" type="text" name="email"
+                     placeholder="E-mail"
+                     value="{{ request.form['email'] }}" required></input>
+              <br>
+              <br>
+              <label for="password">Password</label>
+              <br>
+              <input class="input" type="password" name="password"
+                     placeholder="Password"
+                     value="{{ request.form['password'] }}" required></input>
+              <br>
+              <br>
+              <label for="verif_password">Verif password</label>
+              <br>
+              <input class="input" type="password" name="verif_password"
+                     placeholder="Verif password"
+                     value="{{ request.form['verif_password'] }}" required></input>
+              <br>
+              <br>
+              <label for="terms">
+                     <input type="checkbox" name="terms" id="terms" required>
+                     J'accepte les <a href="{{ url_for('main.conditions_uses') }}" target="_blank">CGU</a>
+              </label>
+              <br>
+              <br>
+              <p>Already an account ? <a href="{{ url_for('auth.login') }}">Login</a></p>
+              <br>
+              <button class="button" type="submit">Submit</button>
+       </form>
+</div>
+{% endblock %}

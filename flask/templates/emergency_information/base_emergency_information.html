@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>{% block title %}Emergency Information{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style_emergency_information.css') }}">
+  {% block extra_styles %}{% endblock %}
+</head>
+
+<body class="ei-body ei-body--{{ page_context | default('default') }}">
+
+  {% block navigation %}
+  <nav class="ei-nav" role="navigation" aria-label="Main navigation">
+    <div class="ei-nav__container">
+      <a href="{{ url_for('main.home') }}" class="ei-nav__logo">
+        ← {{ Back }}
+      </a>
+    </div>
+  </nav>
+  {% endblock %}
+
+  <main class="ei-main" id="main-content" role="main">
+
+    {% block header %}
+    <div class="ei-container">
+      <header class="ei-page-header">
+        <h1 class="ei-page-header__title">{% block page_title %}{% endblock %}</h1>
+        {% block page_subtitle %}{% endblock %}
+      </header>
+    </div>
+    {% endblock %}
+
+    {% block messages %}
+    <div class="ei-container">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          <div role="region" aria-live="polite" aria-atomic="true">
+            {% for category, message in messages %}
+              <div class="ei-alert ei-alert--{{ category }}" role="alert">
+                <span class="ei-alert__icon" aria-hidden="true">
+                  {% if category == 'success' %}✅
+                  {% elif category == 'error' %}❌
+                  {% elif category == 'warning' %}⚠️
+                  {% else %}ℹ️
+                  {% endif %}
+                </span>
+                <span class="ei-alert__message">{{ message }}</span>
+                <button class="ei-alert__close" type="button" aria-label="Dismiss alert" onclick="this.parentElement.remove()">×</button>
+              </div>
+            {% endfor %}
+          </div>
+        {% endif %}
+      {% endwith %}
+    </div>
+    {% endblock %}
+
+    {% block content %}
+    <div class="ei-container">
+      {% block page_content %}{% endblock %}
+    </div>
+    {% endblock %}
+
+  </main>
+
+  {% block footer %}
+  <footer class="ei-footer" role="contentinfo">
+    <div class="ei-footer__inner">
+      <p class="ei-footer__text">Emergency Medical Information — Secure Access</p>
+    </div>
+  </footer>
+  {% endblock %}
+
+  <script src="{{ url_for('static', filename='js/emergency_information.js') }}"></script>
+  {% block extra_scripts %}{% endblock %}
+
+</body>
+</html>

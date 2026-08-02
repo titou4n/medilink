@@ -1,0 +1,63 @@
+# ===== Secrets =====
+secrets/
+flask\.env
+*.env
+.env.local
+*.pyc
+
+# ===== Flask / app =====
+instance/
+flask_session/
+
+# ===== Database =====
+*.db
+*.sqlite3
+
+# ===== Uploads =====
+flask/static/uploads/
+
+# ===== Python =====
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.pdb
+*.egg-info/
+*.egg
+*.manifest
+*.spec
+
+# ===== Pytest / cache =====
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# ===== VSCode =====
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+!.vscode/*.code-snippets
+!*.code-workspace
+*.vsix # Built Visual Studio Code Extensions
+
+# ===== Docker =====
+*.log
+*.pid
+*.env
+docker-compose.override.yml
+
+# ===== SSL Certificates =====
+certs/*.pem
+certs/*.key
+certs/*.crt
+certs/*.csr
+
+# ===== SECURITY_AUDITS =====
+audits/*.md
+
+# ===== CLAUDE =====
+CLAUDE.md
+.claude/
