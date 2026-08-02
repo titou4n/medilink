@@ -1,6 +1,6 @@
 # ===== Secrets =====
 secrets/
-flask\.env
+flask/.env
 *.env
 .env.local
 *.pyc

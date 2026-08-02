@@ -34,18 +34,12 @@ class Config:
     if not SECRET_KEY:
         raise RuntimeError("SECRET_KEY is missing")
     
-    USERNAME_SUPER_ADMIN: str = os.getenv("USERNAME_SUPER_ADMIN", "superadmin")
+    EMAIL_SUPER_ADMIN: str = os.getenv("EMAIL_SUPER_ADMIN", "superadmin@medilink.local")
     SUPER_ADMIN_INITIAL_PASSWORD_LENGTH: int = 24
     ROLE_NAME_SUPER_ADMIN: str = "super_admin"
     NAME_SUPER_ADMIN: str = "SUPER ADMIN"
 
-    # Visitor account (read-only demo access)
-    USERNAME_VISITOR: str = os.getenv("USERNAME_VISITOR", "UsernameVisitor")
-    PASSWORD_VISITOR: str = os.getenv("PASSWORD_VISITOR", "PasswordVisitor")
-    ROLE_NAME_VISITOR: str = "visitor"
-    NAME_VISITOR: str = "Visitor"
-
-    EMAIL_ADDRESS = os.getenv("EMAIL_ADDRESS", "medilink.mail@gmail.com")
+    EMAIL_ADDRESS = os.getenv("EMAIL_ADDRESS", "titouservice.mail@gmail.com")
     EMAIL_APP_PASSWORD = read_secret("email_app_password") if ENV_PROD else os.getenv("EMAIL_APP_PASSWORD")
     if not EMAIL_APP_PASSWORD:
         raise RuntimeError("EMAIL_APP_PASSWORD is missing")
@@ -118,7 +112,7 @@ class Config:
     ROLE_NAME_ADMIN: str = "admin"
 
     # Debug user (development only)
-    USERNAME_DEBUG: str    = os.getenv("USERNAME_DEBUG", "username_debug")
+    EMAIL_DEBUG: str       = os.getenv("EMAIL_DEBUG", "titouservice.mail@gmail.com")
     PASSWORD_DEBUG: str    = os.getenv("PASSWORD_DEBUG", "password_debug")
     ROLE_NAME_DEBUG: str   = ROLE_NAME_SUPER_ADMIN
     NAME_DEBUG : str       = "DEBUG"

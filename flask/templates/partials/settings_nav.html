@@ -1,0 +1,11 @@
+{% set ep = request.endpoint %}
+<nav aria-label="Settings sections">
+  <ul class="local-nav">
+    <li><a class="{{ 'active' if ep in ['settings.account_home','settings.account_change_name','settings.account_change_email','settings.account_change_password'] else '' }}" href="{{ url_for('settings.account_home') }}">Personal Information</a></li>
+    <li><a class="{{ 'active' if ep == 'settings.security_home' else '' }}" href="{{ url_for('settings.security_home') }}">Security</a></li>
+    <li><a class="{{ 'active' if ep == 'settings.notifications_home' else '' }}" href="{{ url_for('settings.notifications_home') }}">Notifications</a></li>
+    <li><a class="{{ 'active' if ep == 'settings.appearance_home' else '' }}" href="{{ url_for('settings.appearance_home') }}">Appearance</a></li>
+    <li><a class="{{ 'active' if ep == 'settings.privacy_home' else '' }}" href="{{ url_for('settings.privacy_home') }}">Privacy</a></li>
+    <li><a class="{{ 'active' if ep == 'settings.about_support_home' else '' }}" href="{{ url_for('settings.about_support_home') }}">About &amp; Support</a></li>
+  </ul>
+</nav>

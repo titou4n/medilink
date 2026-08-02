@@ -1,22 +1,23 @@
 {% extends 'base.html' %}
+{% block title %}Privacy — MediLink{% endblock %}
 {% block content %}
-<nav>
-    <ul>
-        <li><a href="{{ url_for('settings.settings_home') }}">Back to Settings</a></li>
-    </ul>
-</nav>
-<h2>Privacy</h2>
-<div class="post">
 
-    <p>Export your Data</p>
+{% include 'partials/settings_nav.html' %}
+
+<div class="page-header">
+  <h1>Privacy</h1>
+</div>
+
+<div class="card">
+    <h3 class="card__title">Export your data</h3>
+    <p>Download a copy of the personal data associated with your account.</p>
     <form action="{{ url_for('settings.export_data') }}" method="post">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-        <button class="button" type="submit">Export Data</button>
+        <button class="btn btn--secondary" type="submit">Export Data</button>
     </form>
 
     <hr>
 
-    <p class="terms-footer">Je souhaites accéder au <a href="{{ url_for('main.conditions_uses') }}" target="_blank">CGU</a></p>
-    
+    <p class="terms-footer">Read our <a href="{{ url_for('main.conditions_uses') }}" target="_blank">Terms &amp; Conditions</a></p>
 </div>
 {% endblock %}

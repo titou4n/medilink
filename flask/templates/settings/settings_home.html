@@ -1,68 +1,49 @@
 {% extends 'base.html' %}
+{% block title %}Settings — MediLink{% endblock %}
 {% block content %}
-<nav>
-    <ul>
-        <li><a href="{{ url_for('main.home') }}">Back to Home</a></li>
-    </ul>
-</nav>
 
-<section id="intro" class="mid">
-  <div id="not-media">
-    <h3>Hi {{ name }}, Welcome on your settings ⚙️</h3>
-    <p>From here, you can manage your account, security, privacy and application preferences.</p>
-  </div>
-</section>
+<div class="page-header">
+  <h1>Settings</h1>
+  <p class="page-subtitle">Manage your account, security, privacy and application preferences.</p>
+</div>
 
+<div class="card-grid">
 
-<section id="first-row" class="mid">
-
-  <div class="finz">
-    <h4>Your account</h4>
+  <div class="card">
+    <h3 class="card__title">Your account</h3>
     <p>Manage your personal information, account details and main preferences.</p>
-    <form action="{{ url_for('settings.account_home') }}" method="get">
-      <button class="button" type="submit">Go to my Account</button>
-    </form>
+    <a class="btn btn--secondary" href="{{ url_for('settings.account_home') }}">Go to my Account</a>
   </div>
 
-  <div class="finz">
-    <h4>Security</h4>
-    <p>Configure security options like password, two-factor authentication and active sessions.</p>
-    <form action="{{ url_for('settings.security_home') }}" method="get">
-      <button class="button" type="submit">Security</button>
-    </form>
+  <div class="card">
+    <h3 class="card__title">Security</h3>
+    <p>Configure your password, two-factor authentication and active sessions.</p>
+    <a class="btn btn--secondary" href="{{ url_for('settings.security_home') }}">Security</a>
   </div>
 
-  <div class="finz">
-    <h4>Notifications</h4>
+  <div class="card">
+    <h3 class="card__title">Notifications</h3>
     <p>Choose how and when you want to receive notifications and alerts.</p>
-    <form action="{{ url_for('settings.notifications_home') }}" method="get">
-      <button class="button" type="submit">Notifications</button>
-    </form>
+    <a class="btn btn--secondary" href="{{ url_for('settings.notifications_home') }}">Notifications</a>
   </div>
 
-  <div class="finz">
-    <h4>Appearance</h4>
+  <div class="card">
+    <h3 class="card__title">Appearance</h3>
     <p>Customize the look and feel of the application to match your preferences.</p>
-    <form action="{{ url_for('settings.appearance_home') }}" method="get">
-      <button class="button" type="submit">Security</button>
-    </form>
+    <a class="btn btn--secondary" href="{{ url_for('settings.appearance_home') }}">Appearance</a>
   </div>
 
-  <div class="finz">
-    <h4>Privacy</h4>
-    <p>Control your data, visibility settings and privacy-related options.</p>
-    <form action="{{ url_for('settings.privacy_home') }}" method="get">
-      <button class="button" type="submit">Security</button>
-    </form>
+  <div class="card">
+    <h3 class="card__title">Privacy</h3>
+    <p>Control your data, export it, and review privacy-related options.</p>
+    <a class="btn btn--secondary" href="{{ url_for('settings.privacy_home') }}">Privacy</a>
   </div>
 
-  <div class="finz">
-    <h4>About/Support</h4>
-    <p>Find information about the application, updates and get help if needed.</p>
-    <form action="{{ url_for('settings.about_support_home') }}" method="get">
-      <button class="button" type="submit">About/Support</button>
-    </form>
+  <div class="card">
+    <h3 class="card__title">About &amp; Support</h3>
+    <p>Find information about the application and get help if needed.</p>
+    <a class="btn btn--secondary" href="{{ url_for('settings.about_support_home') }}">About &amp; Support</a>
   </div>
 
-</section>
+</div>
 {% endblock %}

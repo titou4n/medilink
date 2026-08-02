@@ -1,39 +1,42 @@
 {% extends 'base_login_register.html' %}
+{% block title_tag %}Create an account — MediLink{% endblock %}
 {% block content %}
-<div class="little_post">
-       <h2>{% block title %} Sign up {% endblock %}</h2>
-       <form method="post">
-              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-              <label for="email">E-mail</label>
-              <br>
-              <input class="input" type="text" name="email"
-                     placeholder="E-mail"
-                     value="{{ request.form['email'] }}" required></input>
-              <br>
-              <br>
-              <label for="password">Password</label>
-              <br>
-              <input class="input" type="password" name="password"
-                     placeholder="Password"
-                     value="{{ request.form['password'] }}" required></input>
-              <br>
-              <br>
-              <label for="verif_password">Verif password</label>
-              <br>
-              <input class="input" type="password" name="verif_password"
-                     placeholder="Verif password"
-                     value="{{ request.form['verif_password'] }}" required></input>
-              <br>
-              <br>
-              <label for="terms">
-                     <input type="checkbox" name="terms" id="terms" required>
-                     J'accepte les <a href="{{ url_for('main.conditions_uses') }}" target="_blank">CGU</a>
-              </label>
-              <br>
-              <br>
-              <p>Already an account ? <a href="{{ url_for('auth.login') }}">Login</a></p>
-              <br>
-              <button class="button" type="submit">Submit</button>
-       </form>
+<div class="card card--narrow">
+    <h2>Create your account</h2>
+    <p class="page-subtitle" style="text-align:center; margin-bottom:20px;">Free access to your MediLink dashboard</p>
+
+    <form method="post">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+        <div class="field">
+            <label for="email">E-mail</label>
+            <input class="input" type="email" id="email" name="email"
+                placeholder="you@example.com"
+                value="{{ request.form['email'] }}" required>
+        </div>
+
+        <div class="field">
+            <label for="password">Password</label>
+            <input class="input" type="password" id="password" name="password"
+                placeholder="Choose a password"
+                value="{{ request.form['password'] }}" required>
+        </div>
+
+        <div class="field">
+            <label for="verif_password">Confirm password</label>
+            <input class="input" type="password" id="verif_password" name="verif_password"
+                placeholder="Repeat your password"
+                value="{{ request.form['verif_password'] }}" required>
+        </div>
+
+        <div class="checkbox-field">
+            <input type="checkbox" name="terms" id="terms" required>
+            <label for="terms" style="margin-bottom:0;">I accept the <a href="{{ url_for('main.conditions_uses') }}" target="_blank">Terms &amp; Conditions</a></label>
+        </div>
+
+        <button class="btn btn--full" type="submit">Create account</button>
+
+        <p class="form-footer">Already have an account? <a href="{{ url_for('auth.login') }}">Sign In</a></p>
+    </form>
 </div>
 {% endblock %}

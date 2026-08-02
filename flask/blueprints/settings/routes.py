@@ -30,10 +30,7 @@ def settings_home():
 def account_home():
     return render_template('settings/account_home.html',
                            id=current_user.id,
-                           username=current_user.username,
                            name=current_user.name,
-                           pay=round(current_user.pay, 2),
-                           user_has_email=(current_user.email is not None),
                            email=current_user.email,
                            email_verified=current_user.email_verified,
                            role_name=current_user.role_name)
@@ -57,37 +54,13 @@ def account_change_email():
         flash(error, "error")
         return redirect(url_for('settings.account_change_email'))
 
+    if email != current_user.email and ext.db_account_repository.exists_by_email(email):
+        flash("This email is already used by another account.", "error")
+        return redirect(url_for('settings.account_change_email'))
+
     ext.db_account_repository.update_email(current_user.id, email)
     ext.db_account_repository.update_email_verified(current_user.id, False)
     flash('Your email has been updated')
-    return redirect(url_for('settings.account_home'))
-
-
-@bp.route('/account/change_username', methods=['GET', 'POST'])
-@bp.route('/account/change_username/', methods=['GET', 'POST'])
-@login_required
-@require_permission("edit_own_profile")
-def account_change_username():
-    if request.method == 'GET':
-        return render_template('settings/account_change_username.html',
-                               id=current_user.id,
-                               username=ext.db_account_repository.get_username_by_id(current_user.id))
-
-    new_username = str(request.form['new_username']).strip()
-    if not new_username:
-        flash('Username is required !')
-        return redirect(url_for('settings.account_change_username'))
-
-    if len(new_username) > ext.config.MAX_SHORT_FIELD:
-        flash(f'Username must not exceed {ext.config.MAX_SHORT_FIELD} characters.')
-        return redirect(url_for('settings.account_change_username'))
-
-    if ext.db_account_repository.exists_by_username(new_username):
-        flash('This username is already taken !')
-        return redirect(url_for('settings.account_change_username'))
-
-    ext.db_account_repository.update_username(current_user.id, new_username)
-    flash('Your username has been updated')
     return redirect(url_for('settings.account_home'))
 
 
@@ -197,7 +170,6 @@ def security_home():
 
     return render_template('settings/security_home.html',
                            id=current_user.id,
-                           username=ext.db_account_repository.get_username_by_id(user_id=current_user.id),
                            name=ext.db_account_repository.get_name_by_id(current_user.id),
                            pay=ext.db_account_repository.get_pay_by_id(current_user.id),
                            user_has_email=email is not None,

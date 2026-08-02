@@ -1,13 +1,16 @@
 {% extends 'base.html' %}
+{% block title %}About &amp; Support — MediLink{% endblock %}
 {% block content %}
-<nav>
-    <ul>
-        <li><a href="{{ url_for('settings.settings_home') }}">Back to Settings</a></li>
-    </ul>
-</nav>
 
-<h2>About/Support</h2>
-<div class="post">
-    <p>This section has not yet been implemented. Sorry for the disturbance.</p>
+{% include 'partials/settings_nav.html' %}
+
+<div class="page-header">
+  <h1>About &amp; Support</h1>
+</div>
+
+<div class="card">
+    <div class="empty-state">
+        <p>Documentation and support are coming soon. In the meantime, you can review our <a href="{{ url_for('main.conditions_uses') }}">Terms &amp; Conditions</a>.</p>
+    </div>
 </div>
 {% endblock %}

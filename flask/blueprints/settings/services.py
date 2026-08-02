@@ -20,7 +20,7 @@ def build_data_export(user_id: int) -> BytesIO:
     content  = "=== PERSONALE DATA EXPORT ===\n"
     content += f"Date       : {ext.utils.format_datetime(ext.utils.get_datetime_isoformat())}\n"
     content += f"ID         : {user_id}\n"
-    content += f"Username   : {ext.db_account_repository.get_username_by_id(user_id)}\n"
+    content += f"Email      : {ext.db_account_repository.get_email_by_id(user_id)}\n"
     content += f"Name       : {ext.db_account_repository.get_name_by_id(user_id)}\n"
     content += f"Pay        : {ext.db_account_repository.get_pay_by_id(user_id)} TC\n\n"
 

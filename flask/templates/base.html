@@ -3,25 +3,44 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MediLink</title>
+    <title>{% block title %}MediLink{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
   </head>
   <body>
-    <div class="header-profile">
-        {% if id %}
-          {% if 'session_id' in session %}
-          <a href="{{ url_for('settings.account_home') }}" class="profile-link">
-            <img class="profile-pic" src="{{ url_for('settings.profile_picture', user_id=id) }}" alt="Profile Picture">
-          </a>
+    <header class="site-header">
+      <div class="site-header__inner">
+        <a class="site-logo" href="{{ url_for('main.home' if current_user.is_authenticated else 'main.index') }}">MediLink</a>
+
+        {% if current_user.is_authenticated %}
+        <ul class="site-nav">
+          <li><a href="{{ url_for('main.home') }}">Home</a></li>
+          <li><a href="{{ url_for('settings.settings_home') }}">Settings</a></li>
+          {% if nav_can_access_admin %}
+          <li><a href="{{ url_for('admin.admin_panel') }}">Admin Panel</a></li>
           {% endif %}
+        </ul>
+
+        <div class="site-header__actions">
+          <a href="{{ url_for('settings.account_home') }}" title="Your account">
+            <img class="profile-pic" src="{{ url_for('settings.profile_picture', user_id=current_user.id) }}" alt="Profile picture">
+          </a>
+          <a class="btn btn--secondary btn--small" href="{{ url_for('main.logout') }}">Log Out</a>
+        </div>
+        {% else %}
+        <div class="site-header__actions">
+          <a class="btn btn--secondary btn--small" href="{{ url_for('auth.login') }}">Sign In</a>
+          <a class="btn btn--small" href="{{ url_for('auth.register') }}">Sign Up</a>
+        </div>
         {% endif %}
-    </div>
+      </div>
+    </header>
+
     <div class="content">
         {% block messages %}
           {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
               {% for category, message in messages %}
-                <div class="alert">
+                <div class="alert alert--{{ category }}">
                   {% if category == 'success' %}✅
                   {% elif category == 'error' %}❌
                   {% elif category == 'warning' %}⚠️
@@ -36,5 +55,9 @@
 
         {% block content %}{% endblock %}
     </div>
+
+    <footer class="site-footer">
+      <p>&copy; 2026 MediLink. <a href="{{ url_for('main.conditions_uses') }}">Terms &amp; Conditions</a></p>
+    </footer>
   </body>
 </html>

@@ -1,10 +1,9 @@
 {% extends 'base_login_register.html' %}
+{% block title_tag %}Two-Step Verification — MediLink{% endblock %}
 {% block content %}
-<div class="little_post">
-    <script src="{{ url_for('static', filename='js/two_factor.js') }}"></script>
+<div class="card card--narrow">
     <h2>Two-step verification</h2>
-    <p>Enter the 6-digit code received by email.</p>
-    <br>
+    <p class="page-subtitle" style="text-align:center; margin-bottom:20px;">Enter the 6-digit code sent to your email.</p>
 
     <form method="post">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
@@ -19,7 +18,9 @@
 
         <input value="{{ request.form['code'] }}" type="hidden" name="code" id="code">
 
-        <button class="button" type="submit">Submit</button>
+        <button class="btn btn--full" type="submit">Verify</button>
     </form>
 </div>
+
+<script src="{{ url_for('static', filename='js/two_factor.js') }}" defer></script>
 {% endblock %}

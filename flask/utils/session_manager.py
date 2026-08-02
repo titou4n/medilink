@@ -161,6 +161,8 @@ class SessionManager:
             if not db_session:
                 return False
 
+            db_session = dict(db_session)
+
             if db_session.get("is_revoked", False):
                 return False
 

@@ -1,44 +1,27 @@
 {% extends 'base.html' %}
+{% block title %}Admin Panel — MediLink{% endblock %}
 {% block content %}
-<nav>
-    <ul>
-        <li><a href="{{ url_for('main.home') }}">Back to Home</a></li>
-    </ul>
-</nav>
 
-<section id="intro" class="mid">
-  <div id="not-media">
-    <h3>Hi {{ name }}, Welcome on Admin Panel ⚙️</h3>
-    <p>Flask environnement : {{ flask_env }}</p>
-  </div>
-</section>
+{% include 'partials/admin_nav.html' %}
 
+<div class="page-header">
+  <h1>Admin Panel</h1>
+  <p class="page-subtitle">Environment: {{ flask_env }}</p>
+</div>
 
-<section id="first-row" class="mid">
+<div class="card-grid">
 
-  <div class="finz">
-    <h4>Role and permission</h4>
-    <p>Role and permission manager</p>
-    <form action="{{ url_for('admin.role_permission_manager') }}" method="get">
-      <button class="button" type="submit">Role and permission</button>
-    </form>
+  <div class="card">
+    <h3 class="card__title">Roles &amp; Permissions</h3>
+    <p>Create roles, define their permissions, and assign them to accounts.</p>
+    <a class="btn btn--secondary" href="{{ url_for('admin.role_permission_manager') }}">Manage Roles</a>
   </div>
 
-  <div class="finz">
-    <h4>Admin Panel</h4>
-    <p>Go to the Admin Panel</p>
-    <form action="{{ url_for('admin.admin_panel') }}" method="get">
-      <button class="button" type="submit">Admin Panel</button>
-    </form>
+  <div class="card">
+    <h3 class="card__title">Emergency Information</h3>
+    <p>Review and moderate emergency medical profiles across the platform.</p>
+    <a class="btn btn--secondary" href="{{ url_for('emergency_information.admin_dashboard') }}">Open Module</a>
   </div>
 
-  <div class="finz">
-    <h4>Admin Panel</h4>
-    <p>Go to the Admin Panel</p>
-    <form action="{{ url_for('admin.admin_panel') }}" method="get">
-      <button class="button" type="submit">Admin Panel</button>
-    </form>
-  </div>
-
-</section>
+</div>
 {% endblock %}

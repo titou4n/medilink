@@ -1,72 +1,67 @@
 {% extends 'base.html' %}
+{% block title %}Your Account — MediLink{% endblock %}
 {% block content %}
-<nav>
-    <ul>
-        <li><a class="active" href="{{ url_for('settings.account_home') }}">Personal Information</a></li>
-        <li><a href="{{ url_for('settings.account_change_username') }}">Change Username</a></li>
-        <li><a href="{{ url_for('settings.account_change_name') }}">Change Name</a></li>
-        <li><a href="{{ url_for('settings.account_change_password') }}">Change Password</a></li>
-        <li><a href="{{ url_for('settings.account_change_email') }}">Change Email</a></li>
-        <li><a href="{{ url_for('settings.settings_home') }}">Back to Settings</a></li>
-    </ul>
-</nav>
 
-<h2>Your account</h2>
-<div class="post">
+{% include 'partials/settings_nav.html' %}
 
-    <div class="profile-pic-container">
-        <img class="profile-pic-big" src="{{ url_for('settings.profile_picture', user_id=id) }}" alt="Profile Picture">
+<div class="page-header">
+  <h1>Your account</h1>
+</div>
+
+<div class="card">
+
+    <div style="display:flex; gap:24px; flex-wrap:wrap; align-items:flex-start;">
+      <img class="profile-pic-lg" src="{{ url_for('settings.profile_picture', user_id=id) }}" alt="Profile picture">
+
+      <dl class="account-details">
+        <div><dt>Account ID</dt><dd>{{ id }}</dd></div>
+        <div><dt>Role</dt><dd>{{ role_name }}</dd></div>
+        <div><dt>Name</dt><dd>{{ name }} — <a href="{{ url_for('settings.account_change_name') }}">change</a></dd></div>
+        <div>
+          <dt>Email</dt>
+          <dd>
+            <strong>{{ email }}</strong>
+            {% if email_verified %}
+              <span class="badge badge--success">Verified</span>
+            {% else %}
+              <span class="badge badge--danger">Not verified</span>
+              — <a href="{{ url_for('auth.two_factor_authentication') }}">verify now</a>
+            {% endif %}
+            — <a href="{{ url_for('settings.account_change_email') }}">change</a>
+          </dd>
+        </div>
+        <div><dt>Password</dt><dd><a href="{{ url_for('settings.account_change_password') }}">Change password</a></dd></div>
+      </dl>
     </div>
-    
-    <h3>Account Details</h3>
-    <pre>ID        : {{ id }}
-Role      : {{ role_name }} 
-Username  : {{ username }}        
-Name      : {{ name }}
-Balance   : {{ pay }} $</pre>
-
-<br>
-{% if user_has_email %}
-<p>Your email: <strong>{{ email }}</strong></p>
-
-    {% if email_verified %}
-        <p>Your email is verified</p>
-    {% else %}
-        <p>Your email isn't verified - <a href="{{ url_for('auth.two_factor_authentication') }}">Check-it</a></p>
-    {% endif %}
-{% else %}
-<p>No email has been added - <a href="{{ url_for('settings.account_change_email') }}">Add an Email</a></li></p>
-{% endif %}
 
     <hr>
-    
-    <div class="form-actions">
 
-        <p>Upload a profile picture</p>
-        <form action="{{ url_for('settings.upload_profile_picture') }}" method="post" enctype="multipart/form-data">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-            <label for="profile_picture">
-                    Choose a profile picture (max 5MB)
-            </label>
+    <h4>Profile picture</h4>
+    <form action="{{ url_for('settings.upload_profile_picture') }}" method="post" enctype="multipart/form-data">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="field">
+            <label for="profile_picture">Choose a new picture (max 5MB)</label>
             <input type="file"
                     id="profile_picture"
                     name="profile_picture"
                     accept="image/*"
                     required>
-            <br>
-            <button class="button" type="submit">Upload Picture</button>
-        </form>
+        </div>
+        <button class="btn btn--secondary" type="submit">Upload Picture</button>
+    </form>
 
-        <hr>
+    <hr>
 
-        <p>Delete your account</p>
-        <form action="{{ url_for('settings.delete_account') }}" method="POST" class="delete-action">
+    <div class="danger-zone">
+        <h4>Delete your account</h4>
+        <p>This will permanently remove your account and all associated data. This action cannot be undone.</p>
+        <form action="{{ url_for('settings.delete_account') }}" method="POST" class="inline-form">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-            <button class="button_red" type="submit" onclick="return confirm('Are you sure? This action cannot be undone.')">Delete Account</button>
+            <button class="btn btn--danger" type="submit" onclick="return confirm('Are you sure? This action cannot be undone.')">Delete Account</button>
         </form>
     </div>
 
-    <p class="terms-footer">Je souhaites accéder au <a href="{{ url_for('main.conditions_uses') }}" target="_blank">CGU</a></p>
-    
+    <p class="terms-footer" style="margin-top:16px;">Read our <a href="{{ url_for('main.conditions_uses') }}" target="_blank">Terms &amp; Conditions</a></p>
+
 </div>
 {% endblock %}

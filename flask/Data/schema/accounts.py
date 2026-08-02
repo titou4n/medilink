@@ -9,11 +9,10 @@ SCHEMA_ACCOUNTS: str = """
 CREATE TABLE IF NOT EXISTS account (
     id                  INTEGER PRIMARY KEY AUTOINCREMENT,
     role_id             INTEGER NOT NULL,
-    username            TEXT    NOT NULL UNIQUE,
+    email               TEXT    NOT NULL UNIQUE,
     password            TEXT    NOT NULL,
-    name                TEXT    NOT NULL UNIQUE,
-    email               TEXT,
     email_verified      INTEGER NOT NULL DEFAULT 0,
+    name                TEXT    NOT NULL,
     pay                 REAL    NOT NULL DEFAULT 0.0,
     profile_picture_path TEXT,
     nbpasswordchange    INTEGER NOT NULL DEFAULT 0,
@@ -41,10 +40,6 @@ CREATE TABLE IF NOT EXISTS metadata (
 );
 """
 
-INDEX_ACCOUNT_USERNAME: str = """
-CREATE INDEX IF NOT EXISTS idx_account_username ON account(username);
-"""
-
 INDEX_ACCOUNT_NAME: str = """
 CREATE INDEX IF NOT EXISTS idx_account_name ON account(name);
 """
@@ -61,7 +56,6 @@ ALL_STATEMENTS: list[str] = [
     SCHEMA_ACCOUNTS,
     SCHEMA_USER_PREFERENCES,
     SCHEMA_METADATA,
-    INDEX_ACCOUNT_USERNAME,
     INDEX_ACCOUNT_NAME,
     INDEX_ACCOUNT_EMAIL,
     INDEX_METADATA_USER_ID,

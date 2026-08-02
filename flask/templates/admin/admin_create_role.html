@@ -1,51 +1,49 @@
 {% extends 'base.html' %}
+{% block title %}Create Role — MediLink{% endblock %}
 {% block content %}
-<nav>
-    <ul>
-        <li><a href="{{ url_for('admin.admin_panel') }}">Back to Admin Panel</a></li>
-    </ul>
-</nav>
 
-<div class="little_post">
+{% include 'partials/admin_nav.html' %}
 
-    <script src="{{ url_for('static', filename='js/permissions.js') }}"></script>
+<div class="page-header">
+  <h1>Create a role</h1>
+</div>
+
+<div class="card">
     <form method="post">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
-        <label>Role Name</label>
-        <input class="input" type="text" name="role_name" placeholder="Enter role name" value="{{ request.form['role_name'] }}" required>
-        <br>
-        
-        <!-----------------Permission---------------->
+        <div class="field">
+            <label for="role_name">Role name</label>
+            <input class="input" type="text" id="role_name" name="role_name" placeholder="Enter role name" value="{{ request.form['role_name'] }}" required>
+        </div>
+
         {% if dict_permissions %}
             {% for type, list_permissions in dict_permissions.items() %}
-                <br>
-                <h5>
-                    <label>
+                <div class="permission-group">
+                    <label class="permission-group__title">
                         <input type="checkbox" class="parent-checkbox" data-type="{{ type }}">
                         {{ type }}
                     </label>
-                </h5>
 
-                {% if list_permissions %}
-                    {% for permission in list_permissions %}
-                        <label style="margin-left:20px;">
-                            <input type="checkbox" name="permissions" value="{{ permission }}" class="child-checkbox" data-type="{{ type }}">
-                            {{ permission }}
-                        </label>
-                    {% endfor %}
-                {% else %}
-                    <div class="post">
-                        <p>No Permissions</p>
-                    </div>
-                {% endif %}
+                    {% if list_permissions %}
+                        <div class="permission-group__list">
+                            {% for permission in list_permissions %}
+                                <label>
+                                    <input type="checkbox" name="permissions" value="{{ permission }}" class="child-checkbox" data-type="{{ type }}">
+                                    {{ permission }}
+                                </label>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="page-subtitle" style="margin-left:26px;">No permissions</p>
+                    {% endif %}
+                </div>
             {% endfor %}
         {% endif %}
-        <!------------------------------------------->
 
-        <br>
-        <button class="button" type="submit">Create Role</button>
-        
+        <button class="btn" type="submit" style="margin-top:8px;">Create Role</button>
     </form>
 </div>
+
+<script src="{{ url_for('static', filename='js/permissions.js') }}" defer></script>
 {% endblock %}

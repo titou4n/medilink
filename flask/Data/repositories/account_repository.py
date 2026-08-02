@@ -34,7 +34,7 @@ class AccountRepository:
 
     def create(
         self,
-        username: str,
+        email: str,
         password_hash: str,
         name: str,
         role_id: int,
@@ -43,13 +43,13 @@ class AccountRepository:
         with self._db.connect() as conn:
             conn.execute(
                 """
-                INSERT INTO account (username, password, name, role_id)
+                INSERT INTO account (email, password, name, role_id)
                 VALUES (?, ?, ?, ?);
                 """,
-                (username, password_hash, name, role_id),
+                (email, password_hash, name, role_id),
             )
             conn.commit()
-        logger.debug("Account created: username=%s", username)
+        logger.debug("Account created: email=%s", email)
 
     # ------------------------------------------------------------------ #
     # Account – reads
@@ -61,7 +61,7 @@ class AccountRepository:
             return conn.execute(
                 """
                 SELECT
-                    id, role_id, username, password, name,
+                    id, role_id, password, name,
                     email, email_verified, pay, profile_picture_path,
                     nbpasswordchange, created_at
                 FROM account
@@ -70,12 +70,12 @@ class AccountRepository:
                 (user_id,),
             ).fetchone()
 
-    def get_by_username(self, username: str) -> Optional[sqlite3.Row]:
-        """Return the account row matching *username*, or ``None``."""
+    def get_by_email(self, email: str) -> Optional[sqlite3.Row]:
+        """Return the account row matching *email*, or ``None``."""
         with self._db.connect() as conn:
             return conn.execute(
-                "SELECT * FROM account WHERE username = ?;",
-                (username,),
+                "SELECT * FROM account WHERE email = ?;",
+                (email,),
             ).fetchone()
 
     def get_by_name(self, name: str) -> Optional[sqlite3.Row]:
@@ -85,15 +85,6 @@ class AccountRepository:
                 "SELECT * FROM account WHERE name = ?;",
                 (name,),
             ).fetchone()
-
-    def get_id_by_username(self, username: str) -> Optional[int]:
-        """Return the *id* for the given *username*, or ``None``."""
-        with self._db.connect() as conn:
-            row = conn.execute(
-                "SELECT id FROM account WHERE username = ?;",
-                (username,),
-            ).fetchone()
-        return row["id"] if row else None
 
     def get_id_by_email(self, email: str) -> Optional[int]:
         """Return the *id* for the given *email*, or ``None``."""
@@ -112,14 +103,6 @@ class AccountRepository:
                 (name,),
             ).fetchone()
         return row["id"] if row else None
-
-    def get_username_by_id(self, user_id: int) -> Optional[str]:
-        with self._db.connect() as conn:
-            row = conn.execute(
-                "SELECT username FROM account WHERE id = ?;",
-                (user_id,),
-            ).fetchone()
-        return row["username"] if row else None
 
     def get_password_hash(self, user_id: int) -> Optional[str]:
         with self._db.connect() as conn:
@@ -195,11 +178,11 @@ class AccountRepository:
             ).fetchone()
         return row is not None
 
-    def exists_by_username(self, username: str) -> bool:
+    def exists_by_email(self, email: str) -> bool:
         with self._db.connect() as conn:
             row = conn.execute(
-                "SELECT 1 FROM account WHERE username = ?;",
-                (username,),
+                "SELECT 1 FROM account WHERE email = ?;",
+                (email,),
             ).fetchone()
         return row is not None
 
@@ -223,14 +206,6 @@ class AccountRepository:
     # ------------------------------------------------------------------ #
     # Account – updates
     # ------------------------------------------------------------------ #
-
-    def update_username(self, user_id: int, new_username: str) -> None:
-        with self._db.connect() as conn:
-            conn.execute(
-                "UPDATE account SET username = ? WHERE id = ?;",
-                (new_username, user_id),
-            )
-            conn.commit()
 
     def update_password(self, user_id: int, new_password_hash: str) -> None:
         with self._db.connect() as conn:

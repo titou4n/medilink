@@ -1,36 +1,35 @@
 {% extends 'base.html' %}
+{% block title %}Notifications — MediLink{% endblock %}
 {% block content %}
-<nav>
-    <ul>
-        <li><a href="{{ url_for('settings.settings_home') }}">Back to Settings</a></li>
-    </ul>
-</nav>
 
-<h2>Notifications</h2>
-<div class="post">
-    
-    <div class="form-actions">
-        <script src="{{ url_for('static', filename='js/auto_submit_checkbox.js') }}" defer></script>
-        <h4>Security alerts</h4>
-        <p>Notify me when:</p>
-        <form action="{{ url_for('settings.settings_notify_password_change') }}" method="post" class="auto-submit-form">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-            <label>
-                <input type="checkbox" name="notify_password_change" class="auto-submit-checkbox"
-                    {% if notify_password_change %}checked{% endif %}>
-                My password changes
-            </label>
-        </form>
+{% include 'partials/settings_nav.html' %}
 
-        <form action="{{ url_for('settings.settings_notify_twofa_change') }}" method="post" class="auto-submit-form">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-            <label>
-                <input type="checkbox" name="notify_twofa_change" class="auto-submit-checkbox"
-                    {% if notify_twofa_disabled %}checked{% endif %}>
-                Two-Factor Authentication is disabled
-            </label>
-        </form>
-
-    </div>
+<div class="page-header">
+  <h1>Notifications</h1>
 </div>
+
+<div class="card">
+    <h3 class="card__title">Security alerts</h3>
+    <p>Notify me when:</p>
+
+    <form action="{{ url_for('settings.settings_notify_password_change') }}" method="post" class="auto-submit-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="checkbox-field">
+            <input type="checkbox" name="notify_password_change" id="notify_password_change" class="auto-submit-checkbox"
+                {% if notify_password_change %}checked{% endif %}>
+            <label for="notify_password_change" style="margin-bottom:0;">My password changes</label>
+        </div>
+    </form>
+
+    <form action="{{ url_for('settings.settings_notify_twofa_change') }}" method="post" class="auto-submit-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="checkbox-field">
+            <input type="checkbox" name="notify_twofa_change" id="notify_twofa_change" class="auto-submit-checkbox"
+                {% if notify_twofa_disabled %}checked{% endif %}>
+            <label for="notify_twofa_change" style="margin-bottom:0;">Two-factor authentication is disabled</label>
+        </div>
+    </form>
+</div>
+
+<script src="{{ url_for('static', filename='js/auto_submit_checkbox.js') }}" defer></script>
 {% endblock %}

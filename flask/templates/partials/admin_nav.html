@@ -1,0 +1,8 @@
+{% set ep = request.endpoint %}
+<nav aria-label="Admin sections">
+  <ul class="local-nav">
+    <li><a class="{{ 'active' if ep == 'admin.admin_panel' else '' }}" href="{{ url_for('admin.admin_panel') }}">Overview</a></li>
+    <li><a class="{{ 'active' if ep in ['admin.role_permission_manager','admin.create_role','admin.edit_role','admin.assign_role'] else '' }}" href="{{ url_for('admin.role_permission_manager') }}">Roles &amp; Permissions</a></li>
+    <li><a class="{{ 'active' if ep in ['emergency_information.admin_dashboard','emergency_information.admin_view'] else '' }}" href="{{ url_for('emergency_information.admin_dashboard') }}">Emergency Information</a></li>
+  </ul>
+</nav>

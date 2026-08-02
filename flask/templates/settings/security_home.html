@@ -1,101 +1,116 @@
 {% extends 'base.html' %}
+{% block title %}Security — MediLink{% endblock %}
 {% block content %}
-<nav>
-    <ul>
-        <li><a href="{{ url_for('settings.settings_home') }}">Back to Settings</a></li>
-    </ul>
-</nav>
 
-<h2>Security Settings</h2>
-<div class="post">
+{% include 'partials/settings_nav.html' %}
 
-{% if user_has_email %}
-<p>Your email: <strong>{{ email }}</strong></p>
+<div class="page-header">
+  <h1>Security</h1>
+</div>
 
-    {% if email_verified %}
-        <p>Your email is verified</p>
-    {% else %}
-        <p>Your email isn't verified - <a href="{{ url_for('auth.two_factor_authentication') }}">Verify-it</a></p>
-    {% endif %}
-{% else %}
-<p>No email has been added - <a href="{{ url_for('settings.account_change_email') }}">Add an Email</a></li></p>
-{% endif %}
-
-    <hr>
-    
-    <div class="form-actions">
-        <script src="{{ url_for('static', filename='js/auto_submit_checkbox.js') }}" defer></script>
-        
-        <h3>Account Security</h3>
-        <p>Your IP address {{ ip_address }} - {{ session_location }}</p>
-        <form action="{{ url_for('main.logout') }}" method="get">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-            <button type="submit" class="button_red">Log out</button>
-        </form>
-
-        <hr>
-
-        <h4>Authentication</h4>
-        <form action="{{ url_for('settings.settings_switch_2fa') }}" method="post" class="auto-submit-form">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-            <label>
-                <input type="checkbox" name="enable_2fa" class="auto-submit-checkbox"
-                    {% if twofa_enabled %}checked{% endif %}>
-                {% if twofa_enabled %}
-                Disable Two-Factor Authentication
-                {% else %}
-                Enable Two-Factor Authentication
-                {% endif %}
-                
-            </label>
-        </form>
-
-        <h4>Sessions and devices</h4>
-        <p>See and manage active sessions.</p>
-
-        {% for session in sessions %}
-        <div class="post">
-            <h5>Session : {{ session['session_id_hash'] }}</h5>
-            <br>
-            <p>
-                Created at   : {{ format_datetime(session['created_at']) }}<br>
-                Expires at   : {{ format_datetime(session['expires_at']) }}<br>
-                Last used at : {{ format_datetime(session['last_used_at']) }}<br>
-
-                {% if session['session_id_hash'] == session_id_hash %}
-                <br>Your IP address {{ ip_address }} - {{ session_location }}
-                {% endif %}
-            </p>
-
-            {% if session['is_revoked'] %}
-                <p>Session is not active</p>
-                <form action="{{ url_for('settings.settings_delete_session', session_id_hash=session['session_id_hash']) }}" method="post">
-                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                    <button type="submit" class="button">Delete this session</button>
-                </form>
+<div class="card">
+    <h3 class="card__title">Email</h3>
+    {% if user_has_email %}
+        <p>
+            <strong>{{ email }}</strong>
+            {% if email_verified %}
+                <span class="badge badge--success">Verified</span>
             {% else %}
-                <p>Session is active</p>
-                <form action="{{ url_for('settings.settings_logout_session', session_id_hash=session['session_id_hash']) }}" method="post">
-                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                    <button type="submit" class="button">Log out this session</button>
-                </form>
+                <span class="badge badge--danger">Not verified</span>
+                — <a href="{{ url_for('auth.two_factor_authentication') }}">Verify now</a>
             {% endif %}
+        </p>
+    {% else %}
+        <p>No email has been added yet — <a href="{{ url_for('settings.account_change_email') }}">Add an email</a></p>
+    {% endif %}
+</div>
 
+<div class="card">
+    <h3 class="card__title">Two-Factor Authentication</h3>
+    <p>Add an extra layer of security by requiring a code sent to your email when signing in.</p>
+    <form action="{{ url_for('settings.settings_switch_2fa') }}" method="post" class="auto-submit-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="checkbox-field">
+            <input type="checkbox" name="enable_2fa" id="enable_2fa" class="auto-submit-checkbox"
+                {% if twofa_enabled %}checked{% endif %}>
+            <label for="enable_2fa" style="margin-bottom:0;">
+                {% if twofa_enabled %}Two-factor authentication is enabled{% else %}Enable two-factor authentication{% endif %}
+            </label>
         </div>
-        {% endfor %}
+    </form>
+</div>
 
-        <form action="{{ url_for('settings.settings_logout_all') }}" method="post">
+<div class="card">
+    <h3 class="card__title">Sessions &amp; Devices</h3>
+    <p>Your current IP address: {{ ip_address }} — {{ session_location }}</p>
+
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Session</th>
+                    <th>Created</th>
+                    <th>Last used</th>
+                    <th>Status</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for session in sessions %}
+                <tr>
+                    <td>
+                        {{ session['session_id_hash'][:8] }}…
+                        {% if session['session_id_hash'] == session_id_hash %}<span class="badge badge--neutral">This device</span>{% endif %}
+                    </td>
+                    <td>{{ format_datetime(session['created_at']) }}</td>
+                    <td>{{ format_datetime(session['last_used_at']) }}</td>
+                    <td>
+                        {% if session['is_revoked'] %}
+                            <span class="badge badge--danger">Revoked</span>
+                        {% else %}
+                            <span class="badge badge--success">Active</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if session['is_revoked'] %}
+                        <form action="{{ url_for('settings.settings_delete_session', session_id_hash=session['session_id_hash']) }}" method="post" class="inline-form">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <button type="submit" class="btn btn--small btn--secondary">Delete</button>
+                        </form>
+                        {% else %}
+                        <form action="{{ url_for('settings.settings_logout_session', session_id_hash=session['session_id_hash']) }}" method="post" class="inline-form">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <button type="submit" class="btn btn--small btn--secondary">Log out</button>
+                        </form>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <form action="{{ url_for('settings.settings_logout_all') }}" method="post" class="inline-form" style="display:block; margin-top:16px;">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button type="submit" class="btn btn--danger-outline">Log out from all devices</button>
+    </form>
+</div>
+
+<div class="card">
+    <form action="{{ url_for('main.logout') }}" method="get" style="margin-bottom:16px;">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button type="submit" class="btn btn--secondary">Log out</button>
+    </form>
+
+    <div class="danger-zone">
+        <h4>Delete your account</h4>
+        <p>This will permanently remove your account and all associated data. This action cannot be undone.</p>
+        <form action="{{ url_for('settings.delete_account') }}" method="post" class="inline-form">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-            <button type="submit" class="button_red">Log out from all devices</button>
-        </form>
-       
-        <hr>
-        
-        <p>Delete your account</p>
-        <form action="{{ url_for('settings.delete_account') }}" method="post" class="delete-action">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-            <button class="button_red" type="submit" onclick="return confirm('Are you sure? This action cannot be undone.')">Delete Account</button>
+            <button class="btn btn--danger" type="submit" onclick="return confirm('Are you sure? This action cannot be undone.')">Delete Account</button>
         </form>
     </div>
 </div>
+
+<script src="{{ url_for('static', filename='js/auto_submit_checkbox.js') }}" defer></script>
 {% endblock %}

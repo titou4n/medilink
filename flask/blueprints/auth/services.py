@@ -9,21 +9,21 @@ from flask_login import login_user
 logger = logging.getLogger(__name__)
 
 
-def authenticate_user(username: str, raw_password: str):
+def authenticate_user(email: str, raw_password: str):
     """
     Authentifie un utilisateur.
     Retourne (user_id, error_message).
     error_message est None si succès.
     """
-    AUTHENTICATION_ERROR_MESSAGE = "Invalid username or password."
+    AUTHENTICATION_ERROR_MESSAGE = "Invalid email or password."
 
-    if not username or not raw_password:
-        logger.warning("Authentication attempt with empty username or password.")
+    if not email or not raw_password:
+        logger.warning("Authentication attempt with empty email or password.")
         return None, AUTHENTICATION_ERROR_MESSAGE
 
-    user_id = ext.db_account_repository.get_id_by_username(username)
+    user_id = ext.db_account_repository.get_id_by_email(email)
     if user_id is None:
-        logger.warning("Authentication failed: user not found (username not resolved to ID)")
+        logger.warning("Authentication failed: no account for the given email")
         return None, AUTHENTICATION_ERROR_MESSAGE
 
     stored_hash = ext.db_account_repository.get_password_hash(user_id)
@@ -48,30 +48,35 @@ def authenticate_user(username: str, raw_password: str):
     return user_id, None
 
 
-def register_user(username: str, raw_password: str, raw_verif: str, name: str):
+def register_user(email: str, raw_password: str, raw_verif: str, name: str):
     """
     Crée un compte.
     Retourne (user_id, error_message).
     """
-    if not username or not raw_password or not raw_verif or not name:
+    if not email or not raw_password or not raw_verif or not name:
         logger.warning("Registration attempt with missing fields")
         return None, "All fields are required."
 
-    if ext.db_account_repository.exists_by_username(username):
-        logger.warning("Registration failed: username already exists")
-        return None, "Username is already used."
+    is_valid_email, email_error = ext.email_manager.validate_user_email(email)
+    if not is_valid_email:
+        logger.warning("Registration failed: invalid email format")
+        return None, email_error
+
+    if ext.db_account_repository.exists_by_email(email):
+        logger.warning("Registration failed: email already exists")
+        return None, "An account with this email already exists."
 
     if ext.db_account_repository.exists_by_name(name):
         logger.warning("Registration failed: name already exists")
         return None, "Name is already used."
 
     if raw_password != raw_verif:
-        logger.warning("Registration failed: password mismatch for username '%s'", username)
+        logger.warning("Registration failed: password mismatch")
         return None, "Passwords must be identical."
 
     password_error = ext.utils.validate_password_strength(raw_password, ext.config.MIN_PASSWORD_LENGTH)
     if password_error:
-        logger.warning("Registration failed: weak password for username '%s'", username)
+        logger.warning("Registration failed: weak password")
         return None, password_error
 
     try:
@@ -82,8 +87,8 @@ def register_user(username: str, raw_password: str, raw_verif: str, name: str):
             logger.error("User role not found in database")
             return None, "System configuration error. Please try again later."
 
-        ext.db_account_repository.create(username, password_hash, name, role_id)
-        user_id = ext.db_account_repository.get_id_by_username(username)
+        ext.db_account_repository.create(email, password_hash, name, role_id)
+        user_id = ext.db_account_repository.get_id_by_email(email)
 
         if user_id is None:
             logger.error("Failed to retrieve created user %s", user_id)
@@ -105,45 +110,5 @@ def register_user(username: str, raw_password: str, raw_verif: str, name: str):
         return user_id, None
 
     except Exception as e:
-        logger.error("Error during registration for user '%s': %s", username, str(e))
+        logger.error("Error during registration: %s", str(e))
         return None, "Registration failed. Please try again."
-
-
-def login_as_visitor():
-    """
-    Authentifie le compte visiteur pré-configuré.
-    Retourne (user_id, error_message).
-    """
-    username = ext.config.USERNAME_VISITOR
-
-    try:
-        user_id = ext.db_account_repository.get_id_by_username(username)
-        if user_id is None:
-            logger.error("Visitor account '%s' not found in database", username)
-            return None, "Visitor account not found."
-
-        stored_hash = ext.db_account_repository.get_password_hash(user_id)
-        if not stored_hash:
-            logger.error("No password hash for visitor account %s", user_id)
-            return None, "Visitor account misconfigured."
-
-        if not ext.hash_manager.check_password(ext.config.PASSWORD_VISITOR, stored_hash):
-            logger.error("Visitor account password mismatch")
-            return None, "Visitor account misconfigured."
-
-        ext.session_manager.send_session(user_id=user_id)
-        user = User(user_id)
-        login_user(user)
-
-        ext.db_account_repository.insert_metadata(
-            user_id=user_id,
-            date_connected=ext.utils.get_datetime_isoformat(),
-            ipv4=ext.session_manager.get_ip_session()
-        )
-
-        logger.info("Visitor account logged in")
-        return user_id, None
-
-    except Exception as e:
-        logger.error("Error logging in visitor account: %s", str(e))
-        return None, "An error occurred. Please try again."

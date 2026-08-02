@@ -5,7 +5,7 @@ from flask import render_template, redirect, request, flash, url_for, session as
 from flask_login import current_user, login_user
 
 from blueprints.auth import bp
-from blueprints.auth.services import authenticate_user, register_user, login_as_visitor
+from blueprints.auth.services import authenticate_user, register_user
 import extensions as ext
 from models.user import User
 from utils.twofa_manager import (
@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 
 @bp.route('/login', methods=['GET', 'POST'])
 @bp.route('/login/', methods=['GET', 'POST'])
-@ext.limiter.limit("5 per minute; 20 per hour; 100 per day")
+#@ext.limiter.limit("5 per minute; 20 per hour; 100 per day")
 def login():
     if request.method == 'GET':
         return render_template('auth/login.html')
@@ -57,7 +57,7 @@ def login():
 
 @bp.route('/register', methods=['GET', 'POST'])
 @bp.route('/register/', methods=['GET', 'POST'])
-@ext.limiter.limit("3 per minute; 10 per hour; 30 per day")
+#@ext.limiter.limit("3 per minute; 10 per hour; 30 per day")
 def register():
     if request.method == 'GET':
         return render_template('auth/register.html')
@@ -70,27 +70,12 @@ def register():
         flash('All fields are required.')
         return redirect(url_for('auth.register'))
 
-    user_id, error = register_user(username=email, raw_password=raw_password, raw_verif=raw_verif, name=email)
+    user_id, error = register_user(email=email, raw_password=raw_password, raw_verif=raw_verif, name=email)
     if error:
         flash(error)
         return redirect(url_for('auth.register'))
 
     logger.info("User %s registered successfully", user_id)
-    return redirect(url_for('main.home'))
-
-
-@bp.route('/continue_as_a_visitor', methods=['POST'])
-@ext.limiter.limit("10 per minute")
-def continue_as_a_visitor():
-    if current_user.is_authenticated:
-        return redirect(url_for('main.home'))
-
-    user_id, error = login_as_visitor()
-    if error:
-        flash(error)
-        return redirect(url_for('auth.login'))
-
-    logger.info("Visitor account logged in (user_id=%s)", user_id)
     return redirect(url_for('main.home'))
 
 

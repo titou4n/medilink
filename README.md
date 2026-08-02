@@ -201,11 +201,11 @@ cp flask/.env.example flask/.env
 | Variable | Défaut | Rôle |
 |---|---|---|
 | `ENV_PROD` | `false` | Bascule dev/prod (source des secrets, cookies sécurisés, debug) |
-| `USERNAME_SUPER_ADMIN` | `superadmin` | Nom d'utilisateur du compte super admin bootstrapé |
+| `EMAIL_SUPER_ADMIN` | `superadmin@medilink.local` | Email du compte super admin bootstrapé (identifiant de connexion) |
 | `EMAIL_ADDRESS` | `medilink.mail@gmail.com` | Adresse d'expédition des e-mails (2FA, notifications) |
 | `CREATE_SEEDED_ACCOUNTS` | `false` | Définie et documentée, mais **non lue par le code actuel** (`Data/seeders/accounts_seeder.py` seede le compte visiteur inconditionnellement, et le compte debug uniquement si `ENV_PROD=false`, sans consulter ce flag) |
-| `USERNAME_VISITOR` / `PASSWORD_VISITOR` | `UsernameVisitor` / `PasswordVisitor` | Identifiants du compte visiteur de démonstration |
-| `USERNAME_DEBUG` / `PASSWORD_DEBUG` | `username_debug` / `password_debug` | Identifiants du compte de debug (seedé uniquement si `ENV_PROD=false`, rôle `super_admin`) |
+| `EMAIL_VISITOR` / `PASSWORD_VISITOR` | `visitor@medilink.local` / `PasswordVisitor` | Identifiants du compte visiteur de démonstration |
+| `EMAIL_DEBUG` / `PASSWORD_DEBUG` | `debug@medilink.local` / `password_debug` | Identifiants du compte de debug (seedé uniquement si `ENV_PROD=false`, rôle `super_admin`) |
 | `NEED_TO_RESET_ALL_DB` | `false` | Réinitialise entièrement la base `database.db` au démarrage |
 | `NEED_TO_RESET_DB_EXCEPT_ACCOUNT` | `false` | Censée réinitialiser tout sauf les comptes ; la liste de tables protégées dans le code (`accounts`, `account_preferences`) ne correspond pas aux noms de tables réels (`account`, `user_preferences`) — voir [Limitations connues](#limitations-connues) |
 | `NEED_TO_RESET_ROLES_PERMISSIONS_TABLES` | `false` | Réinitialise uniquement rôles/permissions |

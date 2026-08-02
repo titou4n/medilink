@@ -28,7 +28,6 @@ class User(UserMixin):
             raise ValueError(f"User with id {self.id} not found")
 
         user = dict(user)
-        self.username = user.get("username")
         self.name = user.get("name")
         self.email = user.get("email")
         self.email_verified = user.get("email_verified", False)

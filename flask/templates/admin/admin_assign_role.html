@@ -1,32 +1,35 @@
 {% extends 'base.html' %}
+{% block title %}Assign Role — MediLink{% endblock %}
 {% block content %}
-<nav>
-    <ul>
-        <li><a href="{{ url_for('admin.admin_panel') }}">Back to Admin Panel</a></li>
-    </ul>
-</nav>
 
-<div class="little_post">
-    
+{% include 'partials/admin_nav.html' %}
+
+<div class="page-header">
+  <h1>Assign a role</h1>
+</div>
+
+<div class="card card--narrow">
     <form method="post">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
-        <label for="id">Account ID</label>
-        <input class="input" type="number" name="account_id" placeholder="Enter ID" value="{{ request.form['account_id'] }}" min="0" step="1" required>
+        <div class="field">
+            <label for="account_id">Account ID</label>
+            <input class="input" type="number" id="account_id" name="account_id" placeholder="Enter ID" value="{{ request.form['account_id'] }}" min="0" step="1" required>
+        </div>
 
-        <label for="role-select">Please select a role</label>
-        <select name="roles" id="role-select">
-            <option value="">Please select a role</option>
-            {% if dict_role_permission %}
-                {% for role in dict_role_permission.keys() %}
-                    <option value="{{ role }}">{{ role }}</option>
-                {% endfor %}
-            {% endif %}
-        </select>
-        <br>
-        <br>
-        <button class="button" type="submit">Update Role</button>
+        <div class="field">
+            <label for="role-select">Role</label>
+            <select name="roles" id="role-select">
+                <option value="">Please select a role</option>
+                {% if dict_role_permission %}
+                    {% for role in dict_role_permission.keys() %}
+                        <option value="{{ role }}">{{ role }}</option>
+                    {% endfor %}
+                {% endif %}
+            </select>
+        </div>
+
+        <button class="btn btn--full" type="submit">Update Role</button>
     </form>
-
 </div>
 {% endblock %}

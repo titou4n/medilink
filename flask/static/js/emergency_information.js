@@ -32,7 +32,7 @@ document.addEventListener('DOMContentLoaded', () => {
       navigator.clipboard.writeText(text).then(() => {
         const original = button.textContent;
         button.textContent = '✓ Copied';
-        button.style.color = 'var(--ei-success)';
+        button.style.color = 'var(--color-success)';
         setTimeout(() => {
           button.textContent = original;
           button.style.color = '';
@@ -43,19 +43,6 @@ document.addEventListener('DOMContentLoaded', () => {
         document.execCommand('copy');
       });
     });
-  });
-
-  /* ==========================================
-     AUTO-DISMISS ALERTS
-  ========================================== */
-
-  document.querySelectorAll('.ei-alert').forEach(alert => {
-    setTimeout(() => {
-      alert.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
-      alert.style.opacity = '0';
-      alert.style.transform = 'translateY(-4px)';
-      setTimeout(() => alert.remove(), 400);
-    }, 5000);
   });
 
 });

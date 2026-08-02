@@ -54,8 +54,7 @@ def index():
 def home():
     return render_template('main/home.html',
         id=current_user.id,
-        name=ext.db_account_repository.get_name_by_id(current_user.id),
-        access_admin_panel=current_user.has_permission("access_admin_panel")
+        name=ext.db_account_repository.get_name_by_id(current_user.id)
     )
 
 
