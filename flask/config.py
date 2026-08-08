@@ -34,7 +34,7 @@ class Config:
     if not SECRET_KEY:
         raise RuntimeError("SECRET_KEY is missing")
     
-    EMAIL_SUPER_ADMIN: str = os.getenv("EMAIL_SUPER_ADMIN", "superadmin@medilink.local")
+    EMAIL_SUPER_ADMIN: str = os.getenv("EMAIL_SUPER_ADMIN", "titouservice.mail@gmail.com")
     SUPER_ADMIN_INITIAL_PASSWORD_LENGTH: int = 24
     ROLE_NAME_SUPER_ADMIN: str = "super_admin"
     NAME_SUPER_ADMIN: str = "SUPER ADMIN"

@@ -35,6 +35,10 @@ def authenticate_user(email: str, raw_password: str):
         logger.warning("Authentication failed: invalid password for user %s", user_id)
         return None, AUTHENTICATION_ERROR_MESSAGE
 
+    if ext.db_account_repository.get_is_active_by_id(user_id) is False:
+        logger.warning("Authentication blocked: account %s is suspended", user_id)
+        return None, "This account has been suspended. Please contact an administrator."
+
     try:
         ext.db_account_repository.insert_metadata(
             user_id=user_id,
@@ -105,6 +109,8 @@ def register_user(email: str, raw_password: str, raw_verif: str, name: str):
             date_connected=ext.utils.get_datetime_isoformat(),
             ipv4=ext.session_manager.get_ip_session()
         )
+
+        ext.email_manager.send_welcome_email(user_id=user_id)
 
         logger.info("User %s registered successfully", user_id)
         return user_id, None

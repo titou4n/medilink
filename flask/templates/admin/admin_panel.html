@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block title %}Admin Panel — MediLink{% endblock %}
+{% block title %}Admin Panel - MediLink{% endblock %}
 {% block content %}
 
 {% include 'partials/admin_nav.html' %}
@@ -15,6 +15,12 @@
     <h3 class="card__title">Roles &amp; Permissions</h3>
     <p>Create roles, define their permissions, and assign them to accounts.</p>
     <a class="btn btn--secondary" href="{{ url_for('admin.role_permission_manager') }}">Manage Roles</a>
+  </div>
+
+  <div class="card">
+    <h3 class="card__title">Users</h3>
+    <p>Browse accounts, review their status and manage access to the platform.</p>
+    <a class="btn btn--secondary" href="{{ url_for('admin.users_list') }}">Manage Users</a>
   </div>
 
   <div class="card">

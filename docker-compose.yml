@@ -25,6 +25,7 @@ services:
 
     volumes:
       - db-data:/app/Data/db
+      - folder-profile-picture:/app/static/img
 
     expose:
       - "5000"
@@ -99,6 +100,7 @@ networks:
 
 volumes:
   db-data:
+  folder-profile-picture:
   redis-data:
 
 secrets:

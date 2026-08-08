@@ -11,14 +11,6 @@ class PermissionsManager:
         self.db_role = ext.db_role_repository
         self.config = ext.config
 
-    def _has_role(self, role: str) -> bool:
-        if not current_user or not current_user.is_authenticated:
-            return False
-        user_roles = getattr(current_user, 'roles', [])
-        if isinstance(user_roles, str):
-            user_roles = [user_roles]
-        return role in user_roles
-
     def is_user(self) -> bool:
         return current_user.is_authenticated if current_user else False
 
@@ -53,7 +45,7 @@ class PermissionsManager:
                 return {}
 
             for role in list_all_role:
-                role_name = role.get("name")
+                role_name = role["name"]
                 if role_name:
                     permissions_dict[role_name] = []
 

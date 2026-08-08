@@ -100,6 +100,7 @@ def create_app(config_object=Config):
         logger.info("Redis connected successfully")
 
     except Exception as e:
+        # for run redis in Local : docker run -p 6379:6379 redis:7-alpine
         logger.error("Redis connection failed: %s",str(e))
         raise RuntimeError("Unable to connect to Redis") from e
 

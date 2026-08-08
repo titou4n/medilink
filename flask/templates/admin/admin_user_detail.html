@@ -1,0 +1,131 @@
+{% extends 'base.html' %}
+{% block title %}User #{{ account.id }} - Admin - MediLink{% endblock %}
+{% block content %}
+
+{% include 'partials/admin_nav.html' %}
+
+<div class="page-header">
+  <h1>{{ account.name }}</h1>
+  <p class="page-subtitle"><a href="{{ url_for('admin.users_list') }}">← Back to users</a></p>
+</div>
+
+<div class="card card--narrow">
+  <h3 class="card__title">Account details</h3>
+
+  <div class="form-row">
+    <strong>ID</strong>
+    <span>#{{ account.id }}</span>
+  </div>
+
+  <div class="form-row">
+    <strong>Email</strong>
+    <span>{{ account.email }}</span>
+  </div>
+
+  <div class="form-row">
+    <strong>Email verified</strong>
+    <span>
+      {% if account.email_verified %}
+        <span class="badge badge--success">Verified</span>
+      {% else %}
+        <span class="badge badge--neutral">Not verified</span>
+      {% endif %}
+    </span>
+  </div>
+
+  <div class="form-row">
+    <strong>Role</strong>
+    <span>{{ role_name or "-" }}</span>
+  </div>
+
+  <div class="form-row">
+    <strong>Status</strong>
+    <span>
+      {% if account.is_active %}
+        <span class="badge badge--success">Active</span>
+      {% else %}
+        <span class="badge badge--danger">Suspended</span>
+      {% endif %}
+    </span>
+  </div>
+
+  <div class="form-row">
+    <strong>Created</strong>
+    <span>{{ format_datetime(account.created_at) if account.created_at else "-" }}</span>
+  </div>
+
+  <div class="form-row">
+    <strong>Last updated</strong>
+    <span>{{ format_datetime(account.updated_at) if account.updated_at else "-" }}</span>
+  </div>
+
+  <div class="form-row">
+    <strong>Last login</strong>
+    <span>{{ format_datetime(last_login) if last_login else "-" }}</span>
+  </div>
+</div>
+
+{% if current_user.has_permission('ban_user') %}
+<div class="card card--narrow">
+  <h3 class="card__title">Account status</h3>
+
+  {% if account.id == current_user.id %}
+    <p class="page-subtitle">You cannot suspend or reactivate your own account.</p>
+  {% elif account.is_active %}
+    <form method="post" action="{{ url_for('admin.user_suspend', user_id=account.id) }}"
+          onsubmit="return confirm('Suspend this account? The user will not be able to log in until reactivated.');">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <button class="btn btn--danger" type="submit">Suspend account</button>
+    </form>
+  {% else %}
+    <form method="post" action="{{ url_for('admin.user_reactivate', user_id=account.id) }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <button class="btn btn--secondary" type="submit">Reactivate account</button>
+    </form>
+  {% endif %}
+</div>
+{% endif %}
+
+{% if current_user.has_permission('assign_role') %}
+<div class="card card--narrow">
+  <h3 class="card__title">Change role</h3>
+
+  {% if account.id == current_user.id %}
+    <p class="page-subtitle">You cannot change your own role.</p>
+  {% else %}
+    <form method="post" action="{{ url_for('admin.user_update_role', user_id=account.id) }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+      <div class="field">
+        <label for="role_name">Role</label>
+        <select class="input" id="role_name" name="role_name">
+          {% for role in roles %}
+            <option value="{{ role.name }}" {% if role.name == role_name %}selected{% endif %}>{{ role.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <button class="btn btn--secondary" type="submit">Update role</button>
+    </form>
+  {% endif %}
+</div>
+{% endif %}
+
+{% if current_user.has_permission('delete_user') %}
+<div class="form-section form-section--critical">
+  <h3 class="form-section__title">Danger zone</h3>
+
+  {% if account.id == current_user.id %}
+    <p class="form-section__hint">You cannot delete your own account.</p>
+  {% else %}
+    <p class="form-section__hint">Permanently delete this account and all associated data. This cannot be undone.</p>
+    <form method="post" action="{{ url_for('admin.user_delete', user_id=account.id) }}"
+          onsubmit="return confirm('Permanently delete this account? This action cannot be undone.');">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <button class="btn btn--danger" type="submit">Delete account</button>
+    </form>
+  {% endif %}
+</div>
+{% endif %}
+
+{% endblock %}
