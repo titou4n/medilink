@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% block title %}Create User - Admin - MediLink{% endblock %}
+{% block content %}
+
+{% include 'partials/admin_nav.html' %}
+
+<div class="page-header">
+  <h1>Create a user</h1>
+  <p class="page-subtitle"><a href="{{ url_for('admin.users_list') }}">← Back to users</a></p>
+</div>
+
+<div class="card card--narrow">
+  <form method="post">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+    <div class="field">
+      <label for="email">E-mail</label>
+      <input class="input" type="email" id="email" name="email" placeholder="user@example.com" required>
+    </div>
+
+    <div class="field">
+      <label for="name">Name</label>
+      <input class="input" type="text" id="name" name="name" placeholder="Full name" required>
+    </div>
+
+    <div class="field">
+      <label for="password">Password</label>
+      <input class="input" type="password" id="password" name="password" placeholder="Temporary password" required>
+    </div>
+
+    <div class="field">
+      <label for="role_name">Role</label>
+      <select class="input" id="role_name" name="role_name" required>
+        <option value="">Please select a role</option>
+        {% for role in roles %}
+          <option value="{{ role.name }}">{{ role.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <button class="btn btn--full" type="submit">Create user</button>
+  </form>
+</div>
+
+{% endblock %}

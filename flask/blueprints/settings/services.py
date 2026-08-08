@@ -21,8 +21,7 @@ def build_data_export(user_id: int) -> BytesIO:
     content += f"Date       : {ext.utils.format_datetime(ext.utils.get_datetime_isoformat())}\n"
     content += f"ID         : {user_id}\n"
     content += f"Email      : {ext.db_account_repository.get_email_by_id(user_id)}\n"
-    content += f"Name       : {ext.db_account_repository.get_name_by_id(user_id)}\n"
-    content += f"Pay        : {ext.db_account_repository.get_pay_by_id(user_id)} TC\n\n"
+    content += f"Name       : {ext.db_account_repository.get_name_by_id(user_id)}\n\n"
 
     metadata  = ext.db_account_repository.get_metadata_by_user_id(user_id)
     content  += "=== MÉTADONNÉES ===\n\n"

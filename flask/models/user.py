@@ -31,7 +31,6 @@ class User(UserMixin):
         self.name = user.get("name")
         self.email = user.get("email")
         self.email_verified = user.get("email_verified", False)
-        self.pay = user.get("pay", 0)
         self.role_id = user.get("role_id")
         self.nbpasswordchange = user.get("nbpasswordchange", 0)
 

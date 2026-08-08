@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block title %}Security — MediLink{% endblock %}
+{% block title %}Security - MediLink{% endblock %}
 {% block content %}
 
 {% include 'partials/settings_nav.html' %}
@@ -17,11 +17,11 @@
                 <span class="badge badge--success">Verified</span>
             {% else %}
                 <span class="badge badge--danger">Not verified</span>
-                — <a href="{{ url_for('auth.two_factor_authentication') }}">Verify now</a>
+                - <a href="{{ url_for('auth.two_factor_authentication') }}">Verify now</a>
             {% endif %}
         </p>
     {% else %}
-        <p>No email has been added yet — <a href="{{ url_for('settings.account_change_email') }}">Add an email</a></p>
+        <p>No email has been added yet - <a href="{{ url_for('settings.account_change_email') }}">Add an email</a></p>
     {% endif %}
 </div>
 
@@ -42,7 +42,7 @@
 
 <div class="card">
     <h3 class="card__title">Sessions &amp; Devices</h3>
-    <p>Your current IP address: {{ ip_address }} — {{ session_location }}</p>
+    <p>Your current IP address: {{ ip_address }} - {{ session_location }}</p>
 
     <div class="table-wrap">
         <table>
@@ -92,6 +92,7 @@
 
     <form action="{{ url_for('settings.settings_logout_all') }}" method="post" class="inline-form" style="display:block; margin-top:16px;">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <br>
         <button type="submit" class="btn btn--danger-outline">Log out from all devices</button>
     </form>
 </div>

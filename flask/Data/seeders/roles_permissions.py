@@ -54,7 +54,7 @@ class RolesPermissionsSeeder:
 
             permissions = {}
             rows_permissions = conn.execute("""SELECT id, name FROM permissions;""").fetchall()
-            for row in rows_permissions: 
+            for row in rows_permissions:
                 permissions[row["name"]] = row["id"]
 
             for role_name, permission_names in self._permissions.DICT_ROLE_PERMISSION.items():

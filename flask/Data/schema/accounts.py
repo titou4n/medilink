@@ -13,10 +13,11 @@ CREATE TABLE IF NOT EXISTS account (
     password            TEXT    NOT NULL,
     email_verified      INTEGER NOT NULL DEFAULT 0,
     name                TEXT    NOT NULL,
-    pay                 REAL    NOT NULL DEFAULT 0.0,
     profile_picture_path TEXT,
     nbpasswordchange    INTEGER NOT NULL DEFAULT 0,
+    is_active           INTEGER NOT NULL DEFAULT 1,
     created_at          TEXT    NOT NULL DEFAULT (datetime('now')),
+    updated_at          TEXT,
     FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE RESTRICT
 );
 """

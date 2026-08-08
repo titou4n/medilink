@@ -171,7 +171,6 @@ def security_home():
     return render_template('settings/security_home.html',
                            id=current_user.id,
                            name=ext.db_account_repository.get_name_by_id(current_user.id),
-                           pay=ext.db_account_repository.get_pay_by_id(current_user.id),
                            user_has_email=email is not None,
                            email=email,
                            email_verified=ext.db_account_repository.get_email_verified_by_id(current_user.id),

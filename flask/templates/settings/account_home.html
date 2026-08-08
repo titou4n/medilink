@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block title %}Your Account — MediLink{% endblock %}
+{% block title %}Your Account - MediLink{% endblock %}
 {% block content %}
 
 {% include 'partials/settings_nav.html' %}
@@ -16,7 +16,7 @@
       <dl class="account-details">
         <div><dt>Account ID</dt><dd>{{ id }}</dd></div>
         <div><dt>Role</dt><dd>{{ role_name }}</dd></div>
-        <div><dt>Name</dt><dd>{{ name }} — <a href="{{ url_for('settings.account_change_name') }}">change</a></dd></div>
+        <div><dt>Name</dt><dd>{{ name }} [<a href="{{ url_for('settings.account_change_name') }}">change</a>]</dd></div>
         <div>
           <dt>Email</dt>
           <dd>
@@ -25,9 +25,9 @@
               <span class="badge badge--success">Verified</span>
             {% else %}
               <span class="badge badge--danger">Not verified</span>
-              — <a href="{{ url_for('auth.two_factor_authentication') }}">verify now</a>
+              - <a href="{{ url_for('auth.two_factor_authentication') }}">verify now</a>
             {% endif %}
-            — <a href="{{ url_for('settings.account_change_email') }}">change</a>
+            [<a href="{{ url_for('settings.account_change_email') }}">change</a>]
           </dd>
         </div>
         <div><dt>Password</dt><dd><a href="{{ url_for('settings.account_change_password') }}">Change password</a></dd></div>
