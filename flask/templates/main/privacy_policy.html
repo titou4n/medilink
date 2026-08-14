@@ -1,0 +1,163 @@
+{% extends 'base.html' %}
+{% block title %}Politique de confidentialité — MediLink{% endblock %}
+{% block content %}
+
+<div class="page-header">
+    <h1>Politique de confidentialité</h1>
+    <p class="page-subtitle">En vigueur au 1/02/2026</p>
+</div>
+
+<div class="card">
+
+    <p>
+        La présente politique de confidentialité décrit comment MediLink (https://medilink.ltjs.net/, ci-après
+        « le Site ») collecte, utilise et protège les données personnelles des Utilisateurs, conformément au
+        Règlement (UE) 2016/679 du 27 avril 2016 (« RGPD ») et à la loi n°78-17 du 6 janvier 1978 modifiée relative
+        à l'informatique, aux fichiers et aux libertés.
+    </p>
+
+    <h3>1. Responsable du traitement</h3>
+    <p>
+        Le responsable du traitement des données collectées sur le Site est SIMON Titouan, domicilié en France,
+        éditeur du Site. Pour toute question relative à vos données personnelles ou pour exercer vos droits, vous
+        pouvez le contacter à l'adresse : titouservice.mail@gmail.com.
+    </p>
+
+    <h3>2. Données collectées</h3>
+    <p>MediLink traite les catégories de données suivantes :</p>
+
+    <p><strong>a) Données de compte</strong></p>
+    <ul class="terms-list">
+        <li>Adresse email et mot de passe (stocké sous forme de hachage cryptographique, jamais en clair) ;</li>
+        <li>Nom associé au compte ;</li>
+        <li>Photo de profil (facultative) ;</li>
+        <li>Historique de connexion : date et adresse IP de connexion, à des fins de sécurité du compte ;</li>
+        <li>Si vous utilisez « Se connecter avec Google » : votre identifiant Google, votre adresse email et votre
+            nom, transmis par Google avec votre autorisation lors de la connexion.</li>
+    </ul>
+
+    <p><strong>b) Données médicales d'urgence (données de santé)</strong></p>
+    <p>
+        Si vous choisissez de renseigner votre profil médical d'urgence, vous nous transmettez volontairement des
+        données qui constituent des <strong>données de santé au sens de l'article 9 du RGPD</strong>, une catégorie
+        particulière de données personnelles bénéficiant d'une protection renforcée : identité (nom, prénom, date
+        de naissance, genre), groupe sanguin, taille et poids, allergies, pathologies, traitements en cours,
+        informations critiques et notes médicales, statut de donneur d'organes, ainsi que les coordonnées d'un
+        contact d'urgence et d'un médecin traitant.
+    </p>
+    <p>
+        Ces informations sont <strong>entièrement facultatives</strong> : vous n'êtes jamais obligé de créer ou de
+        compléter ce profil pour utiliser les autres fonctionnalités du Site. En créant ou en complétant ce profil,
+        vous consentez explicitement au traitement de ces données de santé, conformément à l'article 9.2.a) du
+        RGPD. Vous pouvez modifier ou supprimer ces informations à tout moment depuis votre espace personnel, ce
+        qui retire votre consentement pour l'avenir.
+    </p>
+
+    <p><strong>c) Données techniques et de session</strong></p>
+    <ul class="terms-list">
+        <li>Cookie de session (« session_id ») : strictement nécessaire au fonctionnement du Site (maintien de la
+            connexion), non utilisé à des fins publicitaires ou de traçage ;</li>
+        <li>Empreinte de votre adresse IP et de votre navigateur (User-Agent), conservée sous forme hachée, utilisée
+            pour détecter les tentatives de détournement de session ;</li>
+        <li>Si vous consultez la liste de vos sessions actives dans les paramètres du compte, votre adresse IP est
+            transmise à un service tiers de géolocalisation (voir section 4) afin de vous afficher une localisation
+            approximative.</li>
+    </ul>
+
+    <h3>3. Le lien public d'urgence — point d'attention important</h3>
+    <p>
+        Le profil médical d'urgence peut être rendu accessible via un <strong>lien public unique</strong>, destiné
+        à être utilisé par des secours ou des tiers en cas d'urgence (par exemple via un QR code sur vous).
+        <strong>Toute personne en possession de ce lien peut consulter les données de votre profil médical
+        d'urgence, sans avoir besoin de se connecter à un compte.</strong> Vous restez seul responsable de la
+        diffusion de ce lien. Vous pouvez à tout moment désactiver ce lien ou régénérer un nouveau jeton depuis
+        votre espace personnel, ce qui rend l'ancien lien immédiatement inutilisable.
+    </p>
+
+    <h3>4. Destinataires des données et sous-traitants</h3>
+    <p>
+        Vos données ne sont ni vendues, ni louées, ni utilisées à des fins publicitaires. Elles peuvent être
+        transmises aux tiers suivants, strictement pour permettre le fonctionnement du Site :
+    </p>
+    <ul class="terms-list">
+        <li><strong>Google LLC</strong> — si vous utilisez « Se connecter avec Google », pour l'authentification
+            (OAuth 2.0 / OpenID Connect), ainsi que pour l'envoi des emails du Site via un compte Gmail (bienvenue,
+            réinitialisation de mot de passe, codes de double authentification) ;</li>
+        <li><strong>ipapi.co</strong> — réception de votre adresse IP dans le seul but d'afficher une localisation
+            approximative de vos sessions actives, à votre demande ;</li>
+        <li><strong>Cloudflare, Inc.</strong> — opérateur du tunnel et du réseau utilisé pour exposer le Site sur
+            Internet de façon sécurisée (protection contre les attaques, terminaison TLS).</li>
+    </ul>
+    <p>
+        Certains de ces prestataires sont établis hors de l'Union européenne (notamment aux États-Unis). Ces
+        transferts s'appuient sur les garanties prévues par ces prestataires (clauses contractuelles types ou
+        mécanismes équivalents reconnus par la Commission européenne).
+    </p>
+
+    <h3>5. Hébergement et sécurité</h3>
+    <p>
+        Le Site est actuellement <strong>auto-hébergé en France</strong>. Il n'est, à ce jour, <strong>pas hébergé
+        par un hébergeur certifié « Hébergeur de Données de Santé » (HDS)</strong> au sens du Code de la santé
+        publique. Cette information vous est communiquée en toute transparence : si vous ne souhaitez pas que vos
+        données de santé soient traitées dans ces conditions, vous pouvez choisir de ne pas renseigner de profil
+        médical d'urgence.
+    </p>
+    <p>
+        Des mesures techniques sont mises en œuvre pour protéger vos données : chiffrement des mots de passe,
+        authentification à deux facteurs disponible, connexions chiffrées (HTTPS/TLS), protection contre les
+        attaques CSRF, limitation du nombre de tentatives de connexion, détection de détournement de session, et
+        possibilité de révoquer chacune de vos sessions actives à tout moment.
+    </p>
+
+    <h3>6. Durée de conservation</h3>
+    <p>
+        Vos données de compte et votre profil médical d'urgence sont conservés tant que votre compte reste actif.
+        En cas de suppression de votre compte, vos données sont supprimées dans un délai raisonnable, sous réserve
+        des données que nous serions légalement tenus de conserver plus longtemps. L'historique de connexion est
+        conservé à des fins de sécurité pour une durée limitée.
+    </p>
+
+    <h3>7. Vos droits</h3>
+    <p>
+        Conformément au RGPD, vous disposez d'un droit d'accès, de rectification, d'effacement, de limitation, de
+        portabilité et d'opposition concernant vos données, ainsi que du droit de retirer à tout moment votre
+        consentement au traitement de vos données de santé. Vous pouvez :
+    </p>
+    <ul class="terms-list">
+        <li>consulter, modifier ou supprimer votre profil médical d'urgence directement depuis votre espace
+            personnel ;</li>
+        <li>exporter une copie de vos données personnelles depuis la page « Confidentialité » de vos paramètres de
+            compte ;</li>
+        <li>demander la suppression de votre compte ou exercer tout autre droit en nous contactant à l'adresse
+            indiquée à l'article 1.</li>
+    </ul>
+    <p>
+        Vous disposez également du droit d'introduire une réclamation auprès de la Commission Nationale de
+        l'Informatique et des Libertés (CNIL) — <a href="https://www.cnil.fr" target="_blank" rel="noopener">www.cnil.fr</a>.
+    </p>
+
+    <h3>8. Cookies</h3>
+    <p>
+        Le Site utilise uniquement un cookie de session strictement nécessaire à l'authentification. Ce cookie ne
+        contient aucune donnée personnelle en clair, ne sert à aucun suivi publicitaire et expire automatiquement.
+        Aucun cookie tiers de mesure d'audience ou de publicité n'est utilisé.
+    </p>
+
+    <h3>9. Modification de la présente politique</h3>
+    <p>
+        Cette politique de confidentialité peut être mise à jour, notamment pour refléter une évolution des
+        fonctionnalités du Site ou de la réglementation applicable. La date de dernière mise à jour figure en haut
+        de cette page.
+    </p>
+
+    <h3>10. Contact</h3>
+    <p>
+        Pour toute question relative à cette politique de confidentialité ou au traitement de vos données, vous
+        pouvez nous contacter à l'adresse : titouservice.mail@gmail.com.
+    </p>
+
+    <hr>
+    <p class="terms-footer">Voir aussi nos <a href="{{ url_for('main.conditions_uses') }}">Conditions Générales d'Utilisation</a>.</p>
+
+</div>
+{% endblock %}

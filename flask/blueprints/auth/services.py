@@ -118,3 +118,100 @@ def register_user(email: str, raw_password: str, raw_verif: str, name: str):
     except Exception as e:
         logger.error("Error during registration: %s", str(e))
         return None, "Registration failed. Please try again."
+
+
+def authenticate_or_create_google_user(claims: dict):
+    """
+    Resolve a verified Google OIDC login to a local account.
+
+    Resolution order:
+      1. An identity already linked to this Google account (``sub``) -> use it.
+      2. No link yet, but an account already exists with the same, Google-
+         verified email -> auto-link (Google is trusted to own that mailbox,
+         so this cannot be used to take over an account you don't control).
+      3. Neither -> create a brand new account, mirroring register_user()
+         (role "user", name = email). The stored password hash is random
+         and never handed to the user - Google is the only way to sign in
+         to this account, exactly like accounts created through
+         register_user() are keyed on a real password.
+
+    Returns (user_id, error_message); error_message is None on success.
+    """
+    GOOGLE_ERROR_MESSAGE = "Google sign-in failed. Please try again."
+    provider = "google"
+
+    provider_sub = claims.get("sub")
+    email = (claims.get("email") or "").strip()
+    email_verified = bool(claims.get("email_verified"))
+
+    if not provider_sub or not email:
+        logger.warning("Google login: missing sub or email in ID token claims")
+        return None, GOOGLE_ERROR_MESSAGE
+
+    user_id = ext.db_oauth_identity_repository.get_account_id_by_provider_sub(
+        provider=provider, provider_sub=provider_sub
+    )
+
+    if user_id is None:
+        if not email_verified:
+            logger.warning("Google login rejected: unverified email for sub=%s", provider_sub)
+            return None, "Your Google account's email must be verified to sign in with Google."
+
+        existing_user_id = ext.db_account_repository.get_id_by_email(email)
+
+        if existing_user_id is not None:
+            ext.db_oauth_identity_repository.link(
+                account_id=existing_user_id, provider=provider, provider_sub=provider_sub, email=email
+            )
+            user_id = existing_user_id
+            logger.info("Linked Google identity to existing account %s", user_id)
+        else:
+            try:
+                role_id = ext.db_role_repository.get_role_id(role_name="user")
+                if role_id is None:
+                    logger.error("User role not found in database")
+                    return None, "System configuration error. Please try again later."
+
+                # Random, never-issued password: this account can only be
+                # signed into through Google, but `account.password` stays
+                # NOT NULL like every other row.
+                random_password_hash = ext.hash_manager.generate_password_hash(
+                    ext.hash_manager.generate_secure_token()
+                )
+                ext.db_account_repository.create(email, random_password_hash, email, role_id)
+
+                user_id = ext.db_account_repository.get_id_by_email(email)
+                if user_id is None:
+                    logger.error("Failed to retrieve account just created from Google sign-in")
+                    return None, GOOGLE_ERROR_MESSAGE
+
+                ext.db_account_repository.update_email_verified(user_id, True)
+                ext.db_account_repository.create_preferences(user_id=user_id)
+                ext.db_oauth_identity_repository.link(
+                    account_id=user_id, provider=provider, provider_sub=provider_sub, email=email
+                )
+
+                try:
+                    ext.email_manager.send_welcome_email(user_id=user_id)
+                except Exception as e:
+                    logger.error("Error sending welcome email to Google-created user %s: %s", user_id, str(e))
+
+                logger.info("Created new account %s via Google sign-in", user_id)
+            except Exception as e:
+                logger.error("Error creating account from Google sign-in: %s", str(e))
+                return None, GOOGLE_ERROR_MESSAGE
+
+    if ext.db_account_repository.get_is_active_by_id(user_id) is False:
+        logger.warning("Google login blocked: account %s is suspended", user_id)
+        return None, "This account has been suspended. Please contact an administrator."
+
+    try:
+        ext.db_account_repository.insert_metadata(
+            user_id=user_id,
+            date_connected=ext.utils.get_datetime_isoformat(),
+            ipv4=ext.session_manager.get_ip_session()
+        )
+    except Exception as e:
+        logger.error("Error inserting metadata for user %s: %s", user_id, str(e))
+
+    return user_id, None

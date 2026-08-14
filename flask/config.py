@@ -44,6 +44,11 @@ class Config:
     if not EMAIL_APP_PASSWORD:
         raise RuntimeError("EMAIL_APP_PASSWORD is missing")
 
+    # Google Sign-In (OAuth 2.0 / OIDC).
+    GOOGLE_CLIENT_ID: str | None = os.getenv("GOOGLE_CLIENT_ID")
+    GOOGLE_CLIENT_SECRET: str | None = read_secret("google_client_secret") if ENV_PROD else os.getenv("GOOGLE_CLIENT_SECRET")
+    GOOGLE_OAUTH_ENABLED: bool = bool(GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET)
+
     # ──────────────────────────── Paths ─────────────────────────────────── #
 
     BASE_DIR: Path = Path(__file__).parent.resolve()
