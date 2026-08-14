@@ -5,7 +5,7 @@ from flask import render_template, redirect, request, flash, url_for, session as
 from flask_login import current_user, login_user
 
 from blueprints.auth import bp
-from blueprints.auth.services import authenticate_user, register_user
+from blueprints.auth.services import authenticate_user, register_user, authenticate_or_create_google_user
 import extensions as ext
 from models.user import User
 from utils.twofa_manager import (
@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 
 @bp.route('/login', methods=['GET', 'POST'])
 @bp.route('/login/', methods=['GET', 'POST'])
-#@ext.limiter.limit("5 per minute; 20 per hour; 100 per day")
+@ext.limiter.limit("5 per minute; 20 per hour; 100 per day")
 def login():
     if request.method == 'GET':
         return render_template('auth/login.html')
@@ -57,7 +57,7 @@ def login():
 
 @bp.route('/register', methods=['GET', 'POST'])
 @bp.route('/register/', methods=['GET', 'POST'])
-#@ext.limiter.limit("3 per minute; 10 per hour; 30 per day")
+@ext.limiter.limit("3 per minute; 10 per hour; 30 per day")
 def register():
     if request.method == 'GET':
         return render_template('auth/register.html')
@@ -77,6 +77,60 @@ def register():
 
     logger.info("User %s registered successfully", user_id)
     return redirect(url_for('main.home'))
+
+
+@bp.route('/login/google')
+@bp.route('/login/google/')
+def google_login():
+    if not ext.config.GOOGLE_OAUTH_ENABLED:
+        flash('Google sign-in is not available.')
+        return redirect(url_for('auth.login'))
+
+    redirect_uri = url_for('auth.google_callback', _external=True)
+    return ext.oauth.google.authorize_redirect(redirect_uri)
+
+
+@bp.route('/login/google/callback')
+@bp.route('/login/google/callback/')
+def google_callback():
+    if not ext.config.GOOGLE_OAUTH_ENABLED:
+        flash('Google sign-in is not available.')
+        return redirect(url_for('auth.login'))
+
+    try:
+        token = ext.oauth.google.authorize_access_token()
+    except Exception as e:
+        logger.warning("Google OAuth callback failed: %s", str(e))
+        flash('Google sign-in failed. Please try again.')
+        return redirect(url_for('auth.login'))
+
+    claims = token.get('userinfo')
+    if not claims:
+        logger.warning("Google OAuth callback: no userinfo/ID token claims in token response")
+        flash('Google sign-in failed. Please try again.')
+        return redirect(url_for('auth.login'))
+
+    user_id, error = authenticate_or_create_google_user(claims)
+    if error:
+        flash(error)
+        return redirect(url_for('auth.login'))
+
+    # Même pipeline que le login classique : session temporaire -> 2FA si activée -> session réelle.
+    ext.session_manager.send_temp_2fa_session(user_id=user_id)
+
+    if ext.db_account_repository.get_twofa_enabled(user_id=user_id):
+        return redirect(url_for('auth.two_factor_authentication'))
+
+    try:
+        user = User(user_id)
+        login_user(user)
+        ext.session_manager.finalize_2fa_session(user_id)
+        logger.info("User %s logged in successfully via Google (no 2FA)", user_id)
+        return redirect(url_for('main.home'))
+    except Exception as e:
+        logger.error("Error loading user %s: %s", user_id, str(e))
+        flash('An error occurred during login. Please try again.')
+        return redirect(url_for('auth.login'))
 
 
 @bp.route('/forgot_password', methods=['GET', 'POST'])

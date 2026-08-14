@@ -21,7 +21,6 @@ services:
       ENV_PROD: "true"
       FLASK_ENV: "production"
       RATELIMIT_STORAGE_URI: redis://redis:6379/0
-      PROXY_TRUSTED_HOP_COUNT: "2"
 
     volumes:
       - db-data:/app/Data/db
@@ -40,6 +39,7 @@ services:
     secrets:
       - secret_key
       - email_app_password
+      - google_client_secret
 
   redis:
     image: redis:7-alpine
@@ -110,3 +110,5 @@ secrets:
     file: ./secrets/email_app_password.txt
   cloudflare_tunnel_token:
     file: ./secrets/cloudflare_tunnel_token.txt
+  google_client_secret:
+    file: ./secrets/google_client_secret.txt

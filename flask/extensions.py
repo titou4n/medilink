@@ -5,6 +5,7 @@ from flask_login import LoginManager
 from flask_wtf import CSRFProtect
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
+from authlib.integrations.flask_client import OAuth
 
 logger = logging.getLogger(__name__)
 
@@ -18,6 +19,7 @@ from Data.repositories.account_repository           import AccountRepository
 from Data.repositories.role_repository              import RoleRepository
 from Data.repositories.session_repository           import SessionRepository
 from Data.repositories.twofa_repository             import TwoFARepository
+from Data.repositories.oauth_identity_repository     import OAuthIdentityRepository
 from Data.repositories.emergency_information_repository import EmergencyInformationRepository
 
 from config import Config
@@ -56,6 +58,7 @@ permissions = Permissions()
 
 # Flask Extensions
 login_manager = LoginManager()
+oauth = OAuth()
 csrf = CSRFProtect()
 limiter = Limiter(
     key_func=get_client_identifier,
@@ -80,6 +83,7 @@ db_role_repository: RoleRepository = RoleRepository(db_connection)
 db_session_repository: SessionRepository = SessionRepository(db_connection)
 db_twofa_repository: TwoFARepository = TwoFARepository(db_connection)
 db_emergency_information_repository: EmergencyInformationRepository = EmergencyInformationRepository(db_connection)
+db_oauth_identity_repository: OAuthIdentityRepository = OAuthIdentityRepository(db_connection)
 
 # ------------------------------------------------------------------ #
 # Service singletons
@@ -98,6 +102,21 @@ twofa_manager = TwofaManager()
 
 # Utils/Tools
 utils = Utils()
+
+# Google OAuth / OIDC client. Registered here (not gated behind init_app)
+# so `ext.config.GOOGLE_OAUTH_ENABLED` and `ext.oauth.google` are both usable
+# as soon as extensions.py is imported; oauth.init_app(app) in app.py only
+# binds Flask-specific bits (session storage for state/nonce).
+if config.GOOGLE_OAUTH_ENABLED:
+    oauth.register(
+        name="google",
+        client_id=config.GOOGLE_CLIENT_ID,
+        client_secret=config.GOOGLE_CLIENT_SECRET,
+        server_metadata_url="https://accounts.google.com/.well-known/openid-configuration",
+        client_kwargs={"scope": "openid email profile"},
+    )
+else:
+    logger.warning("GOOGLE_CLIENT_ID/GOOGLE_CLIENT_SECRET not set - Google Sign-In is disabled.")
 
 # Initialise seeders
 _roles_permissions_seeders = RolesPermissionsSeeder()

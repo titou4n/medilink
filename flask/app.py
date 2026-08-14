@@ -92,6 +92,7 @@ def create_app(config_object=Config):
     ext.login_manager.login_view = "auth.login"
     ext.session_manager.init_app(app)
     ext.limiter.init_app(app)
+    ext.oauth.init_app(app)
 
     # redis
     try:

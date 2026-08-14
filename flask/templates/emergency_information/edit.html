@@ -7,6 +7,16 @@
 </div>
 
 <div class="card">
+
+  <div class="alert alert--info" style="margin-bottom:20px;">
+    ℹ️ The information below (blood type, allergies, conditions, medications…) is considered
+    <strong>health data</strong> and is entirely optional. By saving this profile, you consent to
+    us storing it for the purpose of emergency access. If you enable the public emergency link,
+    anyone holding that link will be able to view this profile without logging in. You can edit,
+    clear, or delete this profile — and disable the public link — at any time. See our
+    <a href="{{ url_for('main.privacy_policy') }}" target="_blank">Privacy Policy</a> for full details.
+  </div>
+
   <form method="POST" action="{{ url_for('emergency_information.edit') }}">
 
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">

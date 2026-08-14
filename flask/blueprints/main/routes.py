@@ -71,3 +71,9 @@ def logout():
 @bp.route('/conditions_uses/')
 def conditions_uses():
     return render_template('main/conditions_uses.html')
+
+
+@bp.route('/privacy_policy')
+@bp.route('/privacy_policy/')
+def privacy_policy():
+    return render_template('main/privacy_policy.html')
