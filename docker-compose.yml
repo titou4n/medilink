@@ -21,6 +21,13 @@ services:
       ENV_PROD: "true"
       FLASK_ENV: "production"
       RATELIMIT_STORAGE_URI: redis://redis:6379/0
+      EMAIL_SUPER_ADMIN: "titou4n.simon@gmail.com"
+      PROXY_TRUSTED_HOP_COUNT: 2
+      NEED_TO_RESET_DB_EXCEPT_ACCOUNT: "false"
+      NEED_TO_RESET_ALL_DB: "false"
+      NEED_TO_RESET_ROLES_PERMISSIONS_TABLES: "true"
+      CREATE_SEEDED_ACCOUNTS: "false"
+      GOOGLE_CLIENT_ID: "628634609065-b6e7vpagmm6focbl1o7h1nkemqo1gon0.apps.googleusercontent.com"
 
     volumes:
       - db-data:/app/Data/db

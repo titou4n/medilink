@@ -91,6 +91,7 @@ def account_change_password():
         return redirect(url_for('settings.account_change_password'))
 
     ext.db_account_repository.update_password(current_user.id, ext.hash_manager.generate_password_hash(new_password))
+    ext.session_manager.logout_other_sessions(current_user.id)
     flash('Your password has been updated')
     return redirect(url_for('settings.account_home'))
 
