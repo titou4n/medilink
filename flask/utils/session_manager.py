@@ -285,6 +285,22 @@ class SessionManager:
         except Exception as e:
             logger.error("Error logging out user from all devices: %s", str(e))
 
+    def logout_other_sessions(self, user_id: int) -> None:
+        """Revoke every other active session for *user_id*, keeping the current one alive."""
+        try:
+            session_id = flask_session.get("session_id")
+            if not session_id:
+                self.db_session.revoke_all_for_user(user_id=user_id)
+                return
+
+            session_id_hash = self.hash_session_id(session_id=session_id)
+            self.db_session.revoke_all_for_user_except(
+                user_id=user_id, except_session_id_hash=session_id_hash
+            )
+            logger.info("Other sessions revoked for user %s", user_id)
+        except Exception as e:
+            logger.error("Error logging out other sessions for user %s: %s", user_id, str(e))
+
     def logout_session_owned(self, session_id_hash: str, user_id: int) -> bool:
         """Revoke a session, but only if it belongs to *user_id*. Returns True on success."""
         return self.db_session.revoke_owned(session_id_hash=session_id_hash, user_id=user_id)

@@ -7,8 +7,8 @@ class Config:
     """
     Application configuration.
 
-    Secrets are read from Docker secrets in production and from
-    environment variables (via .env) in development.
+    Production : secrets are read from Docker secrets
+    Development : from environment variables (via .env)
     """
 
     load_dotenv()
@@ -16,7 +16,6 @@ class Config:
     # ─────────────────────────── Environment ────────────────────────────── #
 
     ENV_PROD: bool = os.getenv("ENV_PROD", "false").lower() == "true"
-
     FLASK_ENV: str = "production" if ENV_PROD else "development"
     DEBUG: bool = not ENV_PROD
     
@@ -85,7 +84,16 @@ class Config:
     SESSION_COOKIE_PATH          = None
     SESSION_COOKIE_HTTPONLY: bool = True          # Blocks JS access to the cookie
     SESSION_COOKIE_SECURE: bool  = ENV_PROD       # Requires HTTPS in production
-    SESSION_COOKIE_SAMESITE: str = "Strict"
+
+    # "Strict" would silently break Google Sign-In: the browser lands back on
+    # /login/google/callback via a top-level cross-site navigation *from*
+    # accounts.google.com, and Strict cookies are not sent on that request -
+    # so Authlib can never find the state/nonce it stored before redirecting
+    # to Google, and every callback fails with a mismatching_state error.
+    # "Lax" still blocks cross-site POST/fetch (the actual CSRF vector);
+    # state-changing requests are additionally covered by Flask-WTF's
+    # CSRFProtect (see extensions.py), so this doesn't weaken CSRF defense.
+    SESSION_COOKIE_SAMESITE: str = "Lax"
 
     SESSION_COOKIE_MAX_AGE: int = 3600  # 1 heure
 

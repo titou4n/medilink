@@ -1,7 +1,7 @@
 import logging
 from pathlib import Path
-from flask import Flask, request, flash, redirect, url_for
-from flask_login import current_user
+from flask import Flask, request, flash, redirect, url_for, session as flask_session
+from flask_login import current_user, logout_user
 from werkzeug.exceptions import BadRequest
 from config import Config
 import redis
@@ -61,6 +61,46 @@ def create_app(config_object=Config):
         if allowed_hosts and _hostname_without_port(request.host) not in allowed_hosts:
             logger.warning("Rejected request with invalid Host header: %s", request.host)
             raise BadRequest("Invalid Host header")
+
+    @app.before_request
+    def enforce_session_validity():
+        """
+        Security: a signed Flask-Login cookie only proves the user
+        authenticated at some point in the past - revoking a session ("log
+        out this device" / "log out all devices") or suspending an account
+        only wrote to the database and had no effect on a request that
+        already carried a still-valid cookie (see audits/). Re-check both
+        the app-level `sessions` table and `account.is_active` on every
+        request from a known user and force a real logout (cookie included)
+        the moment either one no longer holds, instead of waiting for the
+        cookie to expire naturally.
+
+        Gated on is_anonymous rather than is_authenticated: User.is_active
+        (models/user.py) already makes is_authenticated False for a
+        suspended account via UserMixin, which alone blocks every
+        @login_required / require_* route - but without this hook the
+        stale cookie would linger unnoticed instead of being cleared.
+        """
+        if current_user.is_anonymous or request.endpoint == "static":
+            return
+
+        session_is_active = ext.session_manager.get_current_session_id_hash() is not None
+        account_is_active = current_user.is_active
+
+        if session_is_active and account_is_active:
+            return
+
+        user_id = current_user.get_id()
+        logout_user()
+        flask_session.clear()
+        logger.warning(
+            "Forced logout for user %s (session_active=%s, account_active=%s)",
+            user_id, session_is_active, account_is_active
+        )
+
+        if request.endpoint != "main.logout":
+            flash("Your session is no longer valid. Please log in again.", "warning")
+        return redirect(url_for("auth.login"))
 
     @app.before_request
     def enforce_password_change():

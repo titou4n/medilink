@@ -12,12 +12,26 @@ class User(UserMixin):
 
         self.id = user_id
         self._permissions: list[str] | None = None
+        self._is_active = True
         self._load_from_db()
 
     # ── Flask-Login ──────────────────────────────────────────────── #
 
     def get_id(self) -> str:
         return str(self.id)
+
+    @property
+    def is_active(self) -> bool:
+        """
+        Overrides UserMixin.is_active (a read-only property defaulting to
+        True). UserMixin.is_authenticated delegates to this, so a suspended
+        account (account.is_active = 0) is treated as unauthenticated by
+        Flask-Login and every @login_required / require_* check the moment
+        this object is reloaded - which happens on every request, since
+        register_login_manager()'s user_loader builds a fresh User (and
+        re-reads the DB) each time rather than caching it across requests.
+        """
+        return self._is_active
 
     # ── Data loading ─────────────────────────────────────────────── #
 
@@ -33,6 +47,7 @@ class User(UserMixin):
         self.email_verified = user.get("email_verified", False)
         self.role_id = user.get("role_id")
         self.nbpasswordchange = user.get("nbpasswordchange", 0)
+        self._is_active = bool(user.get("is_active", True))
 
         if self.role_id is None:
             logger.warning("User %s has no role_id", self.id)

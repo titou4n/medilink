@@ -147,6 +147,16 @@ class SessionRepository:
             conn.commit()
         logger.info("All sessions revoked for user_id=%d", user_id)
 
+    def revoke_all_for_user_except(self, user_id: int, except_session_id_hash: str) -> None:
+        """Revoke every active session for *user_id* other than *except_session_id_hash*."""
+        with self._db.connect() as conn:
+            conn.execute(
+                "UPDATE sessions SET is_revoked = 1 WHERE user_id = ? AND session_id_hash != ?;",
+                (user_id, except_session_id_hash),
+            )
+            conn.commit()
+        logger.info("All other sessions revoked for user_id=%d", user_id)
+
     # ------------------------------------------------------------------ #
     # Delete
     # ------------------------------------------------------------------ #
