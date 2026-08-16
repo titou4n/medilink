@@ -21,6 +21,7 @@ from Data.repositories.session_repository           import SessionRepository
 from Data.repositories.twofa_repository             import TwoFARepository
 from Data.repositories.oauth_identity_repository     import OAuthIdentityRepository
 from Data.repositories.emergency_information_repository import EmergencyInformationRepository
+from Data.repositories.password_reset_repository    import PasswordResetRepository
 
 from config import Config
 from utils.utils import Utils
@@ -29,6 +30,7 @@ from utils.permissions_manager import PermissionsManager
 from utils.email_manager import EmailManager
 from utils.hash_manager import HashManager
 from utils.twofa_manager import TwofaManager
+from utils.password_reset_manager import PasswordResetManager
 from utils.decorators import *
 
 from permissions import Permissions
@@ -84,6 +86,7 @@ db_session_repository: SessionRepository = SessionRepository(db_connection)
 db_twofa_repository: TwoFARepository = TwoFARepository(db_connection)
 db_emergency_information_repository: EmergencyInformationRepository = EmergencyInformationRepository(db_connection)
 db_oauth_identity_repository: OAuthIdentityRepository = OAuthIdentityRepository(db_connection)
+db_password_reset_repository: PasswordResetRepository = PasswordResetRepository(db_connection)
 
 # ------------------------------------------------------------------ #
 # Service singletons
@@ -99,6 +102,7 @@ permission_manager = PermissionsManager()
 email_manager = EmailManager()
 hash_manager = HashManager()
 twofa_manager = TwofaManager()
+password_reset_manager = PasswordResetManager()
 
 # Utils/Tools
 utils = Utils()

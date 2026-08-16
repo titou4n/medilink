@@ -6,7 +6,8 @@ from flask_login import login_required, current_user
 
 from blueprints.admin import bp
 from blueprints.admin.services import (
-    change_user_role, set_user_active_status, delete_user_account, create_user_account
+    change_user_role, set_user_active_status, delete_user_account, create_user_account,
+    trigger_password_reset
 )
 from utils.decorators import require_permission
 import extensions as ext
@@ -306,6 +307,26 @@ def user_reactivate(user_id: int):
         current_user_role_name=current_user.role_name,
         target_account=account,
         activate=True,
+    )
+    flash(message, category)
+    return redirect(url_for("admin.user_detail", user_id=user_id))
+
+
+@bp.route('/users/<int:user_id>/reset_password', methods=['POST'])
+@bp.route('/users/<int:user_id>/reset_password/', methods=['POST'])
+@login_required
+@require_permission("access_admin_panel")
+@require_permission("reset_user_password")
+def user_reset_password(user_id: int):
+    account = ext.db_account_repository.get_by_id(user_id)
+    if account is None:
+        flash("This user does not exist.", "warning")
+        return redirect(url_for("admin.users_list"))
+
+    success, message, category = trigger_password_reset(
+        current_user_id=current_user.id,
+        current_user_role_name=current_user.role_name,
+        target_account=account,
     )
     flash(message, category)
     return redirect(url_for("admin.user_detail", user_id=user_id))

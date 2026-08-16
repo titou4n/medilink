@@ -118,6 +118,39 @@ def delete_user_account(
     return True, "Account deleted successfully.", "success"
 
 
+def trigger_password_reset(
+    current_user_id: int,
+    current_user_role_name: str,
+    target_account: sqlite3.Row,
+) -> tuple[bool, str, str]:
+    """
+    Send *target_account* a single-use password reset link, triggered by an admin.
+
+    The admin never sees or sets the password: a random token is generated,
+    only its hash is stored, and the reset link is emailed to the account's
+    own address so the user picks their new password themselves. Only a
+    Super Admin may reset the password of an Admin or Super Admin account.
+    Returns ``(success, message, flash_category)``.
+    """
+    super_admin_role_id = ext.db_role_repository.get_role_id(ext.config.ROLE_NAME_SUPER_ADMIN)
+    admin_role_id       = ext.db_role_repository.get_role_id(ext.config.ROLE_NAME_ADMIN)
+
+    if target_account["role_id"] in (super_admin_role_id, admin_role_id) and current_user_role_name != ext.config.ROLE_NAME_SUPER_ADMIN:
+        return False, "Only a Super Admin can reset the password of an Admin or Super Admin account.", "danger"
+
+    try:
+        sent = ext.password_reset_manager.request_reset(user_id=target_account["id"])
+    except Exception as e:
+        logger.error("Error triggering password reset for user %s: %s", target_account["id"], str(e))
+        return False, "Could not send the password reset email. Please try again later.", "error"
+
+    if not sent:
+        return False, "Could not send the password reset email. Please try again later.", "error"
+
+    logger.info("Admin %s triggered a password reset email for user %s", current_user_id, target_account["id"])
+    return True, "Password reset email sent successfully.", "success"
+
+
 def create_user_account(
     current_user_role_name: str,
     email: str,
@@ -133,7 +166,7 @@ def create_user_account(
     Admin to grant the Admin or Super Admin role. Returns
     ``(success, message, flash_category)``.
     """
-    email = (email or "").strip()
+    email = (email or "").strip().lower()
     name = (name or "").strip()
 
     if not email or not name or not raw_password or not role_name:

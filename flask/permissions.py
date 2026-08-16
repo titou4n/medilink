@@ -23,6 +23,7 @@ class Permissions():
         "delete_user",
         "ban_user",
         "assign_role",
+        "reset_user_password",
     ]
 
     LIST_PERMISSIONS_MANAGE_ROLES: list[str] = [

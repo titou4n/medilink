@@ -293,6 +293,45 @@ class EmailManager:
             logger.error("Error sending password reset email to user %s: %s", user_id, str(e))
             return False
 
+    def send_password_reset_link_email(self, user_id: int, token: str) -> bool:
+        try:
+            receiver_email_address = self.db_account.get_email_by_id(user_id=user_id)
+            if not receiver_email_address:
+                logger.warning("No email found for password reset link for user %s", user_id)
+                return False
+
+            name = self._get_display_name(user_id)
+            reset_url = build_external_url(url_for('auth.reset_password', token=token))
+
+            body_html = (
+                self._paragraph(f"Hi {name},")
+                + self._paragraph(
+                    "An administrator requested a password reset for your MediLink account. "
+                    f"Click the button below to choose a new password. This link expires in "
+                    f"{self.config.PASSWORD_RESET_TOKEN_TIMELAPS_MINUTES} minutes and can only be used once."
+                )
+                + self._button("Reset your password", reset_url)
+                + self._notice(
+                    "If you didn't expect this, you can safely ignore this email — your password "
+                    "won't change unless you open the link above and set a new one.",
+                    variant="warning",
+                )
+            )
+            html_content = self._layout(
+                preheader="Set a new password for your MediLink account.",
+                heading="Reset your password",
+                body_html=body_html,
+            )
+
+            subject = "Reset your MediLink password"
+            result = self.send_email_with_html_content(user_id=user_id, subject=subject, html_content=html_content)
+            if result:
+                logger.info("Password reset link email sent to user %s", user_id)
+            return result
+        except Exception as e:
+            logger.error("Error sending password reset link email to user %s: %s", user_id, str(e))
+            return False
+
     def send_welcome_email(self, user_id: int) -> bool:
         try:
             receiver_email_address = self.db_account.get_email_by_id(user_id=user_id)

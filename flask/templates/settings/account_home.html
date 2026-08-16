@@ -10,7 +10,7 @@
 
 <div class="card">
 
-    <div style="display:flex; gap:24px; flex-wrap:wrap; align-items:flex-start;">
+    <div class="account-overview">
       <img class="profile-pic-lg" src="{{ url_for('settings.profile_picture', user_id=id) }}" alt="Profile picture">
 
       <dl class="account-details">
@@ -61,7 +61,7 @@
         </form>
     </div>
 
-    <p class="terms-footer" style="margin-top:16px;">Read our <a href="{{ url_for('main.conditions_uses') }}" target="_blank">Terms &amp; Conditions</a></p>
+    <p class="terms-footer terms-footer--spaced">Read our <a href="{{ url_for('main.conditions_uses') }}" target="_blank">Terms &amp; Conditions</a></p>
 
 </div>
 {% endblock %}

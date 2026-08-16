@@ -1,4 +1,5 @@
 import os
+from datetime import timedelta
 from pathlib import Path
 from dotenv import load_dotenv
 import redis
@@ -95,15 +96,25 @@ class Config:
     # CSRFProtect (see extensions.py), so this doesn't weaken CSRF defense.
     SESSION_COOKIE_SAMESITE: str = "Lax"
 
-    SESSION_COOKIE_MAX_AGE: int = 3600  # 1 heure
-
     # Session lifetime
     SESSION_COOKIE_TIME_DAYS: int    = int(os.getenv("SESSION_COOKIE_TIME_DAYS", "0"))
     SESSION_COOKIE_TIME_HOURS: int   = int(os.getenv("SESSION_COOKIE_TIME_HOURS", "1"))
     SESSION_COOKIE_TIME_MINUTES: int = int(os.getenv("SESSION_COOKIE_TIME_MINUTES", "0"))
 
+    # Drives the actual browser cookie's Max-Age (via session.permanent = True
+    # in SessionManager.send_session()), kept in sync with the DB-tracked
+    # `sessions.expires_at` above so both lifetimes agree.
+    PERMANENT_SESSION_LIFETIME: timedelta = timedelta(
+        days=SESSION_COOKIE_TIME_DAYS,
+        hours=SESSION_COOKIE_TIME_HOURS,
+        minutes=SESSION_COOKIE_TIME_MINUTES,
+    )
+
     # 2FA code validity window
     TWOFA_TIMELAPS_MINUTES: int = int(os.getenv("TWOFA_TIMELAPS_MINUTES", "15"))
+
+    # Admin-triggered password reset link validity window
+    PASSWORD_RESET_TOKEN_TIMELAPS_MINUTES: int = int(os.getenv("PASSWORD_RESET_TOKEN_TIMELAPS_MINUTES", "60"))
 
     # Password generation
     PASSWORD_GENERATION_LENGTH: int = 20

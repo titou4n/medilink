@@ -33,7 +33,7 @@
         <div class="checkbox-field">
             <input type="checkbox" name="enable_2fa" id="enable_2fa" class="auto-submit-checkbox"
                 {% if twofa_enabled %}checked{% endif %}>
-            <label for="enable_2fa" style="margin-bottom:0;">
+            <label for="enable_2fa">
                 {% if twofa_enabled %}Two-factor authentication is enabled{% else %}Enable two-factor authentication{% endif %}
             </label>
         </div>
@@ -90,7 +90,7 @@
         </table>
     </div>
 
-    <form action="{{ url_for('settings.settings_logout_all') }}" method="post" class="inline-form" style="display:block; margin-top:16px;">
+    <form action="{{ url_for('settings.settings_logout_all') }}" method="post" class="logout-all-form">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <br>
         <button type="submit" class="btn btn--danger-outline">Log out from all devices</button>
@@ -98,7 +98,7 @@
 </div>
 
 <div class="card">
-    <form action="{{ url_for('main.logout') }}" method="get" style="margin-bottom:16px;">
+    <form action="{{ url_for('main.logout') }}" method="get">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <button type="submit" class="btn btn--secondary">Log out</button>
     </form>

@@ -3,7 +3,7 @@
 {% block content %}
 <div class="card card--narrow">
     <h2>Two-step verification</h2>
-    <p class="page-subtitle" style="text-align:center; margin-bottom:20px;">Enter the 6-digit code sent to your email.</p>
+    <p class="page-subtitle">Enter the 6-digit code sent to your email.</p>
 
     <form method="post">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">

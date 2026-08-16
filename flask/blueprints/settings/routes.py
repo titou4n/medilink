@@ -47,7 +47,7 @@ def account_change_email():
                                user_has_email=(current_user.email is not None),
                                email=current_user.email)
 
-    email = request.form.get("email", "")
+    email = request.form.get("email", "").strip().lower()
     is_valid, error = ext.email_manager.validate_user_email(email)
 
     if not is_valid:
