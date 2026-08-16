@@ -4,12 +4,16 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}MediLink{% endblock %}</title>
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='img/medilink-logo.svg') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
   </head>
   <body>
     <header class="site-header">
       <div class="site-header__inner">
-        <a class="site-logo" href="{{ url_for('main.home' if current_user.is_authenticated else 'main.index') }}">MediLink</a>
+        <a class="site-logo" href="{{ url_for('main.home' if current_user.is_authenticated else 'main.index') }}">
+          <img class="site-logo__icon" src="{{ url_for('static', filename='img/medilink-logo.svg') }}" alt="">
+          MediLink
+        </a>
 
         {% if current_user.is_authenticated %}
         <ul class="site-nav">

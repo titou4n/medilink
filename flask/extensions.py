@@ -97,10 +97,10 @@ from blueprints.emergency_information.service import EmergencyInformationService
 emergency_information_service: EmergencyInformationService = EmergencyInformationService(db_emergency_information_repository)
 
 # Manager
+hash_manager = HashManager()
+email_manager = EmailManager()
 session_manager = SessionManager()
 permission_manager = PermissionsManager()
-email_manager = EmailManager()
-hash_manager = HashManager()
 twofa_manager = TwofaManager()
 password_reset_manager = PasswordResetManager()
 
