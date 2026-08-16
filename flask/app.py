@@ -11,6 +11,7 @@ from werkzeug.middleware.proxy_fix import ProxyFix
 from blueprints.auth.register_login_manager import register_login_manager
 from app_setup.context_processor import register_context_processors
 from app_setup.blueprints import register_blueprints
+from app_setup.error_handlers import register_error_handlers
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
@@ -149,6 +150,7 @@ def create_app(config_object=Config):
     register_login_manager()
     register_context_processors(app)
     register_blueprints(app)
+    register_error_handlers(app)
 
     logger.info("Application initialized successfully")
 

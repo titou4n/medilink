@@ -11,7 +11,35 @@
 <div class="card">
 
     <div class="account-overview">
-      <img class="profile-pic-lg" src="{{ url_for('settings.profile_picture', user_id=id) }}" alt="Profile picture">
+      <form action="{{ url_for('settings.upload_profile_picture') }}" method="post" enctype="multipart/form-data" class="avatar-upload">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+          <label for="profile_picture" class="avatar-upload__preview">
+              <img id="avatar-upload-preview" class="profile-pic-lg" src="{{ url_for('settings.profile_picture', user_id=id) }}" alt="Profile picture">
+              <span class="avatar-upload__overlay">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                  <span>Change</span>
+              </span>
+          </label>
+
+          <div class="avatar-upload__controls">
+              <input type="file"
+                      id="profile_picture"
+                      name="profile_picture"
+                      accept="image/*"
+                      class="avatar-upload__input"
+                      required>
+              <div class="avatar-upload__browse-row">
+                  <label for="profile_picture" class="btn btn--secondary btn--small">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                      Browse...
+                  </label>
+                  <span class="avatar-upload__filename" id="avatar-upload-filename">No file selected</span>
+              </div>
+              <p class="field-hint">JPG, PNG or GIF. 5MB max.</p>
+              <button class="btn btn--secondary btn--small" type="submit">Upload Picture</button>
+          </div>
+      </form>
 
       <dl class="account-details">
         <div><dt>Account ID</dt><dd>{{ id }}</dd></div>
@@ -34,21 +62,7 @@
       </dl>
     </div>
 
-    <hr>
-
-    <h4>Profile picture</h4>
-    <form action="{{ url_for('settings.upload_profile_picture') }}" method="post" enctype="multipart/form-data">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-        <div class="field">
-            <label for="profile_picture">Choose a new picture (max 5MB)</label>
-            <input type="file"
-                    id="profile_picture"
-                    name="profile_picture"
-                    accept="image/*"
-                    required>
-        </div>
-        <button class="btn btn--secondary" type="submit">Upload Picture</button>
-    </form>
+    <script src="{{ url_for('static', filename='js/avatar_upload.js') }}" defer></script>
 
     <hr>
 

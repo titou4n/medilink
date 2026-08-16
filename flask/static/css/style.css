@@ -196,9 +196,17 @@ p {
 }
 
 .site-logo {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
     font-size: 1.125rem;
     font-weight: 700;
     color: var(--color-text);
+}
+
+.site-logo__icon {
+    width: 24px;
+    height: 24px;
 }
 
 .site-logo:hover {
@@ -619,6 +627,14 @@ tbody tr:hover {
     flex-wrap: wrap;
 }
 
+.error-page__code {
+    font-size: 5rem;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--color-primary);
+    margin-bottom: 8px;
+}
+
 .section {
     max-width: var(--content-width);
     margin: 0 auto;
@@ -807,6 +823,94 @@ tbody tr:hover {
 
 .account-details--standalone {
     margin-top: 16px;
+}
+
+/* ============================================================
+   UPLOAD PHOTO DE PROFIL
+   ============================================================ */
+.avatar-upload {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    flex-wrap: wrap;
+    flex: 1 1 320px;
+    max-width: 420px;
+}
+
+.avatar-upload__preview {
+    position: relative;
+    width: 120px;
+    height: 120px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    cursor: pointer;
+    display: block;
+}
+
+.avatar-upload__preview .profile-pic-lg {
+    width: 100%;
+    height: 100%;
+    transition: filter 0.15s ease;
+}
+
+.avatar-upload__overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    border-radius: 50%;
+    background: rgba(15, 23, 42, 0.55);
+    color: #fff;
+    font-size: var(--font-size-small);
+    font-weight: 600;
+    opacity: 0;
+    transition: opacity 0.15s ease;
+}
+
+.avatar-upload__overlay svg {
+    width: 20px;
+    height: 20px;
+}
+
+.avatar-upload__preview:hover .avatar-upload__overlay,
+.avatar-upload__preview:focus-within .avatar-upload__overlay {
+    opacity: 1;
+}
+
+.avatar-upload__controls {
+    flex: 1;
+    min-width: 220px;
+}
+
+.avatar-upload__input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+.avatar-upload__browse-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 6px;
+}
+
+.avatar-upload__filename {
+    color: var(--color-text-secondary);
+    font-size: 0.9375rem;
+}
+
+.avatar-upload__input:focus-visible + .avatar-upload__browse-row .btn {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
 }
 
 /* ============================================================
@@ -1056,6 +1160,8 @@ tbody tr:hover {
     }
 
     .hero h1 { font-size: 1.875rem; }
+
+    .error-page__code { font-size: 3.5rem; }
 
     .content { padding: 20px 16px; }
 
