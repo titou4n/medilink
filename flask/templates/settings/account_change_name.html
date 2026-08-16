@@ -9,7 +9,7 @@
 </div>
 
 <div class="card card--narrow">
-    <p style="margin-bottom:16px;">Current name: <strong>{{ name }}</strong></p>
+    <p class="current-value">Current name: <strong>{{ name }}</strong></p>
 
     <form method="post">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">

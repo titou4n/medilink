@@ -135,6 +135,44 @@ p {
     margin-bottom: 0;
 }
 
+.page-header--split {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+/* ============================================================
+   HELPERS DE MISE EN PAGE (lignes flex réutilisables)
+   ============================================================ */
+.split-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.row-actions {
+    display: flex;
+    gap: 6px;
+    justify-content: flex-end;
+}
+
+.btn-group {
+    display: flex;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.account-overview {
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+    align-items: flex-start;
+}
+
 /* ============================================================
    HEADER & NAVIGATION PRINCIPALE
    ============================================================ */
@@ -326,6 +364,10 @@ form {
     margin-bottom: 16px;
 }
 
+.current-value {
+    margin-bottom: 16px;
+}
+
 label {
     display: block;
     color: var(--color-text);
@@ -456,6 +498,11 @@ select:focus {
 
 .inline-form {
     display: inline;
+}
+
+.logout-all-form {
+    display: block;
+    margin-top: 16px;
 }
 
 /* ============================================================
@@ -647,6 +694,21 @@ tbody tr:hover {
     text-align: center;
 }
 
+.auth-page .page-subtitle {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.auth-divider {
+    text-align: center;
+    margin: 16px 0;
+    color: var(--color-text-muted);
+}
+
+.btn--google {
+    gap: 10px;
+}
+
 .code-inputs {
     display: flex;
     justify-content: center;
@@ -710,6 +772,10 @@ tbody tr:hover {
     margin-bottom: 0;
 }
 
+.permission-group__empty {
+    margin-left: 26px;
+}
+
 /* ============================================================
    DETAILS DE COMPTE
    ============================================================ */
@@ -737,6 +803,10 @@ tbody tr:hover {
 
 .account-details dd {
     color: var(--color-text);
+}
+
+.account-details--standalone {
+    margin-top: 16px;
 }
 
 /* ============================================================
@@ -789,6 +859,10 @@ tbody tr:hover {
 .terms-footer {
     color: var(--color-text-muted);
     font-size: var(--font-size-small);
+}
+
+.terms-footer--spaced {
+    margin-top: 16px;
 }
 
 /* ============================================================
@@ -954,6 +1028,11 @@ tbody tr:hover {
 
 .public-view ul.plain-list li {
     padding: 4px 0;
+}
+
+.public-view__footer {
+    text-align: center;
+    margin-top: 24px;
 }
 
 .phone-link {

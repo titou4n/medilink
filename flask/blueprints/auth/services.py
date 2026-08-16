@@ -3,8 +3,6 @@
 
 import logging
 import extensions as ext
-from models.user import User
-from flask_login import login_user
 
 logger = logging.getLogger(__name__)
 
@@ -98,11 +96,7 @@ def register_user(email: str, raw_password: str, raw_verif: str, name: str):
             logger.error("Failed to retrieve created user %s", user_id)
             return None, "Registration failed. Please try again."
 
-        ext.session_manager.send_session(user_id=user_id)
         ext.db_account_repository.create_preferences(user_id=user_id)
-
-        user = User(user_id)
-        login_user(user)
 
         ext.db_account_repository.insert_metadata(
             user_id=user_id,
@@ -110,9 +104,12 @@ def register_user(email: str, raw_password: str, raw_verif: str, name: str):
             ipv4=ext.session_manager.get_ip_session()
         )
 
+        # Pas de session réelle tant que le compte n'est pas vérifié par 2FA.
+        ext.session_manager.send_temp_2fa_session(user_id=user_id)
+
         ext.email_manager.send_welcome_email(user_id=user_id)
 
-        logger.info("User %s registered successfully", user_id)
+        logger.info("User %s registered successfully, awaiting 2FA verification", user_id)
         return user_id, None
 
     except Exception as e:
@@ -141,7 +138,7 @@ def authenticate_or_create_google_user(claims: dict):
     provider = "google"
 
     provider_sub = claims.get("sub")
-    email = (claims.get("email") or "").strip()
+    email = (claims.get("email") or "").strip().lower()
     email_verified = bool(claims.get("email_verified"))
 
     if not provider_sub or not email:
@@ -163,6 +160,11 @@ def authenticate_or_create_google_user(claims: dict):
             ext.db_oauth_identity_repository.link(
                 account_id=existing_user_id, provider=provider, provider_sub=provider_sub, email=email
             )
+            # Google already proved ownership of this mailbox (email_verified
+            # claim checked above) - at least as strong a proof as our own
+            # 2FA email code, so reflect it here too instead of leaving the
+            # account stuck "unverified".
+            ext.db_account_repository.update_email_verified(existing_user_id, True)
             user_id = existing_user_id
             logger.info("Linked Google identity to existing account %s", user_id)
         else:

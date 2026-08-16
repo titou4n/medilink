@@ -29,7 +29,7 @@
     <span class="badge badge--danger">Disabled — Not Publicly Accessible</span>
   {% endif %}
 
-  <dl class="account-details" style="margin-top:16px;">
+  <dl class="account-details account-details--standalone">
     <div><dt>Last Updated</dt><dd>{{ format_datetime(record.updated_at) or "—" }}</dd></div>
     <div><dt>Last Accessed by Rescuers</dt><dd>{{ format_datetime(record.last_public_access) or "—" }}</dd></div>
   </dl>

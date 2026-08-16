@@ -4,7 +4,7 @@
 
 {% include 'partials/admin_nav.html' %}
 
-<div class="page-header" style="display:flex; align-items:flex-start; justify-content:space-between; gap:12px;">
+<div class="page-header page-header--split">
   <div>
     <h1>Users</h1>
     <p class="page-subtitle">{{ pagination.total }} {{ "account" if pagination.total == 1 else "accounts" }} registered on the platform.</p>
@@ -14,7 +14,7 @@
   {% endif %}
 </div>
 
-<form method="get" action="{{ url_for('admin.users_list') }}" class="card" style="margin-bottom:20px;">
+<form method="get" action="{{ url_for('admin.users_list') }}" class="card">
   <div class="form-row form-row--3col">
     <div class="field">
       <label for="q">Search</label>
@@ -81,7 +81,7 @@
         <td>{{ format_datetime(user.created_at) if user.created_at else "-" }}</td>
         <td>{{ format_datetime(user.updated_at) if user.updated_at else "-" }}</td>
         <td>
-          <div style="display:flex; gap:6px; justify-content:flex-end;">
+          <div class="row-actions">
             <a class="btn btn--secondary btn--small"
                href="{{ url_for('admin.user_detail', user_id=user.id) }}"
                aria-label="View {{ user.name }}">View</a>
@@ -99,6 +99,14 @@
                   <button type="submit" class="btn btn--secondary btn--small" aria-label="Reactivate {{ user.name }}">Reactivate</button>
                 </form>
               {% endif %}
+            {% endif %}
+
+            {% if current_user.has_permission('reset_user_password') %}
+              <form method="POST" action="{{ url_for('admin.user_reset_password', user_id=user.id) }}" class="inline-form"
+                    onsubmit="return confirm('Send a password reset email to this user?');">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="btn btn--secondary btn--small" aria-label="Send password reset email to {{ user.name }}">Reset password</button>
+              </form>
             {% endif %}
 
             {% if current_user.has_permission('delete_user') and user.id != current_user.id %}

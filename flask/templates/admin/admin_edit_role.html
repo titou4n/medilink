@@ -36,13 +36,15 @@
                             {% endfor %}
                         </div>
                     {% else %}
-                        <p class="page-subtitle" style="margin-left:26px;">No permissions</p>
+                        <p class="page-subtitle permission-group__empty">No permissions</p>
                     {% endif %}
                 </div>
             {% endfor %}
         {% endif %}
 
-        <button class="btn" type="submit" style="margin-top:8px;">Save Changes</button>
+        <div class="form-actions">
+            <button class="btn" type="submit">Save Changes</button>
+        </div>
     </form>
 </div>
 

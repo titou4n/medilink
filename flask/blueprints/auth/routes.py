@@ -13,6 +13,7 @@ from utils.twofa_manager import (
     TwoFactorTooManyAttemptsError, TwoFactorCodeExpiredError,
     TwoFactorInvalidCodeError
 )
+from utils.password_reset_manager import PasswordResetTokenInvalidError
 
 logger = logging.getLogger(__name__)
 
@@ -24,7 +25,7 @@ def login():
     if request.method == 'GET':
         return render_template('auth/login.html')
 
-    email = request.form.get('email', '').strip()
+    email = request.form.get('email', '').strip().lower()
     raw_password = request.form.get('password', '').strip()
 
     if not email or not raw_password:
@@ -62,7 +63,7 @@ def register():
     if request.method == 'GET':
         return render_template('auth/register.html')
 
-    email = request.form.get('email', '').strip()
+    email = request.form.get('email', '').strip().lower()
     raw_password = request.form.get('password', '').strip()
     raw_verif = request.form.get('verif_password', '').strip()
 
@@ -75,8 +76,8 @@ def register():
         flash(error)
         return redirect(url_for('auth.register'))
 
-    logger.info("User %s registered successfully", user_id)
-    return redirect(url_for('main.home'))
+    logger.info("User %s registered successfully, redirecting to 2FA verification", user_id)
+    return redirect(url_for('auth.two_factor_authentication'))
 
 
 @bp.route('/login/google')
@@ -143,7 +144,7 @@ def forgot_password():
     if request.method == 'GET':
         return render_template('auth/forgot_password.html')
 
-    email = request.form.get('email', '').strip()
+    email = request.form.get('email', '').strip().lower()
     if not email:
         flash('Email is required.')
         return render_template('auth/forgot_password.html')
@@ -181,6 +182,56 @@ def forgot_password():
         logger.error("Error processing password reset: %s", str(e))
         flash('An error occurred. Please try again later.')
         return render_template('auth/forgot_password.html')
+
+
+@bp.route('/reset_password/<token>', methods=['GET', 'POST'])
+@bp.route('/reset_password/<token>/', methods=['GET', 'POST'])
+@ext.limiter.limit("10 per minute")
+def reset_password(token):
+    if current_user.is_authenticated:
+        return redirect(url_for('main.home'))
+
+    ext.db_password_reset_repository.delete_expired(ext.config.PASSWORD_RESET_TOKEN_TIMELAPS_MINUTES)
+
+    if request.method == 'GET':
+        try:
+            ext.password_reset_manager.verify_token(token)
+        except PasswordResetTokenInvalidError:
+            flash("This password reset link is invalid or has expired.", "error")
+            return redirect(url_for('auth.login'))
+        return render_template('auth/reset_password.html', token=token)
+
+    new_password = request.form.get('password', '').strip()
+    verif_password = request.form.get('verif_password', '').strip()
+
+    if not new_password or not verif_password:
+        flash('Both fields are required.', "warning")
+        return redirect(url_for('auth.reset_password', token=token))
+
+    if new_password != verif_password:
+        flash('Passwords must be identical.', "warning")
+        return redirect(url_for('auth.reset_password', token=token))
+
+    password_error = ext.utils.validate_password_strength(new_password, ext.config.MIN_PASSWORD_LENGTH)
+    if password_error:
+        flash(password_error, "warning")
+        return redirect(url_for('auth.reset_password', token=token))
+
+    try:
+        user_id = ext.password_reset_manager.consume_token(
+            token=token,
+            new_password_hash=ext.hash_manager.generate_password_hash(new_password),
+        )
+    except PasswordResetTokenInvalidError:
+        flash("This password reset link is invalid or has expired.", "error")
+        return redirect(url_for('auth.login'))
+
+    # Revoke existing sessions so a session opened with the old password can't outlive the reset.
+    ext.db_session_repository.revoke_all_for_user(user_id=user_id)
+
+    logger.info("Password reset completed for user %s via admin-triggered link", user_id)
+    flash("Your password has been reset. You can now log in.", "success")
+    return redirect(url_for('auth.login'))
 
 
 @bp.route('/two_factor_authentication', methods=['GET', 'POST'])

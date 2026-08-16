@@ -13,6 +13,7 @@ class SessionManager:
     def __init__(self):
         self.db_session = ext.db_session_repository
         self.config = ext.config
+        self.hash_manager = ext.hash_manager
         self._request_session = None
 
     def init_app(self, app_instance):
@@ -149,10 +150,14 @@ class SessionManager:
         return hashlib.sha256(session_id.encode()).hexdigest()
     
     def hash_ip(self, ip: str) -> str:
-        return hashlib.sha256(ip.encode()).hexdigest()
-    
+        # Keyed with SECRET_KEY (unlike hash_session_id, whose input is
+        # already a 256-bit random token): an IP is low-entropy and
+        # enumerable, so a plain unkeyed hash would let anyone holding a
+        # leaked `sessions` table dictionary-attack ip_hash back to real IPs.
+        return self.hash_manager.hmac_sha256(ip, self.config.SECRET_KEY)
+
     def hash_user_agent(self, user_agent: str) -> str:
-        return hashlib.sha256(user_agent.encode()).hexdigest()
+        return self.hash_manager.hmac_sha256(user_agent, self.config.SECRET_KEY)
 
     def verif_session_is_active(self, session_id_hash: str) -> bool:
         try:
@@ -197,6 +202,12 @@ class SessionManager:
             return False
 
     def send_session(self, user_id:int) -> None:
+        # Without this, Flask never sets an Expires/Max-Age on the cookie
+        # (SESSION_PERMANENT defaults to False) - the browser then drops it
+        # on close regardless of PERMANENT_SESSION_LIFETIME, decoupling the
+        # real cookie lifetime from the `sessions.expires_at` tracked below.
+        flask_session.permanent = True
+
         session_id = self.generate_session_id()
         session_id_hash = self.hash_session_id(session_id)
 
