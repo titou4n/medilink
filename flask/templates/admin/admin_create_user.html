@@ -10,22 +10,18 @@
 </div>
 
 <div class="card card--narrow">
+  <p class="page-subtitle">The user will receive an email to set their own password. You don't choose one for them.</p>
   <form method="post">
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
     <div class="field">
       <label for="email">E-mail</label>
-      <input class="input" type="email" id="email" name="email" placeholder="user@example.com" required>
+      <input class="input" type="email" id="email" name="email" placeholder="user@example.com" value="{{ request.form['email'] }}" required>
     </div>
 
     <div class="field">
       <label for="name">Name</label>
-      <input class="input" type="text" id="name" name="name" placeholder="Full name" required>
-    </div>
-
-    <div class="field">
-      <label for="password">Password</label>
-      <input class="input" type="password" id="password" name="password" placeholder="Temporary password" required>
+      <input class="input" type="text" id="name" name="name" placeholder="Full name" value="{{ request.form['name'] }}" required>
     </div>
 
     <div class="field">
@@ -33,7 +29,7 @@
       <select class="input" id="role_name" name="role_name" required>
         <option value="">Please select a role</option>
         {% for role in roles %}
-          <option value="{{ role.name }}">{{ role.name }}</option>
+          <option value="{{ role.name }}" {% if request.form['role_name'] == role.name %}selected{% endif %}>{{ role.name }}</option>
         {% endfor %}
       </select>
     </div>

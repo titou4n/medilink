@@ -38,7 +38,12 @@ class Permissions():
     ]
 
     LIST_ACCESS_SERVICES: list[str] = [
-        "emergency_information_access"
+        "emergency_information_access",
+        "orders_access",
+    ]
+
+    LIST_PERMISSIONS_MANAGE_SHOP: list[str] = [
+        "manage_products",
     ]
 
     LIST_ALL_PERMISSIONS: list[str] = (
@@ -47,6 +52,7 @@ class Permissions():
         + LIST_PERMISSIONS_MANAGE_ROLES
         + LIST_PERMISSIONS_SYSTEM
         + LIST_ACCESS_SERVICES
+        + LIST_PERMISSIONS_MANAGE_SHOP
     )
 
     # -- Per-role permission sets ------------------------------------------
@@ -58,7 +64,7 @@ class Permissions():
 
     LIST_USER_PERMS: list[str]      = LIST_PERMISSIONS_ACCOUNT + LIST_ACCESS_SERVICES
     LIST_MODERATOR_PERMS: list[str] = LIST_USER_PERMS + ["access_admin_panel", "view_users", "ban_user"]
-    LIST_ADMIN_PERMS: list[str]     = LIST_USER_PERMS + LIST_PERMISSIONS_MANAGE_USERS + LIST_PERMISSIONS_SYSTEM
+    LIST_ADMIN_PERMS: list[str]     = LIST_USER_PERMS + LIST_PERMISSIONS_MANAGE_USERS + LIST_PERMISSIONS_SYSTEM + LIST_PERMISSIONS_MANAGE_SHOP
     LIST_SUPER_ADMIN_PERMS: list[str] = LIST_ALL_PERMISSIONS
 
     # -- Lookup helpers ----------------------------------------------------
@@ -69,6 +75,7 @@ class Permissions():
         "manage_roles":  LIST_PERMISSIONS_MANAGE_ROLES,
         "system":        LIST_PERMISSIONS_SYSTEM,
         "services":      LIST_ACCESS_SERVICES,
+        "manage_shop":   LIST_PERMISSIONS_MANAGE_SHOP,
     }
 
     DICT_ROLE_PERMISSION: dict[str, list[str]] = {

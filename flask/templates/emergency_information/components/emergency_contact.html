@@ -1,28 +1,17 @@
 <div class="card" aria-label="Emergency contact information">
 
-  <h3 class="card__title">Emergency Contact</h3>
+  <h3 class="card__title">Emergency contact</h3>
 
   {% if record.emergency_contact_name %}
   <div class="summary-grid">
     <div><dt>Name</dt><dd>{{ record.emergency_contact_name }}</dd></div>
     {% if record.emergency_contact_relation %}<div><dt>Relationship</dt><dd>{{ record.emergency_contact_relation }}</dd></div>{% endif %}
     {% if record.emergency_contact_phone %}
-    <div><dt>Phone</dt><dd><a href="tel:{{ record.emergency_contact_phone }}">{{ record.emergency_contact_phone }}</a></dd></div>
+    <div><dt>Phone</dt><dd><a class="phone-link" href="tel:{{ record.emergency_contact_phone }}">{{ record.emergency_contact_phone }}</a></dd></div>
     {% endif %}
   </div>
   {% else %}
     <p class="page-subtitle">No emergency contact defined.</p>
-  {% endif %}
-
-  {% if record.doctor_name %}
-  <hr>
-  <h4>Healthcare Provider</h4>
-  <div class="summary-grid">
-    <div><dt>Doctor</dt><dd>{{ record.doctor_name }}</dd></div>
-    {% if record.doctor_phone %}
-    <div><dt>Phone</dt><dd><a href="tel:{{ record.doctor_phone }}">{{ record.doctor_phone }}</a></dd></div>
-    {% endif %}
-  </div>
   {% endif %}
 
 </div>

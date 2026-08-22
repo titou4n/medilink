@@ -1,0 +1,10 @@
+{% set ep = request.endpoint %}
+<nav aria-label="Shop sections">
+  <ul class="local-nav">
+    <li><a class="{{ 'active' if ep == 'shop.catalog' else '' }}" href="{{ url_for('shop.catalog') }}">Shop</a></li>
+    <li><a class="{{ 'active' if ep == 'shop.cart_view' else '' }}" href="{{ url_for('shop.cart_view') }}">
+      Cart{% if cart_item_count %} <span class="badge badge--neutral">{{ cart_item_count }}</span>{% endif %}
+    </a></li>
+    <li><a class="{{ 'active' if ep in ['orders.mine', 'orders.detail'] else '' }}" href="{{ url_for('orders.mine') }}">My Orders</a></li>
+  </ul>
+</nav>

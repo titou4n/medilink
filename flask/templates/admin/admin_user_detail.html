@@ -72,10 +72,9 @@
   {% if account.id == current_user.id %}
     <p class="page-subtitle">You cannot suspend or reactivate your own account.</p>
   {% elif account.is_active %}
-    <form method="post" action="{{ url_for('admin.user_suspend', user_id=account.id) }}"
-          onsubmit="return confirm('Suspend this account? The user will not be able to log in until reactivated.');">
+    <form method="post" action="{{ url_for('admin.user_suspend', user_id=account.id) }}">
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-      <button class="btn btn--danger" type="submit">Suspend account</button>
+      <button class="btn btn--danger" type="submit" data-confirm-message="Suspend this account? The user will not be able to log in until reactivated.">Suspend account</button>
     </form>
   {% else %}
     <form method="post" action="{{ url_for('admin.user_reactivate', user_id=account.id) }}">
@@ -115,10 +114,9 @@
 <div class="card card--narrow">
   <h3 class="card__title">Password</h3>
   <p class="page-subtitle">Send this user a secure, single-use link to set a new password. You will never see or know their current or new password.</p>
-  <form method="post" action="{{ url_for('admin.user_reset_password', user_id=account.id) }}"
-        onsubmit="return confirm('Send a password reset email to ' + {{ account.email|tojson }} + '?');">
+  <form method="post" action="{{ url_for('admin.user_reset_password', user_id=account.id) }}">
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-    <button class="btn btn--secondary" type="submit">Send password reset email</button>
+    <button class="btn btn--secondary" type="submit" data-confirm-message="Send a password reset email to {{ account.email }}?">Send password reset email</button>
   </form>
 </div>
 {% endif %}
@@ -131,13 +129,13 @@
     <p class="form-section__hint">You cannot delete your own account.</p>
   {% else %}
     <p class="form-section__hint">Permanently delete this account and all associated data. This cannot be undone.</p>
-    <form method="post" action="{{ url_for('admin.user_delete', user_id=account.id) }}"
-          onsubmit="return confirm('Permanently delete this account? This action cannot be undone.');">
+    <form method="post" action="{{ url_for('admin.user_delete', user_id=account.id) }}">
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-      <button class="btn btn--danger" type="submit">Delete account</button>
+      <button class="btn btn--danger" type="submit" data-confirm-message="Permanently delete this account? This action cannot be undone.">Delete account</button>
     </form>
   {% endif %}
 </div>
 {% endif %}
 
+<script src="{{ url_for('static', filename='js/confirm_dialog.js') }}" defer></script>
 {% endblock %}

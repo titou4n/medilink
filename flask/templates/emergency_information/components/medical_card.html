@@ -1,6 +1,6 @@
 <div class="card" aria-label="Medical summary">
 
-  <h3 class="card__title">Medical Summary</h3>
+  <h3 class="card__title">Medical summary</h3>
 
   <div class="summary-grid">
     <div><dt>Name</dt><dd>{{ record.full_name }}</dd></div>
@@ -9,37 +9,9 @@
   </div>
 
   <div class="summary-grid">
-    <div><dt>Blood Type</dt><dd>{{ record.blood_type or "—" }}</dd></div>
+    <div><dt>Blood type</dt><dd>{{ record.blood_type or "—" }}</dd></div>
     {% if record.height_cm %}<div><dt>Height</dt><dd>{{ record.height_cm }} cm</dd></div>{% endif %}
     {% if record.weight_kg %}<div><dt>Weight</dt><dd>{{ record.weight_kg }} kg</dd></div>{% endif %}
-  </div>
-
-  {% if record.allergies %}
-  <div class="summary-grid summary-grid--full">
-    <div><dt>Allergies</dt><dd class="text-critical">{{ record.allergies }}</dd></div>
-  </div>
-  {% endif %}
-
-  {% if record.critical_info %}
-  <div class="summary-grid summary-grid--full">
-    <div><dt>Critical Information</dt><dd>{{ record.critical_info }}</dd></div>
-  </div>
-  {% endif %}
-
-  {% if record.medical_conditions %}
-  <div class="summary-grid summary-grid--full">
-    <div><dt>Conditions</dt><dd>{{ record.medical_conditions }}</dd></div>
-  </div>
-  {% endif %}
-
-  {% if record.current_medications %}
-  <div class="summary-grid summary-grid--full">
-    <div><dt>Medications</dt><dd>{{ record.current_medications }}</dd></div>
-  </div>
-  {% endif %}
-
-  <div class="summary-grid">
-    <div><dt>Organ Donor</dt><dd>{% if record.organ_donor %}Yes{% else %}No{% endif %}</dd></div>
   </div>
 
 </div>

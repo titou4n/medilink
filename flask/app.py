@@ -1,4 +1,7 @@
 import logging
+import shutil
+import subprocess
+import time
 from pathlib import Path
 from flask import Flask, request, flash, redirect, url_for, session as flask_session
 from flask_login import current_user, logout_user
@@ -30,6 +33,56 @@ def _hostname_without_port(host: str) -> str:
     if host.startswith('['):
         return host.split(']')[0] + ']'
     return host.rsplit(':', 1)[0] if ':' in host else host
+
+
+_DEV_REDIS_CONTAINER = "medilink-redis-dev"
+
+
+def _ensure_dev_redis_running(redis_url: str) -> None:
+    """
+    Dev convenience: auto-start a local Redis container instead of requiring
+    `docker run -p 6379:6379 redis:7-alpine` by hand. Never called in prod -
+    there Redis is already a docker-compose service, up before Flask starts
+    (see depends_on/healthcheck in docker-compose.yml).
+    """
+    try:
+        if redis.from_url(redis_url).ping():
+            return
+    except Exception:
+        pass
+
+    if shutil.which("docker") is None:
+        logger.warning("Docker not found on PATH - skipping Redis auto-start")
+        return
+
+    logger.info("Redis not reachable, starting local dev container '%s'...", _DEV_REDIS_CONTAINER)
+
+    inspect = subprocess.run(
+        ["docker", "inspect", "-f", "{{.State.Running}}", _DEV_REDIS_CONTAINER],
+        capture_output=True, text=True
+    )
+
+    try:
+        if inspect.returncode == 0:
+            if inspect.stdout.strip() != "true":
+                subprocess.run(["docker", "start", _DEV_REDIS_CONTAINER], check=True)
+        else:
+            subprocess.run(
+                ["docker", "run", "-d", "--name", _DEV_REDIS_CONTAINER,
+                 "-p", "6379:6379", "redis:7-alpine"],
+                check=True
+            )
+    except subprocess.CalledProcessError as e:
+        logger.error("Failed to auto-start Redis container: %s", str(e))
+        return
+
+    for _ in range(10):
+        try:
+            if redis.from_url(redis_url).ping():
+                logger.info("Redis dev container is up")
+                return
+        except Exception:
+            time.sleep(0.5)
 
 
 def create_app(config_object=Config):
@@ -136,14 +189,17 @@ def create_app(config_object=Config):
     ext.oauth.init_app(app)
 
     # redis
+    if not config_object.ENV_PROD:
+        # for run redis in Local : docker run -p 6379:6379 redis:7-alpine
+        _ensure_dev_redis_running(app.config["REDIS_URL"])
+
     try:
         redis_client = redis.from_url(app.config["REDIS_URL"])
         redis_client.ping()
         logger.info("Redis connected successfully")
 
     except Exception as e:
-        # for run redis in Local : docker run -p 6379:6379 redis:7-alpine
-        logger.error("Redis connection failed: %s",str(e))
+        logger.error("Redis connection failed: %s", str(e))
         raise RuntimeError("Unable to connect to Redis") from e
 
     # Configuration applicative
@@ -173,6 +229,7 @@ if __name__ == '__main__' and not ext.config.ENV_PROD:
                 ext._db_manager.init_database()
                 ext._roles_permissions_seeders.run()
                 ext._accounts_seeder.run()
+                ext._products_seeder.run()
             logger.info("Database initialization complete.")
 
         logger.info("Starting development server on 127.0.0.1:8080")

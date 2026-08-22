@@ -88,10 +88,9 @@
 
             {% if current_user.has_permission('ban_user') and user.id != current_user.id %}
               {% if user.is_active %}
-                <form method="POST" action="{{ url_for('admin.user_suspend', user_id=user.id) }}" class="inline-form"
-                      onsubmit="return confirm('Suspend this account? The user will not be able to log in until reactivated.');">
+                <form method="POST" action="{{ url_for('admin.user_suspend', user_id=user.id) }}" class="inline-form">
                   <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                  <button type="submit" class="btn btn--danger btn--small" aria-label="Suspend {{ user.name }}">Suspend</button>
+                  <button type="submit" class="btn btn--danger btn--small" aria-label="Suspend {{ user.name }}" data-confirm-message="Suspend this account? The user will not be able to log in until reactivated.">Suspend</button>
                 </form>
               {% else %}
                 <form method="POST" action="{{ url_for('admin.user_reactivate', user_id=user.id) }}" class="inline-form">
@@ -102,18 +101,16 @@
             {% endif %}
 
             {% if current_user.has_permission('reset_user_password') %}
-              <form method="POST" action="{{ url_for('admin.user_reset_password', user_id=user.id) }}" class="inline-form"
-                    onsubmit="return confirm('Send a password reset email to this user?');">
+              <form method="POST" action="{{ url_for('admin.user_reset_password', user_id=user.id) }}" class="inline-form">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                <button type="submit" class="btn btn--secondary btn--small" aria-label="Send password reset email to {{ user.name }}">Reset password</button>
+                <button type="submit" class="btn btn--secondary btn--small" aria-label="Send password reset email to {{ user.name }}" data-confirm-message="Send a password reset email to this user?">Reset password</button>
               </form>
             {% endif %}
 
             {% if current_user.has_permission('delete_user') and user.id != current_user.id %}
-              <form method="POST" action="{{ url_for('admin.user_delete', user_id=user.id) }}" class="inline-form"
-                    onsubmit="return confirm('Permanently delete this account? This action cannot be undone.');">
+              <form method="POST" action="{{ url_for('admin.user_delete', user_id=user.id) }}" class="inline-form">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                <button type="submit" class="btn btn--danger btn--small" aria-label="Delete {{ user.name }}">Delete</button>
+                <button type="submit" class="btn btn--danger btn--small" aria-label="Delete {{ user.name }}" data-confirm-message="Permanently delete this account? This action cannot be undone.">Delete</button>
               </form>
             {% endif %}
           </div>
@@ -144,5 +141,7 @@
   {% endif %}
 </nav>
 {% endif %}
+
+<script src="{{ url_for('static', filename='js/confirm_dialog.js') }}" defer></script>
 
 {% endblock %}

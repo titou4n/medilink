@@ -10,15 +10,21 @@
 <div class="card-grid">
 
   <div class="card">
-    <h3 class="card__title">Your Profile</h3>
+    <h3 class="card__title">Your profile</h3>
     <p>View your account details, update your name, email and password.</p>
-    <a class="btn btn--secondary" href="{{ url_for('settings.settings_home') }}">View Profile</a>
+    <a class="btn btn--secondary" href="{{ url_for('settings.settings_home') }}">View profile</a>
   </div>
 
   <div class="card">
-    <h3 class="card__title">Emergency Information</h3>
+    <h3 class="card__title">Emergency information</h3>
     <p>Manage the medical information available to emergency responders through your secure public link.</p>
-    <a class="btn" href="{{ url_for('emergency_information.dashboard') }}">Open Module</a>
+    <a class="btn" href="{{ url_for('emergency_information.dashboard') }}">Open module</a>
+  </div>
+
+  <div class="card">
+    <h3 class="card__title">MediLink NFC card</h3>
+    <p>Order a physical NFC card linked to your emergency profile, and track your orders.</p>
+    <a class="btn btn--secondary" href="{{ url_for('shop.catalog') }}">Order a card</a>
   </div>
 
 </div>

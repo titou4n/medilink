@@ -5,19 +5,6 @@
 document.addEventListener('DOMContentLoaded', () => {
 
   /* ==========================================
-     CONFIRM DIALOGS (data-confirm-message)
-  ========================================== */
-
-  document.querySelectorAll('[data-confirm-message]').forEach(button => {
-    button.addEventListener('click', (e) => {
-      const message = button.getAttribute('data-confirm-message');
-      if (!confirm(message)) {
-        e.preventDefault();
-      }
-    });
-  });
-
-  /* ==========================================
      COPY TO CLIPBOARD (data-copy-target)
   ========================================== */
 

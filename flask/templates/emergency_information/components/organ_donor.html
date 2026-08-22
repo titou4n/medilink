@@ -1,0 +1,8 @@
+<div class="card" aria-label="Organ donor status">
+  <h3 class="card__title">Organ donor status</h3>
+  {% if record.organ_donor %}
+    <span class="badge badge--success">Registered organ donor</span>
+  {% else %}
+    <span class="badge badge--neutral">Not a registered organ donor</span>
+  {% endif %}
+</div>

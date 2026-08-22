@@ -50,7 +50,7 @@ def authenticate_user(email: str, raw_password: str):
     return user_id, None
 
 
-def register_user(email: str, raw_password: str, raw_verif: str, name: str):
+def register_user(email: str, raw_password: str, raw_verif: str, name: str, terms_accepted: bool):
     """
     Crée un compte.
     Retourne (user_id, error_message).
@@ -59,10 +59,19 @@ def register_user(email: str, raw_password: str, raw_verif: str, name: str):
         logger.warning("Registration attempt with missing fields")
         return None, "All fields are required."
 
+    if not terms_accepted:
+        logger.warning("Registration failed: terms & conditions not accepted")
+        return None, "You must accept the Terms & Conditions and Privacy Policy."
+
     is_valid_email, email_error = ext.email_manager.validate_user_email(email)
     if not is_valid_email:
         logger.warning("Registration failed: invalid email format")
         return None, email_error
+
+    # Reclaim emails squatted by abandoned/unverified registrations before
+    # checking uniqueness, so an attacker can't permanently block the real
+    # owner from ever registering by signing up first and never verifying.
+    ext.db_account_repository.delete_unverified_expired(ext.config.UNVERIFIED_ACCOUNT_TTL_MINUTES)
 
     if ext.db_account_repository.exists_by_email(email):
         logger.warning("Registration failed: email already exists")
@@ -98,10 +107,21 @@ def register_user(email: str, raw_password: str, raw_verif: str, name: str):
 
         ext.db_account_repository.create_preferences(user_id=user_id)
 
+        # get_ip_session() resolves the IP via an existing `sessions` DB row,
+        # which never exists yet at registration time (no login has happened) -
+        # it would always return None here and crash on the ipv4 NOT NULL
+        # constraint. get_client_ip() reads the request's IP directly instead.
         ext.db_account_repository.insert_metadata(
             user_id=user_id,
             date_connected=ext.utils.get_datetime_isoformat(),
-            ipv4=ext.session_manager.get_ip_session()
+            ipv4=ext.session_manager.get_client_ip()
+        )
+
+        ext.db_account_repository.record_terms_consent(
+            user_id=user_id,
+            terms_version=ext.config.TERMS_VERSION,
+            accepted_at=ext.utils.get_datetime_isoformat(),
+            ipv4=ext.session_manager.get_client_ip()
         )
 
         # Pas de session réelle tant que le compte n'est pas vérifié par 2FA.
@@ -124,13 +144,22 @@ def authenticate_or_create_google_user(claims: dict):
     Resolution order:
       1. An identity already linked to this Google account (``sub``) -> use it.
       2. No link yet, but an account already exists with the same, Google-
-         verified email -> auto-link (Google is trusted to own that mailbox,
-         so this cannot be used to take over an account you don't control).
-      3. Neither -> create a brand new account, mirroring register_user()
-         (role "user", name = email). The stored password hash is random
-         and never handed to the user - Google is the only way to sign in
-         to this account, exactly like accounts created through
-         register_user() are keyed on a real password.
+         verified email AND that account already independently proved
+         ownership of the mailbox (``email_verified`` = True) -> auto-link.
+         Google is trusted to own that mailbox, and the account has already
+         proven the same through its own channel, so this cannot be used to
+         take over an account you don't control.
+      3. An account exists with that email but is still unverified -> it
+         never proved ownership (e.g. someone signed up with this email and
+         abandoned it before finishing verification, possibly an attacker
+         squatting a victim's email). Google has just proven real ownership,
+         so the unproven row is discarded and treated like case 4 below,
+         instead of being silently linked/verified onto.
+      4. No account at all -> create a brand new account, mirroring
+         register_user() (role "user", name = email). The stored password
+         hash is random and never handed to the user - Google is the only
+         way to sign in to this account, exactly like accounts created
+         through register_user() are keyed on a real password.
 
     Returns (user_id, error_message); error_message is None on success.
     """
@@ -155,19 +184,34 @@ def authenticate_or_create_google_user(claims: dict):
             return None, "Your Google account's email must be verified to sign in with Google."
 
         existing_user_id = ext.db_account_repository.get_id_by_email(email)
+        existing_user_verified = (
+            existing_user_id is not None
+            and ext.db_account_repository.get_email_verified_by_id(existing_user_id)
+        )
 
-        if existing_user_id is not None:
+        if existing_user_id is not None and existing_user_verified:
+            # The account already independently proved ownership of this
+            # mailbox (own 2FA email code), and Google now proves it again -
+            # safe to auto-link.
             ext.db_oauth_identity_repository.link(
                 account_id=existing_user_id, provider=provider, provider_sub=provider_sub, email=email
             )
-            # Google already proved ownership of this mailbox (email_verified
-            # claim checked above) - at least as strong a proof as our own
-            # 2FA email code, so reflect it here too instead of leaving the
-            # account stuck "unverified".
-            ext.db_account_repository.update_email_verified(existing_user_id, True)
             user_id = existing_user_id
-            logger.info("Linked Google identity to existing account %s", user_id)
+            logger.info("Linked Google identity to existing verified account %s", user_id)
         else:
+            if existing_user_id is not None:
+                # Unverified row for this email: nobody has proven ownership
+                # through it, so it's not safe to silently link/verify onto -
+                # it may be an account someone else squatted with the
+                # victim's email. Google just proved real ownership, so
+                # reclaim the email by discarding the unproven row and
+                # creating a fresh, Google-owned account below.
+                logger.warning(
+                    "Google login reclaiming unverified account %s to prove email ownership",
+                    existing_user_id,
+                )
+                ext.db_account_repository.delete(existing_user_id)
+
             try:
                 role_id = ext.db_role_repository.get_role_id(role_name="user")
                 if role_id is None:

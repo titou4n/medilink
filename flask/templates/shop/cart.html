@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+{% block title %}Your Cart - MediLink{% endblock %}
+{% block content %}
+
+{% include 'partials/orders_nav.html' %}
+
+<div class="page-header">
+  <h1>Your Cart</h1>
+</div>
+
+{% if cart.is_empty %}
+<div class="card card--center">
+  <span class="icon-circle">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <circle cx="9" cy="21" r="1"/>
+      <circle cx="20" cy="21" r="1"/>
+      <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+    </svg>
+  </span>
+  <h2 class="card__title">Your cart is empty</h2>
+  <p>Browse the shop to add a product.</p>
+  <a class="btn btn--large" href="{{ url_for('shop.catalog') }}">Go to shop</a>
+</div>
+{% else %}
+<div class="card">
+  <div class="cart-list__header">
+    <span>Product</span>
+    <span>Quantity</span>
+    <span>Price</span>
+    <span></span>
+  </div>
+  {% for item in cart.items %}
+  <div class="cart-line">
+    <div class="cart-line__info">
+      <h3>{{ item.product.name }}</h3>
+      {% if not item.product.is_active %}
+        <span class="badge badge--danger">No longer available</span>
+      {% else %}
+        <p class="page-subtitle">{{ "%.2f"|format(item.product.price_cents / 100) }} {{ item.product.currency|upper }} each</p>
+      {% endif %}
+    </div>
+
+    {% if item.product.is_active %}
+    <form method="POST" action="{{ url_for('shop.cart_item_update', item_id=item.id) }}" class="qty-stepper">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <label class="sr-only" for="qty-{{ item.id }}">Quantity for {{ item.product.name }}</label>
+      <input id="qty-{{ item.id }}" type="number" name="quantity" value="{{ item.quantity }}" min="1" max="20" class="qty-input">
+      <button class="btn btn--secondary btn--small" type="submit">Update</button>
+    </form>
+
+    <strong class="cart-line__subtotal">{{ "%.2f"|format(item.subtotal_cents / 100) }} {{ item.product.currency|upper }}</strong>
+    {% else %}
+    <span>Qty: {{ item.quantity }}</span>
+    <span></span>
+    {% endif %}
+
+    <form method="POST" action="{{ url_for('shop.cart_item_remove', item_id=item.id) }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <button class="btn btn--danger btn--small" type="submit" data-confirm-message="Remove {{ item.product.name }} from your cart?">Remove</button>
+    </form>
+  </div>
+  {% endfor %}
+</div>
+
+<div class="card">
+  <div class="cart-summary">
+    <div class="cart-summary__row cart-summary__row--total">
+      <span>Total</span>
+      <span>{{ "%.2f"|format(cart.total_cents / 100) }} {{ currency|upper }}</span>
+    </div>
+  </div>
+
+  <div class="form-actions">
+    <a class="btn btn--secondary" href="{{ url_for('shop.catalog') }}">Continue shopping</a>
+    <form method="POST" action="{{ url_for('orders.create') }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <button class="btn btn--large" type="submit">Proceed to checkout</button>
+    </form>
+  </div>
+  <p class="terms-footer terms-footer--spaced">By placing an order you accept our <a href="{{ url_for('main.sale_terms') }}" target="_blank">Sale Terms</a>.</p>
+</div>
+{% endif %}
+
+<script src="{{ url_for('static', filename='js/confirm_dialog.js') }}" defer></script>
+{% endblock %}

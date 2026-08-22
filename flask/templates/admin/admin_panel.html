@@ -12,21 +12,27 @@
 <div class="card-grid">
 
   <div class="card">
-    <h3 class="card__title">Roles &amp; Permissions</h3>
+    <h3 class="card__title">Roles &amp; permissions</h3>
     <p>Create roles, define their permissions, and assign them to accounts.</p>
-    <a class="btn btn--secondary" href="{{ url_for('admin.role_permission_manager') }}">Manage Roles</a>
+    <a class="btn btn--secondary" href="{{ url_for('admin.role_permission_manager') }}">Manage roles</a>
   </div>
 
   <div class="card">
     <h3 class="card__title">Users</h3>
     <p>Browse accounts, review their status and manage access to the platform.</p>
-    <a class="btn btn--secondary" href="{{ url_for('admin.users_list') }}">Manage Users</a>
+    <a class="btn btn--secondary" href="{{ url_for('admin.users_list') }}">Manage users</a>
   </div>
 
   <div class="card">
-    <h3 class="card__title">Emergency Information</h3>
+    <h3 class="card__title">Emergency information</h3>
     <p>Review and moderate emergency medical profiles across the platform.</p>
-    <a class="btn btn--secondary" href="{{ url_for('emergency_information.admin_dashboard') }}">Open Module</a>
+    <a class="btn btn--secondary" href="{{ url_for('emergency_information.admin_dashboard') }}">Open module</a>
+  </div>
+
+  <div class="card">
+    <h3 class="card__title">Orders</h3>
+    <p>Read-only overview of every MediLink NFC card order across the platform.</p>
+    <a class="btn btn--secondary" href="{{ url_for('orders.admin_dashboard') }}">View orders</a>
   </div>
 
 </div>

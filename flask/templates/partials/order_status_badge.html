@@ -1,0 +1,12 @@
+{% macro order_status_badge(status) %}
+{%- set variant = {
+  'pending': 'neutral',
+  'paid': 'info',
+  'processing': 'info',
+  'shipped': 'warning',
+  'delivered': 'success',
+  'cancelled': 'danger',
+  'refunded': 'danger',
+}.get(status, 'neutral') -%}
+<span class="badge badge--{{ variant }}">{{ status|capitalize }}</span>
+{%- endmacro %}

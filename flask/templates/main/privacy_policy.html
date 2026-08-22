@@ -4,7 +4,7 @@
 
 <div class="page-header">
     <h1>Politique de confidentialité</h1>
-    <p class="page-subtitle">En vigueur au 1/02/2026</p>
+    <p class="page-subtitle">En vigueur au 20/08/2026</p>
 </div>
 
 <div class="card">
@@ -18,9 +18,10 @@
 
     <h3>1. Responsable du traitement</h3>
     <p>
-        Le responsable du traitement des données collectées sur le Site est SIMON Titouan, domicilié en France,
-        éditeur du Site. Pour toute question relative à vos données personnelles ou pour exercer vos droits, vous
-        pouvez le contacter à l'adresse : titouservice.mail@gmail.com.
+        Le responsable du traitement des données collectées sur le Site est SIMON Titouan, éditeur du Site (voir
+        nos <a href="{{ url_for('main.legal_notice') }}">Mentions légales</a>). Pour toute question relative à vos
+        données personnelles ou pour exercer vos droits, vous pouvez le contacter à l'adresse :
+        titouservice.mail@gmail.com.
     </p>
 
     <h3>2. Données collectées</h3>
@@ -64,6 +65,22 @@
             approximative.</li>
     </ul>
 
+    <p><strong>d) Données de commande et de paiement</strong></p>
+    <p>
+        Si vous commandez une carte MediLink NFC, le Site enregistre le contenu de votre commande (produit,
+        quantité, prix, statut, dates) et l'identifiant de votre session de paiement. Le paiement lui-même est
+        entièrement traité par notre prestataire <strong>Stripe</strong> : le Site ne collecte ni ne conserve à
+        aucun moment votre numéro de carte bancaire.
+    </p>
+    <p>
+        Lors du paiement, l'interface Stripe vous demande également une adresse postale de livraison. <strong>Cette
+        information est transmise à Stripe mais n'est, à ce jour, pas utilisée</strong> : la remise du produit se
+        fait en main propre (voir nos
+        <a href="{{ url_for('main.sale_terms') }}">Conditions Générales de Vente</a>). Nous corrigeons
+        actuellement cette incohérence technique ; en attendant, évitez de renseigner des informations que vous ne
+        souhaitez pas transmettre à Stripe si le champ vous est présenté.
+    </p>
+
     <h3>3. Le lien public d'urgence — point d'attention important</h3>
     <p>
         Le profil médical d'urgence peut être rendu accessible via un <strong>lien public unique</strong>, destiné
@@ -86,7 +103,11 @@
         <li><strong>ipapi.co</strong> — réception de votre adresse IP dans le seul but d'afficher une localisation
             approximative de vos sessions actives, à votre demande ;</li>
         <li><strong>Cloudflare, Inc.</strong> — opérateur du tunnel et du réseau utilisé pour exposer le Site sur
-            Internet de façon sécurisée (protection contre les attaques, terminaison TLS).</li>
+            Internet de façon sécurisée (protection contre les attaques, terminaison TLS) ;</li>
+        <li><strong>Stripe</strong> — si vous commandez une carte MediLink NFC, pour le traitement sécurisé du
+            paiement (coordonnées bancaires, nom, adresse de livraison saisis directement sur l'interface Stripe).
+            Lorsque vous êtes redirigé vers la page de paiement Stripe, celle-ci peut déposer ses propres cookies
+            techniques, hors du contrôle du Site ; voir la politique de confidentialité de Stripe.</li>
     </ul>
     <p>
         Certains de ces prestataires sont établis hors de l'Union européenne (notamment aux États-Unis). Ces
@@ -111,10 +132,18 @@
 
     <h3>6. Durée de conservation</h3>
     <p>
-        Vos données de compte et votre profil médical d'urgence sont conservés tant que votre compte reste actif.
-        En cas de suppression de votre compte, vos données sont supprimées dans un délai raisonnable, sous réserve
-        des données que nous serions légalement tenus de conserver plus longtemps. L'historique de connexion est
-        conservé à des fins de sécurité pour une durée limitée.
+        Vos données de compte, votre profil médical d'urgence et votre historique de commandes sont conservés tant
+        que votre compte reste actif. En cas de suppression de votre compte depuis votre espace personnel, ces
+        données sont supprimées <strong>immédiatement et de façon irréversible</strong>. L'historique de connexion
+        est conservé à des fins de sécurité pour une durée limitée.
+    </p>
+    <p>
+        <strong>Point de vigilance :</strong> en l'absence, à ce jour, de statut juridique déclaré pour l'activité
+        de vente (voir nos <a href="{{ url_for('main.legal_notice') }}">Mentions légales</a>), aucune obligation de
+        conservation comptable des factures n'est actuellement mise en œuvre. Le jour où ce statut sera régularisé,
+        des données de commande pourraient devoir être conservées plus longtemps que la suppression immédiate du
+        compte, pour respecter les obligations comptables applicables (Code de commerce) ; cette politique sera
+        alors mise à jour en conséquence.
     </p>
 
     <h3>7. Vos droits</h3>
@@ -138,9 +167,16 @@
 
     <h3>8. Cookies</h3>
     <p>
-        Le Site utilise uniquement un cookie de session strictement nécessaire à l'authentification. Ce cookie ne
-        contient aucune donnée personnelle en clair, ne sert à aucun suivi publicitaire et expire automatiquement.
-        Aucun cookie tiers de mesure d'audience ou de publicité n'est utilisé.
+        Le Site lui-même utilise uniquement un cookie de session strictement nécessaire à l'authentification. Ce
+        cookie ne contient aucune donnée personnelle en clair, ne sert à aucun suivi publicitaire et expire
+        automatiquement. Aucun cookie tiers de mesure d'audience ou de publicité n'est déposé par le Site.
+    </p>
+    <p>
+        Lorsque vous finalisez une commande, vous êtes redirigé vers la page de paiement de Stripe
+        (checkout.stripe.com) : celle-ci peut déposer ses propres cookies techniques et de lutte anti-fraude, sur
+        son propre domaine, indépendamment du Site. Voir la
+        <a href="https://stripe.com/fr/privacy" target="_blank" rel="noopener">politique de confidentialité de
+        Stripe</a>.
     </p>
 
     <h3>9. Modification de la présente politique</h3>
@@ -157,7 +193,10 @@
     </p>
 
     <hr>
-    <p class="terms-footer">Voir aussi nos <a href="{{ url_for('main.conditions_uses') }}">Conditions Générales d'Utilisation</a>.</p>
+    <p class="terms-footer">
+        Voir aussi nos <a href="{{ url_for('main.conditions_uses') }}">Conditions Générales d'Utilisation</a> et
+        nos <a href="{{ url_for('main.legal_notice') }}">Mentions légales</a>.
+    </p>
 
 </div>
 {% endblock %}

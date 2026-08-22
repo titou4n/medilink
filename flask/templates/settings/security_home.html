@@ -26,7 +26,7 @@
 </div>
 
 <div class="card">
-    <h3 class="card__title">Two-Factor Authentication</h3>
+    <h3 class="card__title">Two-factor authentication</h3>
     <p>Add an extra layer of security by requiring a code sent to your email when signing in.</p>
     <form action="{{ url_for('settings.settings_switch_2fa') }}" method="post" class="auto-submit-form">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
@@ -41,7 +41,7 @@
 </div>
 
 <div class="card">
-    <h3 class="card__title">Sessions &amp; Devices</h3>
+    <h3 class="card__title">Sessions &amp; devices</h3>
     <p>Your current IP address: {{ ip_address }} - {{ session_location }}</p>
 
     <div class="table-wrap">
@@ -108,10 +108,11 @@
         <p>This will permanently remove your account and all associated data. This action cannot be undone.</p>
         <form action="{{ url_for('settings.delete_account') }}" method="post" class="inline-form">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-            <button class="btn btn--danger" type="submit" onclick="return confirm('Are you sure? This action cannot be undone.')">Delete Account</button>
+            <button class="btn btn--danger" type="submit" data-confirm-message="Are you sure? This action cannot be undone.">Delete account</button>
         </form>
     </div>
 </div>
 
 <script src="{{ url_for('static', filename='js/auto_submit_checkbox.js') }}" defer></script>
+<script src="{{ url_for('static', filename='js/confirm_dialog.js') }}" defer></script>
 {% endblock %}

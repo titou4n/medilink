@@ -155,21 +155,23 @@ def create_user_account(
     current_user_role_name: str,
     email: str,
     name: str,
-    raw_password: str,
     role_name: Optional[str],
 ) -> tuple[bool, str, str]:
     """
     Create a new account on an admin's behalf.
 
-    Reuses the same validation as self-registration (email format,
-    uniqueness, password strength) and additionally requires a Super
-    Admin to grant the Admin or Super Admin role. Returns
+    The admin never sets a password: the account is created with an
+    unusable random password hash, and a single-use "set your password"
+    link is emailed to the account's own address (same mechanism as
+    trigger_password_reset). Reuses the same validation as self-registration
+    (email format, uniqueness) and additionally requires a Super Admin to
+    grant the Admin or Super Admin role. Returns
     ``(success, message, flash_category)``.
     """
     email = (email or "").strip().lower()
     name = (name or "").strip()
 
-    if not email or not name or not raw_password or not role_name:
+    if not email or not name or not role_name:
         return False, "All fields are required.", "warning"
 
     is_valid_email, email_error = ext.email_manager.validate_user_email(email)
@@ -182,10 +184,6 @@ def create_user_account(
     if ext.db_account_repository.exists_by_name(name):
         return False, "Name is already used.", "warning"
 
-    password_error = ext.utils.validate_password_strength(raw_password, ext.config.MIN_PASSWORD_LENGTH)
-    if password_error:
-        return False, password_error, "warning"
-
     role_id = ext.db_role_repository.get_role_id(role_name=role_name)
     if role_id is None:
         return False, "Role doesn't exist", "warning"
@@ -197,13 +195,17 @@ def create_user_account(
         return False, "Only a Super Admin can create an Admin or Super Admin account.", "danger"
 
     try:
-        password_hash = ext.hash_manager.generate_password_hash(raw_password)
-        ext.db_account_repository.create(email, password_hash, name, role_id)
+        # No one — not the admin, not the user yet — knows this password:
+        # the account stays unusable until the setup link below is opened.
+        unusable_password_hash = ext.hash_manager.generate_password_hash(ext.hash_manager.generate_secure_token())
+        ext.db_account_repository.create(email, unusable_password_hash, name, role_id)
         user_id = ext.db_account_repository.get_id_by_email(email)
         ext.db_account_repository.create_preferences(user_id=user_id)
-        ext.email_manager.send_welcome_email(user_id=user_id)
+        sent = ext.password_reset_manager.request_account_setup(user_id=user_id)
         logger.info("Admin created new account: user_id=%s email=%s", user_id, email)
-        return True, "Account created successfully.", "success"
+        if not sent:
+            return True, "Account created, but the setup email could not be sent. Use \"Reset password\" on the user's page to resend it.", "warning"
+        return True, "Account created successfully. A setup link was emailed to the user.", "success"
     except Exception as e:
         logger.error("Error creating account for %s: %s", email, str(e))
         return False, "Account creation failed. Please try again.", "error"

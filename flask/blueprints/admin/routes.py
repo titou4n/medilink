@@ -109,10 +109,20 @@ def edit_role(role_name: str):
         if role_name in ext.permissions.LIST_DEFAULT_ROLES:
             flash("You cannot edit this role - It is a default role", "warning")
             return redirect(url_for("admin.role_permission_manager"))
+        role_id = ext.db_role_repository.get_role_id(role_name=role_name)
+        current_permission_names = [
+            ext.db_role_repository.get_permission_name(permission_id=permission_id)
+            for permission_id in ext.db_role_repository.get_permission_ids_for_role(role_id=role_id)
+        ]
         return render_template('admin/admin_edit_role.html',
                                id=current_user.id,
                                dict_permissions=ext.permissions.DICT_PERMISSIONS_BY_TYPE,
-                               current_role_name=role_name)
+                               current_role_name=role_name,
+                               current_permissions=current_permission_names)
+
+    if role_name in ext.permissions.LIST_DEFAULT_ROLES:
+        flash("You cannot edit this role - It is a default role", "warning")
+        return redirect(url_for("admin.role_permission_manager"))
 
     new_role_name         = str(request.form.get("role_name"))
     list_permissions_name = request.form.getlist("permissions")
@@ -221,7 +231,6 @@ def user_create():
         current_user_role_name=current_user.role_name,
         email=request.form.get('email'),
         name=request.form.get('name'),
-        raw_password=request.form.get('password'),
         role_name=request.form.get('role_name'),
     )
     flash(message, category)

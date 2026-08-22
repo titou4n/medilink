@@ -6,7 +6,6 @@ Generic helper utilities shared across the application.
 
 from datetime import datetime, timedelta, timezone
 import logging
-import secrets
 
 logger = logging.getLogger(__name__)
 
@@ -64,11 +63,6 @@ class Utils:
     ############################################
     #_______________PASSWORD___________________#
     ############################################
-
-    @staticmethod
-    def generate_password(size: int) -> str:
-        """Generate a URL-safe random password of given size."""
-        return secrets.token_urlsafe(size)
 
     @staticmethod
     def validate_password_strength(password: str, min_length: int) -> str | None:

@@ -90,6 +90,11 @@ class EmergencyInformation:
     # Helpers
     # ------------------------------------------------------------------ #
 
+    @property
+    def full_name(self) -> str:
+        """Return the first and last name combined."""
+        return f"{self.first_name} {self.last_name}".strip()
+
     def __repr__(self) -> str:
         """Return a developer-friendly representation."""
 

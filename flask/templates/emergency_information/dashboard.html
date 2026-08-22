@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block title %}Emergency Information — MediLink{% endblock %}
+{% block title %}Emergency Information - MediLink{% endblock %}
 {% block content %}
 
 {% if not record %}
@@ -9,9 +9,9 @@
 </div>
 
 <div class="card card--center">
-  <h2 class="card__title">No Medical Profile Found</h2>
+  <h2 class="card__title">No medical profile found</h2>
   <p>Create your emergency profile so first responders can access critical information instantly.</p>
-  <a href="{{ url_for('emergency_information.edit') }}" class="btn btn--large">Create My Emergency Profile</a>
+  <a href="{{ url_for('emergency_information.edit') }}" class="btn btn--large">Create my emergency profile</a>
 </div>
 
 {% else %}
@@ -22,21 +22,21 @@
 </div>
 
 <div class="card">
-  <h3 class="card__title">Profile Status</h3>
+  <h3 class="card__title">Profile status</h3>
   {% if record.is_active %}
-    <span class="badge badge--success">Active — Publicly Accessible</span>
+    <span class="badge badge--success">Active - Publicly Accessible</span>
   {% else %}
-    <span class="badge badge--danger">Disabled — Not Publicly Accessible</span>
+    <span class="badge badge--danger">Disabled - Not Publicly Accessible</span>
   {% endif %}
 
   <dl class="account-details account-details--standalone">
-    <div><dt>Last Updated</dt><dd>{{ format_datetime(record.updated_at) or "—" }}</dd></div>
-    <div><dt>Last Accessed by Rescuers</dt><dd>{{ format_datetime(record.last_public_access) or "—" }}</dd></div>
+    <div><dt>Last Updated</dt><dd>{{ format_datetime(record.updated_at) or "-" }}</dd></div>
+    <div><dt>Last Accessed by Rescuers</dt><dd>{{ format_datetime(record.last_public_access) or "-" }}</dd></div>
   </dl>
 </div>
 
 <div class="card">
-  <h3 class="card__title">Your Emergency Link</h3>
+  <h3 class="card__title">Your emergency link</h3>
   <p>Share this link, print it as a QR code, or insert it in your emergency card.</p>
 
   {% set public_url = base_url ~ url_for('emergency_information.public_view', token=record.public_token) %}
@@ -60,16 +60,36 @@
       class="btn btn--danger-outline btn--small"
       data-confirm-message="Regenerating the link will invalidate the current one. Continue?"
     >
-      Regenerate Link
+      Regenerate link
     </button>
   </form>
+
+  <div class="qr-share">
+    <img class="qr-share__preview" src="{{ url_for('emergency_information.qr_png') }}" alt="QR code linking to my public emergency profile">
+    <div class="qr-share__actions">
+      <a href="{{ url_for('emergency_information.qr_png') }}" class="btn btn--secondary btn--small">Download PNG</a>
+      <a href="{{ url_for('emergency_information.qr_svg') }}" class="btn btn--secondary btn--small">Download SVG</a>
+      <a href="{{ url_for('emergency_information.qr_print') }}" class="btn btn--small" target="_blank" rel="noopener">Print</a>
+    </div>
+  </div>
 </div>
 
 {% include "emergency_information/components/medical_card.html" %}
-{% include "emergency_information/components/emergency_contact.html" %}
+{% include "emergency_information/components/allergies.html" %}
+{% include "emergency_information/components/critical_info.html" %}
+
+<div class="card-grid">
+  {% include "emergency_information/components/medical_conditions.html" %}
+  {% include "emergency_information/components/medications.html" %}
+  {% include "emergency_information/components/emergency_contact.html" %}
+  {% include "emergency_information/components/healthcare_provider.html" %}
+</div>
+
+{% include "emergency_information/components/additional_notes.html" %}
+{% include "emergency_information/components/organ_donor.html" %}
 
 <div class="form-actions">
-  <a href="{{ url_for('emergency_information.edit') }}" class="btn">Edit My Profile</a>
+  <a href="{{ url_for('emergency_information.edit') }}" class="btn">Edit my profile</a>
 
   <form method="POST" action="{{ url_for('emergency_information.delete') }}" class="inline-form">
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
@@ -77,12 +97,13 @@
       type="submit"
       class="btn btn--danger"
       data-confirm-message="This will permanently delete your emergency medical information. Are you sure?">
-      Delete My Profile
+      Delete my profile
     </button>
   </form>
 </div>
 
 {% endif %}
 
+<script src="{{ url_for('static', filename='js/confirm_dialog.js') }}" defer></script>
 <script src="{{ url_for('static', filename='js/emergency_information.js') }}" defer></script>
 {% endblock %}

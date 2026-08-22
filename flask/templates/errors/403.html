@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block title %}Access denied - MediLink{% endblock %}
+{% block content %}
+
+<section class="hero error-page">
+    <p class="error-page__code">403</p>
+    <h1>Access denied</h1>
+    <p>You do not have permission to access this page.</p>
+    <div class="hero__actions">
+        <a href="{{ url_for('main.home' if current_user.is_authenticated else 'main.index') }}" class="btn btn--large">Back to home</a>
+    </div>
+</section>
+
+{% endblock %}

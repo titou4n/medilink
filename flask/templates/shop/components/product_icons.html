@@ -1,0 +1,51 @@
+{#
+  Shared SVG icon set for product cards.
+  icon_key must match one of config.PRODUCT_ICON_CHOICES (server-validated);
+  None/empty/unrecognised falls back to the "box" default, which is the
+  icon every product used before this feature existed.
+#}
+{% macro render_product_icon(icon_key) %}
+{%- if icon_key == 'card' -%}
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <rect x="2" y="5" width="20" height="14" rx="2"/>
+  <line x1="2" y1="9" x2="22" y2="9"/>
+  <line x1="6" y1="15" x2="10" y2="15"/>
+</svg>
+{%- elif icon_key == 'pill' -%}
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <rect x="4" y="9" width="16" height="6" rx="3"/>
+  <line x1="12" y1="9" x2="12" y2="15"/>
+</svg>
+{%- elif icon_key == 'heart' -%}
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <path d="M12 21s-7-4.35-9.5-8.5C.5 8.5 3 5 6.5 5c2 0 3.5 1.2 4.5 2.7C12 6.2 13.5 5 15.5 5 19 5 21.5 8.5 21.5 12.5 19 16.65 12 21 12 21z"/>
+</svg>
+{%- elif icon_key == 'shield' -%}
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <path d="M12 3l8 3v6c0 4.5-3.4 7.9-8 9-4.6-1.1-8-4.5-8-9V6l8-3z"/>
+</svg>
+{%- elif icon_key == 'cross' -%}
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <circle cx="12" cy="12" r="9"/>
+  <line x1="12" y1="8" x2="12" y2="16"/>
+  <line x1="8" y1="12" x2="16" y2="12"/>
+</svg>
+{%- else -%}
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <rect x="2" y="5" width="20" height="14" rx="2"/>
+  <line x1="2" y1="10" x2="22" y2="10"/>
+  <path d="M17 14.5a2.5 2.5 0 0 0 0-3"/>
+  <path d="M19 16a5 5 0 0 0 0-6"/>
+</svg>
+{%- endif -%}
+{% endmacro %}
+
+{% macro product_icon_label(icon_key) %}
+{%- if icon_key == 'card' -%}Card
+{%- elif icon_key == 'pill' -%}Pill
+{%- elif icon_key == 'heart' -%}Heart
+{%- elif icon_key == 'shield' -%}Shield
+{%- elif icon_key == 'cross' -%}Medical cross
+{%- else -%}Default
+{%- endif -%}
+{% endmacro %}

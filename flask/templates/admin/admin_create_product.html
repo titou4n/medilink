@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+{% from 'shop/components/product_icons.html' import render_product_icon, product_icon_label %}
+{% block title %}Add Product - Admin - MediLink{% endblock %}
+{% block content %}
+
+{% include 'partials/admin_nav.html' %}
+
+<div class="page-header">
+  <h1>Add a product</h1>
+  <p class="page-subtitle"><a href="{{ url_for('shop.admin_products') }}">← Back to products</a></p>
+</div>
+
+<div class="card card--narrow">
+  <form method="post" enctype="multipart/form-data">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+    <div class="field">
+      <label for="sku">SKU</label>
+      <input class="input" type="text" id="sku" name="sku" placeholder="medilink-nfc-card" value="{{ request.form['sku'] }}" required>
+    </div>
+
+    <div class="field">
+      <label for="name">Name</label>
+      <input class="input" type="text" id="name" name="name" placeholder="Product name" value="{{ request.form['name'] }}" required>
+    </div>
+
+    <div class="field">
+      <label for="description">Description</label>
+      <textarea class="input" id="description" name="description" rows="3">{{ request.form['description'] }}</textarea>
+    </div>
+
+    <div class="field">
+      <label for="price">Price ({{ currency|upper }})</label>
+      <input class="input" type="number" id="price" name="price" step="0.01" min="0.01" placeholder="29.99" value="{{ request.form['price'] }}" required>
+    </div>
+
+    <div class="field">
+      <label for="image">Product image (optional)</label>
+      <input class="input" type="file" id="image" name="image" accept="image/png,image/jpeg">
+      <p class="field-hint">PNG or JPEG, max 5 MB. Leave empty to show the card icon below instead.</p>
+    </div>
+
+    <div class="field">
+      <label>Card icon</label>
+      <div class="icon-picker">
+        <label class="icon-picker__option">
+          <input type="radio" name="icon_key" value="" {% if not request.form.get('icon_key') %}checked{% endif %}>
+          <span class="icon-picker__preview">{{ render_product_icon(none) }}</span>
+          <span class="icon-picker__label">Default</span>
+        </label>
+        {% for key in icon_choices %}
+        <label class="icon-picker__option">
+          <input type="radio" name="icon_key" value="{{ key }}" {% if request.form.get('icon_key') == key %}checked{% endif %}>
+          <span class="icon-picker__preview">{{ render_product_icon(key) }}</span>
+          <span class="icon-picker__label">{{ product_icon_label(key) }}</span>
+        </label>
+        {% endfor %}
+      </div>
+      <p class="field-hint">Used on the shop card when no image is set.</p>
+    </div>
+
+    <button class="btn btn--full" type="submit">Create product</button>
+  </form>
+</div>
+
+{% endblock %}

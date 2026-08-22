@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+{% from 'partials/order_status_badge.html' import order_status_badge %}
+{% block title %}My Orders - MediLink{% endblock %}
+{% block content %}
+
+{% include 'partials/orders_nav.html' %}
+
+<div class="page-header page-header--split">
+  <div>
+    <h1>My Orders</h1>
+    <p class="page-subtitle">Track the status of your MediLink NFC card orders.</p>
+  </div>
+  {% if orders %}
+  <a class="btn btn--secondary" href="{{ url_for('shop.catalog') }}">Order another card</a>
+  {% endif %}
+</div>
+
+{% if not orders %}
+<div class="card card--center">
+  <span class="icon-circle">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+      <polyline points="14 2 14 8 20 8"/>
+      <line x1="9" y1="13" x2="15" y2="13"/>
+      <line x1="9" y1="17" x2="15" y2="17"/>
+    </svg>
+  </span>
+  <h2 class="card__title">No orders yet</h2>
+  <p>You haven't ordered a MediLink NFC card yet.</p>
+  <a class="btn btn--large" href="{{ url_for('shop.catalog') }}">Order a card</a>
+</div>
+{% else %}
+<div class="card">
+  <div class="order-list">
+    <div class="order-row order-row--header">
+      <span>Order</span>
+      <span>Date</span>
+      <span>Amount</span>
+      <span>Status</span>
+      <span></span>
+    </div>
+    {% for order in orders %}
+    <div class="order-row">
+      <span class="order-row__id">#{{ order.id }}</span>
+      <span class="order-row__date">{{ format_datetime(order.created_at) }}</span>
+      <span class="order-row__amount">{{ "%.2f"|format(order.total_amount_cents / 100) }} {{ order.currency|upper }}</span>
+      <span class="order-row__status">{{ order_status_badge(order.status) }}</span>
+      <a class="btn btn--secondary btn--small order-row__action" href="{{ url_for('orders.detail', order_id=order.id) }}">View details</a>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+{% endblock %}

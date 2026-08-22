@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
   <meta name="robots" content="noindex, nofollow">
   <meta name="description" content="Emergency Medical Information for Responders">
-  <title>Emergency Medical Information — {{ record.first_name }} {{ record.last_name }}</title>
+  <title>Emergency Medical Information - {{ record.first_name }} {{ record.last_name }}</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 
@@ -14,8 +14,12 @@
 <div class="public-view">
 
   <header class="public-view__header">
+    <div class="public-view__brand">
+      <img src="{{ url_for('static', filename='img/medilink-logo.svg') }}" alt="">
+      MediLink
+    </div>
     <h1>Emergency Medical Information</h1>
-    <p class="page-subtitle">For emergency responders only — Do not share</p>
+    <p class="page-subtitle">For emergency responders only - Do not share</p>
   </header>
 
   <main id="main-content">
@@ -25,109 +29,27 @@
       <div class="public-view__tags">
         {% if record.age %}<span class="badge badge--neutral">Age: {{ record.age }}</span>{% endif %}
         {% if record.gender %}<span class="badge badge--neutral">{{ record.gender }}</span>{% endif %}
-        {% if record.date_of_birth %}<span class="badge badge--neutral">DOB / Né(e) le : {{ record.date_of_birth }}</span>{% endif %}
-        {% if record.blood_type %}<span class="badge badge--danger">Blood type / Groupe sanguin : {{ record.blood_type }}</span>{% endif %}
+        {% if record.date_of_birth %}<span class="badge badge--neutral">DOB: {{ record.date_of_birth }}</span>{% endif %}
+        {% if record.blood_type %}<span class="badge badge--danger">Blood type: {{ record.blood_type }}</span>{% endif %}
         {% if record.height_cm %}<span class="badge badge--neutral">Height: {{ record.height_cm }} cm</span>{% endif %}
         {% if record.weight_kg %}<span class="badge badge--neutral">Weight: {{ record.weight_kg }} kg</span>{% endif %}
       </div>
     </section>
 
-    {% if record.allergies %}
-    <section class="card card--critical">
-      <h2 class="card__title">Allergies — Read First / À lire en premier</h2>
-      <ul class="plain-list">
-        {% for item in record.allergies.split('\n') if item.strip() %}
-          <li>{{ item.strip() }}</li>
-        {% else %}
-          <li>{{ record.allergies }}</li>
-        {% endfor %}
-      </ul>
-    </section>
-    {% endif %}
-
-    {% if record.critical_info %}
-    <section class="card card--critical">
-      <h2 class="card__title">Critical Information / Informations essentielles</h2>
-      <ul class="plain-list">
-        {% for item in record.critical_info.split('\n') if item.strip() %}
-          <li>{{ item.strip() }}</li>
-        {% else %}
-          <li>{{ record.critical_info }}</li>
-        {% endfor %}
-      </ul>
-    </section>
-    {% endif %}
+    {% include "emergency_information/components/allergies.html" %}
+    {% include "emergency_information/components/critical_info.html" %}
 
     <div class="public-view__grid">
-
-      {% if record.medical_conditions %}
-      <section class="card">
-        <h2 class="card__title">Medical Conditions / Problèmes de santé</h2>
-        <ul class="plain-list">
-          {% for item in record.medical_conditions.split('\n') if item.strip() %}
-            <li>{{ item.strip() }}</li>
-          {% else %}
-            <li>{{ record.medical_conditions }}</li>
-          {% endfor %}
-        </ul>
-      </section>
-      {% endif %}
-
-      {% if record.current_medications %}
-      <section class="card">
-        <h2 class="card__title">Medications / Médicaments</h2>
-        <ul class="plain-list">
-          {% for item in record.current_medications.split('\n') if item.strip() %}
-            <li>{{ item.strip() }}</li>
-          {% else %}
-            <li>{{ record.current_medications }}</li>
-          {% endfor %}
-        </ul>
-      </section>
-      {% endif %}
-
-      {% if record.emergency_contact_name %}
-      <section class="card">
-        <h2 class="card__title">Emergency Contact / Contact en cas d'urgence</h2>
-        <dl class="summary-grid">
-          <div><dt>Name / Nom</dt><dd>{{ record.emergency_contact_name }}</dd></div>
-          {% if record.emergency_contact_relation %}<div><dt>Relation</dt><dd>{{ record.emergency_contact_relation }}</dd></div>{% endif %}
-          {% if record.emergency_contact_phone %}
-          <div><dt>Phone / Téléphone</dt><dd><a class="phone-link" href="tel:{{ record.emergency_contact_phone }}">{{ record.emergency_contact_phone }}</a></dd></div>
-          {% endif %}
-        </dl>
-      </section>
-      {% endif %}
-
-      {% if record.doctor_name %}
-      <section class="card">
-        <h2 class="card__title">Healthcare Provider / Professionnel de santé</h2>
-        <dl class="summary-grid">
-          <div><dt>Doctor / Docteur</dt><dd>{{ record.doctor_name }}</dd></div>
-          {% if record.doctor_phone %}
-          <div><dt>Phone / Téléphone</dt><dd><a class="phone-link" href="tel:{{ record.doctor_phone }}">{{ record.doctor_phone }}</a></dd></div>
-          {% endif %}
-        </dl>
-      </section>
-      {% endif %}
-
+      {% include "emergency_information/components/medical_conditions.html" %}
+      {% include "emergency_information/components/medications.html" %}
+      {% include "emergency_information/components/emergency_contact.html" %}
+      {% include "emergency_information/components/healthcare_provider.html" %}
     </div>
 
-    {% if record.medical_notes %}
-    <section class="card">
-      <h2 class="card__title">Additional Notes</h2>
-      <p>{{ record.medical_notes }}</p>
-    </section>
-    {% endif %}
-
-    <section class="card">
-      <h2 class="card__title">Organ Donor Status</h2>
-      {% if record.organ_donor %}
-        <span class="badge badge--success">Registered organ donor</span>
-      {% else %}
-        <span class="badge badge--neutral">Not a registered organ donor</span>
-      {% endif %}
-    </section>
+    <br>
+    
+    {% include "emergency_information/components/additional_notes.html" %}
+    {% include "emergency_information/components/organ_donor.html" %}
 
   </main>
 
@@ -136,7 +58,7 @@
       This information is for emergency use only.<br>
       Last updated:
       <time datetime="{{ record.updated_at if record.updated_at else '' }}">
-        {% if record.updated_at %}{{ format_datetime(record.updated_at) }}{% else %}—{% endif %}
+        {% if record.updated_at %}{{ format_datetime(record.updated_at) }}{% else %}-{% endif %}
       </time>
     </p>
   </footer>

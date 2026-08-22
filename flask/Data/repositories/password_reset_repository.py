@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 
 class PasswordResetRepository:
-    """Repository for admin-triggered password reset tokens."""
+    """Repository for password reset tokens (admin-triggered or self-service)."""
 
     def __init__(self, db_connection: DatabaseConnection) -> None:
         self._db = db_connection

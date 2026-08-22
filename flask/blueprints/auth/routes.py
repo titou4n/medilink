@@ -14,13 +14,14 @@ from utils.twofa_manager import (
     TwoFactorInvalidCodeError
 )
 from utils.password_reset_manager import PasswordResetTokenInvalidError
+from utils.email_change_manager import EmailChangeTokenInvalidError, EmailChangeEmailTakenError
 
 logger = logging.getLogger(__name__)
 
 
 @bp.route('/login', methods=['GET', 'POST'])
 @bp.route('/login/', methods=['GET', 'POST'])
-@ext.limiter.limit("5 per minute; 20 per hour; 100 per day")
+@ext.limiter.limit("15 per minute; 30 per hour; 100 per day")
 def login():
     if request.method == 'GET':
         return render_template('auth/login.html')
@@ -40,10 +41,13 @@ def login():
     # Créer une session temporaire (sans accès full à l'app)
     ext.session_manager.send_temp_2fa_session(user_id=user_id)
 
-    if ext.db_account_repository.get_twofa_enabled(user_id=user_id):
+    # L'email doit être vérifié avant tout accès (compte fraîchement créé et
+    # jamais vérifié), indépendamment du réglage optionnel "2FA à la connexion".
+    if (ext.db_account_repository.get_twofa_enabled(user_id=user_id)
+            or not ext.db_account_repository.get_email_verified_by_id(user_id=user_id)):
         return redirect(url_for('auth.two_factor_authentication'))
 
-    # Si pas de 2FA, créer la session réelle
+    # Si pas de 2FA et email déjà vérifié, créer la session réelle
     try:
         user = User(user_id)
         login_user(user)
@@ -58,7 +62,7 @@ def login():
 
 @bp.route('/register', methods=['GET', 'POST'])
 @bp.route('/register/', methods=['GET', 'POST'])
-@ext.limiter.limit("3 per minute; 10 per hour; 30 per day")
+@ext.limiter.limit("10 per minute; 30 per hour; 30 per day")
 def register():
     if request.method == 'GET':
         return render_template('auth/register.html')
@@ -66,12 +70,20 @@ def register():
     email = request.form.get('email', '').strip().lower()
     raw_password = request.form.get('password', '').strip()
     raw_verif = request.form.get('verif_password', '').strip()
+    terms_accepted = request.form.get('terms') is not None
 
     if not all([email, raw_password, raw_verif]):
         flash('All fields are required.')
         return redirect(url_for('auth.register'))
 
-    user_id, error = register_user(email=email, raw_password=raw_password, raw_verif=raw_verif, name=email)
+    if not terms_accepted:
+        flash('You must accept the Terms & Conditions and Privacy Policy.')
+        return redirect(url_for('auth.register'))
+
+    user_id, error = register_user(
+        email=email, raw_password=raw_password, raw_verif=raw_verif, name=email,
+        terms_accepted=terms_accepted
+    )
     if error:
         flash(error)
         return redirect(url_for('auth.register'))
@@ -149,39 +161,23 @@ def forgot_password():
         flash('Email is required.')
         return render_template('auth/forgot_password.html')
 
-    user_id = ext.db_account_repository.get_id_by_email(email=email)
-
-    if user_id is None:
-        logger.warning("Password reset attempt with non-existent email: %s", email)
-        flash("If this account exists and email is verified, you will receive a password reset link.")
-        return render_template('auth/forgot_password.html')
-    
-    user_email = ext.db_account_repository.get_email_by_id(user_id)
-    if not user_email:
-        logger.warning("Password reset attempt for user without email: %s", user_id)
-        flash("If this account exists and email is verified, you will receive a password reset link.")
-        return render_template('auth/forgot_password.html')
-
-    if not ext.db_account_repository.get_email_verified_by_id(user_id=user_id):
-        logger.warning("Password reset attempt for user without email verified: %s", user_id)
-        flash("If this account exists and email is verified, you will receive a password reset link.")
-        return render_template('auth/forgot_password.html')
+    # The response is identical whether or not the account exists (or is
+    # verified) so the endpoint can't be used to enumerate registered emails.
+    generic_message = "If this account exists and its email is verified, you will receive a password reset link."
 
     try:
-        new_password = ext.utils.generate_password(size=ext.config.PASSWORD_GENERATION_LENGTH)
-        ext.db_account_repository.update_password(
-            user_id=user_id,
-            new_password_hash=ext.hash_manager.generate_password_hash(new_password)
-        )
-        ext.email_manager.send_new_password_code_with_html(user_id=user_id, new_password=new_password)
-        hidden_email = ext.email_manager.get_hide_email(user_id=user_id)
-        flash(f"An email containing a new password has been sent to {hidden_email or 'your email address'}.")
-        logger.info("Password reset requested for user %s", user_id)
-        return redirect(url_for('auth.login'))
+        user_id = ext.db_account_repository.get_id_by_email(email=email)
+
+        if user_id is not None and ext.db_account_repository.get_email_verified_by_id(user_id=user_id):
+            ext.password_reset_manager.request_reset(user_id=user_id, self_service=True)
+            logger.info("Password reset link requested for user %s", user_id)
+        else:
+            logger.warning("Password reset attempt for unknown or unverified email: %s", email)
     except Exception as e:
-        logger.error("Error processing password reset: %s", str(e))
-        flash('An error occurred. Please try again later.')
-        return render_template('auth/forgot_password.html')
+        logger.error("Error processing password reset request: %s", str(e))
+
+    flash(generic_message)
+    return redirect(url_for('auth.login'))
 
 
 @bp.route('/reset_password/<token>', methods=['GET', 'POST'])
@@ -229,8 +225,40 @@ def reset_password(token):
     # Revoke existing sessions so a session opened with the old password can't outlive the reset.
     ext.db_session_repository.revoke_all_for_user(user_id=user_id)
 
-    logger.info("Password reset completed for user %s via admin-triggered link", user_id)
+    logger.info("Password reset completed for user %s via reset link", user_id)
     flash("Your password has been reset. You can now log in.", "success")
+    return redirect(url_for('auth.login'))
+
+
+@bp.route('/confirm_email_change/<token>', methods=['GET', 'POST'])
+@bp.route('/confirm_email_change/<token>/', methods=['GET', 'POST'])
+@ext.limiter.limit("10 per minute")
+def confirm_email_change(token):
+    ext.db_email_change_repository.delete_expired(ext.config.EMAIL_CHANGE_TOKEN_TIMELAPS_MINUTES)
+
+    try:
+        pending = ext.email_change_manager.verify_token(token)
+    except EmailChangeTokenInvalidError:
+        flash("This email confirmation link is invalid or has expired.", "error")
+        return redirect(url_for('auth.login'))
+
+    if request.method == 'GET':
+        return render_template('auth/confirm_email_change.html', token=token, new_email=pending["new_email"])
+
+    try:
+        ext.email_change_manager.confirm_change(token)
+    except EmailChangeTokenInvalidError:
+        flash("This email confirmation link is invalid or has expired.", "error")
+        return redirect(url_for('auth.login'))
+    except EmailChangeEmailTakenError:
+        flash("This email is already used by another account.", "error")
+        return redirect(url_for('auth.login'))
+
+    # Every session (including the one that requested the change) was just
+    # revoked as part of confirm_change(), so the user must sign back in.
+    flask_session.clear()
+    logger.info("Email change confirmed for user %s", pending["user_id"])
+    flash("Your email has been updated. Please sign in again.", "success")
     return redirect(url_for('auth.login'))
 
 

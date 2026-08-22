@@ -54,23 +54,27 @@ class EmailManager:
             receiver_email_address = self.db_account.get_email_by_id(user_id=user_id)
             if not receiver_email_address:
                 return None
-
-            email = str(receiver_email_address).strip()
-            if '@' not in email:
-                logger.warning("Invalid email format for user %s", user_id)
-                return None
-
-            at_index = email.index('@')
-            number_char_visible = 3
-            visible = email[:number_char_visible]
-            domain = email[at_index:]
-            hidden_length = max(at_index - number_char_visible, 0)
-            hidden = '*' * hidden_length
-
-            return visible + hidden + domain
+            return self._mask_email(str(receiver_email_address))
         except Exception as e:
             logger.error("Error hiding email for user %s: %s", user_id, str(e))
             return None
+
+    @staticmethod
+    def _mask_email(email: str) -> str | None:
+        """Return *email* with most of its local part replaced by asterisks."""
+        email = email.strip()
+        if '@' not in email:
+            logger.warning("Invalid email format for masking: %s", email)
+            return None
+
+        at_index = email.index('@')
+        number_char_visible = 3
+        visible = email[:number_char_visible]
+        domain = email[at_index:]
+        hidden_length = max(at_index - number_char_visible, 0)
+        hidden = '*' * hidden_length
+
+        return visible + hidden + domain
 
     # ------------------------------------------------------------------ #
     # SMTP delivery
@@ -104,6 +108,37 @@ class EmailManager:
             return False
         except Exception as e:
             logger.error("Unexpected error sending email to %s: %s", receiver_email_address, str(e))
+            return False
+
+    def send_email_with_html_content_to(self, receiver_email_address: str, subject: str, html_content: str) -> bool:
+        """
+        Same as :meth:`send_email_with_html_content`, but delivers to an
+        explicit *receiver_email_address* instead of looking one up on
+        ``account`` by user id.
+
+        Needed for the email-change confirmation link, whose recipient is
+        the *new*, not-yet-saved address - it isn't on the account row yet.
+        """
+        try:
+            if not receiver_email_address or not subject or not html_content:
+                logger.warning("Missing required email parameters")
+                return False
+
+            message = MIMEMultipart()
+            message["Subject"] = subject
+            message["From"] = self.sender_email_address
+            message["To"] = receiver_email_address
+            message.attach(MIMEText(html_content, "html"))
+
+            self._deliver(receiver_email_address, message)
+            logger.info("HTML email sent successfully to %s", receiver_email_address)
+            return True
+
+        except smtplib.SMTPException as e:
+            logger.error("SMTP error sending HTML email to %s: %s", receiver_email_address, str(e))
+            return False
+        except Exception as e:
+            logger.error("Unexpected error sending HTML email to %s: %s", receiver_email_address, str(e))
             return False
 
     def send_email_with_html_content(self, user_id: int, subject: str, html_content: str) -> bool:
@@ -253,46 +288,6 @@ class EmailManager:
             logger.error("Error sending 2FA email to user %s: %s", user_id, str(e))
             return False
 
-    def send_new_password_code_with_html(self, user_id: int, new_password: str) -> bool:
-        try:
-            receiver_email_address = self.db_account.get_email_by_id(user_id=user_id)
-            if not receiver_email_address:
-                logger.warning("No email found for password reset for user %s", user_id)
-                return False
-
-            name = self._get_display_name(user_id)
-            login_url = build_external_url(url_for('auth.login'))
-
-            body_html = (
-                self._paragraph(f"Hi {name},")
-                + self._paragraph(
-                    "We received a request to reset the password for your MediLink account. "
-                    "Your new temporary password is below."
-                )
-                + self._code_box(escape(new_password), font_size=18, letter_spacing="0.5px", break_all=True)
-                + self._button("Log in to MediLink", login_url)
-                + self._paragraph("For your security, please change this password as soon as you log in.")
-                + self._notice(
-                    "If you didn't request this, your account may be at risk. "
-                    "Log in and change your password immediately.",
-                    variant="danger",
-                )
-            )
-            html_content = self._layout(
-                preheader="A new password was generated for your MediLink account.",
-                heading="Your new password",
-                body_html=body_html,
-            )
-
-            subject = "Your new MediLink password"
-            result = self.send_email_with_html_content(user_id=user_id, subject=subject, html_content=html_content)
-            if result:
-                logger.info("Password reset email sent to user %s", user_id)
-            return result
-        except Exception as e:
-            logger.error("Error sending password reset email to user %s: %s", user_id, str(e))
-            return False
-
     def send_password_reset_link_email(self, user_id: int, token: str) -> bool:
         try:
             receiver_email_address = self.db_account.get_email_by_id(user_id=user_id)
@@ -332,6 +327,159 @@ class EmailManager:
             logger.error("Error sending password reset link email to user %s: %s", user_id, str(e))
             return False
 
+    def send_self_service_password_reset_link_email(self, user_id: int, token: str) -> bool:
+        try:
+            receiver_email_address = self.db_account.get_email_by_id(user_id=user_id)
+            if not receiver_email_address:
+                logger.warning("No email found for password reset link for user %s", user_id)
+                return False
+
+            name = self._get_display_name(user_id)
+            reset_url = build_external_url(url_for('auth.reset_password', token=token))
+
+            body_html = (
+                self._paragraph(f"Hi {name},")
+                + self._paragraph(
+                    "We received a request to reset the password for your MediLink account. "
+                    f"Click the button below to choose a new password. This link expires in "
+                    f"{self.config.PASSWORD_RESET_TOKEN_TIMELAPS_MINUTES} minutes and can only be used once."
+                )
+                + self._button("Reset your password", reset_url)
+                + self._notice(
+                    "If you didn't request this, you can safely ignore this email — your password "
+                    "won't change unless you open the link above and set a new one.",
+                    variant="warning",
+                )
+            )
+            html_content = self._layout(
+                preheader="Set a new password for your MediLink account.",
+                heading="Reset your password",
+                body_html=body_html,
+            )
+
+            subject = "Reset your MediLink password"
+            result = self.send_email_with_html_content(user_id=user_id, subject=subject, html_content=html_content)
+            if result:
+                logger.info("Self-service password reset link email sent to user %s", user_id)
+            return result
+        except Exception as e:
+            logger.error("Error sending self-service password reset link email to user %s: %s", user_id, str(e))
+            return False
+
+    def send_account_setup_email(self, user_id: int, token: str) -> bool:
+        try:
+            receiver_email_address = self.db_account.get_email_by_id(user_id=user_id)
+            if not receiver_email_address:
+                logger.warning("No email found for account setup link for user %s", user_id)
+                return False
+
+            name = self._get_display_name(user_id)
+            setup_url = build_external_url(url_for('auth.reset_password', token=token))
+
+            body_html = (
+                self._paragraph(f"Hi {name},")
+                + self._paragraph(
+                    "An administrator created a MediLink account for you. Click the button below "
+                    f"to choose your password and activate your account. This link expires in "
+                    f"{self.config.PASSWORD_RESET_TOKEN_TIMELAPS_MINUTES} minutes and can only be used once."
+                )
+                + self._button("Set your password", setup_url)
+                + self._notice(
+                    "If you weren't expecting this account, you can safely ignore this email — "
+                    "it won't be usable unless you open the link above and set a password.",
+                    variant="warning",
+                )
+            )
+            html_content = self._layout(
+                preheader="Set your password to activate your MediLink account.",
+                heading="Welcome to MediLink",
+                body_html=body_html,
+            )
+
+            subject = "Set your MediLink password"
+            result = self.send_email_with_html_content(user_id=user_id, subject=subject, html_content=html_content)
+            if result:
+                logger.info("Account setup email sent to user %s", user_id)
+            return result
+        except Exception as e:
+            logger.error("Error sending account setup email to user %s: %s", user_id, str(e))
+            return False
+
+    def send_email_change_confirmation_email(self, user_id: int, new_email: str, token: str) -> bool:
+        """Send the "confirm your new email" link to *new_email* itself."""
+        try:
+            name = self._get_display_name(user_id)
+            confirm_url = build_external_url(url_for('auth.confirm_email_change', token=token))
+
+            body_html = (
+                self._paragraph(f"Hi {name},")
+                + self._paragraph(
+                    "We received a request to change the email address on your MediLink account "
+                    f"to this one. Click the button below to confirm. This link expires in "
+                    f"{self.config.EMAIL_CHANGE_TOKEN_TIMELAPS_MINUTES} minutes and can only be used once."
+                )
+                + self._button("Confirm this email", confirm_url)
+                + self._notice(
+                    "If you didn't request this, you can safely ignore this email - your account's "
+                    "email won't change unless you open the link above.",
+                    variant="warning",
+                )
+            )
+            html_content = self._layout(
+                preheader="Confirm the new email address for your MediLink account.",
+                heading="Confirm your new email",
+                body_html=body_html,
+            )
+
+            subject = "Confirm your new MediLink email address"
+            result = self.send_email_with_html_content_to(
+                receiver_email_address=new_email, subject=subject, html_content=html_content
+            )
+            if result:
+                logger.info("Email change confirmation link sent to new address for user %s", user_id)
+            return result
+        except Exception as e:
+            logger.error("Error sending email change confirmation to new address for user %s: %s", user_id, str(e))
+            return False
+
+    def send_email_change_requested_notice(self, user_id: int, new_email: str) -> bool:
+        """
+        Warn the *current* address on file that an email change was
+        requested, in case the account owner isn't the one who requested it
+        (e.g. a hijacked session).
+        """
+        try:
+            name = self._get_display_name(user_id)
+            masked_new_email = escape(self._mask_email(new_email))
+
+            body_html = (
+                self._paragraph(f"Hi {name},")
+                + self._paragraph(
+                    f"Someone requested to change the email on your MediLink account to "
+                    f"<strong>{masked_new_email}</strong>. Nothing has changed yet - the new "
+                    "address must be confirmed first."
+                )
+                + self._notice(
+                    "If this wasn't you, change your password immediately and sign out of your "
+                    "other devices from Settings &rsaquo; Security.",
+                    variant="danger",
+                )
+            )
+            html_content = self._layout(
+                preheader="An email change was requested on your MediLink account.",
+                heading="Email change requested",
+                body_html=body_html,
+            )
+
+            subject = "An email change was requested on your MediLink account"
+            result = self.send_email_with_html_content(user_id=user_id, subject=subject, html_content=html_content)
+            if result:
+                logger.info("Email-change heads-up notice sent to current address for user %s", user_id)
+            return result
+        except Exception as e:
+            logger.error("Error sending email-change heads-up notice for user %s: %s", user_id, str(e))
+            return False
+
     def send_welcome_email(self, user_id: int) -> bool:
         try:
             receiver_email_address = self.db_account.get_email_by_id(user_id=user_id)
@@ -367,6 +515,107 @@ class EmailManager:
             return result
         except Exception as e:
             logger.error("Error sending welcome email to user %s: %s", user_id, str(e))
+            return False
+
+    def send_order_confirmation_email(self, user_id: int, order_id: int, total_amount_cents: int, currency: str) -> bool:
+        try:
+            receiver_email_address = self.db_account.get_email_by_id(user_id=user_id)
+            if not receiver_email_address:
+                logger.warning("No email found for order confirmation for user %s", user_id)
+                return False
+
+            name = self._get_display_name(user_id)
+            order_url = build_external_url(url_for('orders.detail', order_id=order_id))
+            amount = escape(f"{total_amount_cents / 100:.2f} {currency.upper()}")
+
+            body_html = (
+                self._paragraph(f"Hi {name},")
+                + self._paragraph(
+                    f"We've received your payment of <strong>{amount}</strong> for your MediLink NFC card. "
+                    "Your order is now being prepared."
+                )
+                + self._button("View your order", order_url)
+            )
+            html_content = self._layout(
+                preheader="Your MediLink NFC card order is confirmed.",
+                heading="Order confirmed",
+                body_html=body_html,
+            )
+
+            subject = f"Your MediLink order #{order_id} is confirmed"
+            result = self.send_email_with_html_content(user_id=user_id, subject=subject, html_content=html_content)
+            if result:
+                logger.info("Order confirmation email sent to user %s for order %s", user_id, order_id)
+            return result
+        except Exception as e:
+            logger.error("Error sending order confirmation email to user %s: %s", user_id, str(e))
+            return False
+
+    def send_order_payment_failed_email(self, user_id: int, order_id: int) -> bool:
+        try:
+            receiver_email_address = self.db_account.get_email_by_id(user_id=user_id)
+            if not receiver_email_address:
+                logger.warning("No email found for payment failed notice for user %s", user_id)
+                return False
+
+            name = self._get_display_name(user_id)
+            order_url = build_external_url(url_for('orders.detail', order_id=order_id))
+
+            body_html = (
+                self._paragraph(f"Hi {name},")
+                + self._paragraph(
+                    "We couldn't complete the payment for your MediLink NFC card order. "
+                    "No charge was made - you can try again whenever you're ready."
+                )
+                + self._button("Try payment again", order_url)
+            )
+            html_content = self._layout(
+                preheader="We couldn't complete your MediLink order payment.",
+                heading="Payment didn't go through",
+                body_html=body_html,
+            )
+
+            subject = f"Payment issue with your MediLink order #{order_id}"
+            result = self.send_email_with_html_content(user_id=user_id, subject=subject, html_content=html_content)
+            if result:
+                logger.info("Payment failed email sent to user %s for order %s", user_id, order_id)
+            return result
+        except Exception as e:
+            logger.error("Error sending payment failed email to user %s: %s", user_id, str(e))
+            return False
+
+    def send_order_refunded_email(self, user_id: int, order_id: int, total_amount_cents: int, currency: str) -> bool:
+        try:
+            receiver_email_address = self.db_account.get_email_by_id(user_id=user_id)
+            if not receiver_email_address:
+                logger.warning("No email found for refund notice for user %s", user_id)
+                return False
+
+            name = self._get_display_name(user_id)
+            order_url = build_external_url(url_for('orders.detail', order_id=order_id))
+            amount = escape(f"{total_amount_cents / 100:.2f} {currency.upper()}")
+
+            body_html = (
+                self._paragraph(f"Hi {name},")
+                + self._paragraph(
+                    f"We've refunded <strong>{amount}</strong> for your MediLink NFC card order. "
+                    "The amount should appear back on your original payment method within a few business days."
+                )
+                + self._button("View your order", order_url)
+            )
+            html_content = self._layout(
+                preheader="Your MediLink order has been refunded.",
+                heading="Order refunded",
+                body_html=body_html,
+            )
+
+            subject = f"Your MediLink order #{order_id} was refunded"
+            result = self.send_email_with_html_content(user_id=user_id, subject=subject, html_content=html_content)
+            if result:
+                logger.info("Refund email sent to user %s for order %s", user_id, order_id)
+            return result
+        except Exception as e:
+            logger.error("Error sending refund email to user %s: %s", user_id, str(e))
             return False
 
     def validate_user_email(self, email: str) -> tuple[bool, str]:

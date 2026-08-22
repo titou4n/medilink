@@ -13,6 +13,7 @@ def main():
         ext._db_manager.init_database()
         ext._roles_permissions_seeders.run()
         ext._accounts_seeder.run()
+        ext._products_seeder.run()
 
         logger.info("Database initialization complete.")
 

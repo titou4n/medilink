@@ -30,7 +30,7 @@
                         <div class="permission-group__list">
                             {% for permission in list_permissions %}
                                 <label>
-                                    <input type="checkbox" name="permissions" value="{{ permission }}" class="child-checkbox" data-type="{{ type }}">
+                                    <input type="checkbox" name="permissions" value="{{ permission }}" class="child-checkbox" data-type="{{ type }}" {% if permission in current_permissions %}checked{% endif %}>
                                     {{ permission }}
                                 </label>
                             {% endfor %}
@@ -43,7 +43,7 @@
         {% endif %}
 
         <div class="form-actions">
-            <button class="btn" type="submit">Save Changes</button>
+            <button class="btn" type="submit">Save changes</button>
         </div>
     </form>
 </div>

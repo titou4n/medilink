@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block title %}Server error - MediLink{% endblock %}
+{% block content %}
+
+<section class="hero error-page">
+    <p class="error-page__code">500</p>
+    <h1>Something went wrong</h1>
+    <p>An unexpected error occurred on our end. Please try again in a moment.</p>
+    <div class="hero__actions">
+        <a href="{{ url_for('main.home' if current_user.is_authenticated else 'main.index') }}" class="btn btn--large">Back to home</a>
+    </div>
+</section>
+
+{% endblock %}

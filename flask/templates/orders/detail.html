@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+{% from 'partials/order_status_badge.html' import order_status_badge %}
+{% block title %}Order #{{ order.id }} - MediLink{% endblock %}
+{% block content %}
+
+{% include 'partials/orders_nav.html' %}
+
+{% if just_paid %}
+  {% if order.status == 'paid' %}
+  <div class="alert alert--success">Payment confirmed! Your MediLink NFC card order is being prepared.</div>
+  {% elif polling %}
+  <div class="alert alert--info" id="payment-polling-alert" data-poll-url="{{ next_poll_url }}">Confirming your payment with Stripe &mdash; this usually takes just a few seconds&hellip;</div>
+  <script src="{{ url_for('static', filename='js/order_polling.js') }}" defer></script>
+  {% elif still_confirming %}
+  <div class="alert alert--info">
+    Still waiting for payment confirmation. This can occasionally take a little longer &mdash;
+    check <a href="{{ url_for('orders.mine') }}">My Orders</a> shortly, or contact support if it doesn't update.
+  </div>
+  {% endif %}
+{% endif %}
+
+<div class="card">
+  <div class="split-row">
+    <div>
+      <h1>Order #{{ order.id }}</h1>
+      <p class="page-subtitle">Placed on {{ format_datetime(order.created_at) }}</p>
+    </div>
+    {{ order_status_badge(order.status) }}
+  </div>
+</div>
+
+<div class="card">
+  <h3 class="card__title">Items</h3>
+  <div class="cart-list__header cart-line--readonly">
+    <span>Product</span>
+    <span>Total</span>
+  </div>
+  {% for item in order.items %}
+  <div class="cart-line cart-line--readonly">
+    <div class="cart-line__info">
+      <h4>{{ item.product_name }}</h4>
+      <p class="page-subtitle">Qty {{ item.quantity }} &times; {{ "%.2f"|format(item.unit_price_cents / 100) }} {{ order.currency|upper }}</p>
+    </div>
+    <strong class="cart-line__subtotal">{{ "%.2f"|format((item.unit_price_cents * item.quantity) / 100) }} {{ order.currency|upper }}</strong>
+  </div>
+  {% endfor %}
+
+  <div class="cart-summary">
+    <div class="cart-summary__row cart-summary__row--total">
+      <span>Total</span>
+      <span>{{ "%.2f"|format(order.total_amount_cents / 100) }} {{ order.currency|upper }}</span>
+    </div>
+  </div>
+</div>
+
+{% if order.shipping_line1 %}
+<div class="card">
+  <h3 class="card__title">Shipping address</h3>
+  <dl class="account-details account-details--standalone">
+    <div><dt>Name</dt><dd>{{ order.shipping_name }}</dd></div>
+    <div><dt>Address</dt><dd>
+      {{ order.shipping_line1 }}{% if order.shipping_line2 %}, {{ order.shipping_line2 }}{% endif %}<br>
+      {{ order.shipping_postal_code }} {{ order.shipping_city }}, {{ order.shipping_country }}
+    </dd></div>
+  </dl>
+</div>
+{% endif %}
+
+{% if is_admin and (next_fulfillment_status or is_refundable) %}
+<div class="card">
+  <h3 class="card__title">Admin actions</h3>
+  <div class="form-actions">
+    {% if next_fulfillment_status %}
+    <form method="POST" action="{{ url_for('orders.admin_advance', order_id=order.id) }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <button class="btn" type="submit">Mark as {{ next_fulfillment_status|capitalize }}</button>
+    </form>
+    {% endif %}
+    {% if is_refundable %}
+    <form method="POST" action="{{ url_for('orders.admin_refund', order_id=order.id) }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <button class="btn btn--danger" type="submit" data-confirm-message="Refund {{ '%.2f'|format(order.total_amount_cents / 100) }} {{ order.currency|upper }} to the customer via Stripe? This cannot be undone.">Refund via Stripe</button>
+    </form>
+    {% endif %}
+  </div>
+</div>
+{% endif %}
+
+{% if order.status == 'pending' and not still_confirming %}
+<div class="card">
+  <h3 class="card__title">Payment</h3>
+  {% if stripe_enabled %}
+  <p>Your order is reserved but not paid yet. Complete payment to confirm it.</p>
+  <form method="POST" action="{{ url_for('orders.pay', order_id=order.id) }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <button class="btn btn--large" type="submit">Pay {{ "%.2f"|format(order.total_amount_cents / 100) }} {{ order.currency|upper }}</button>
+  </form>
+  {% else %}
+  <p>Online payment isn't available yet &mdash; it's coming in the next update.</p>
+  {% endif %}
+
+  <form method="POST" action="{{ url_for('orders.cancel', order_id=order.id) }}" class="form-actions">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <button class="btn btn--danger" type="submit" data-confirm-message="Cancel this order? This cannot be undone.">Cancel order</button>
+  </form>
+</div>
+{% endif %}
+
+<div class="form-actions">
+  <a href="{{ url_for('orders.mine') }}" class="btn btn--secondary">Back to my orders</a>
+</div>
+
+<script src="{{ url_for('static', filename='js/confirm_dialog.js') }}" defer></script>
+{% endblock %}

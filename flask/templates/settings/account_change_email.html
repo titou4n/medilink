@@ -13,13 +13,21 @@
         <p class="current-value">Current email: <strong>{{ email }}</strong></p>
     {% endif %}
 
+    <p class="field-hint">We'll send a confirmation link to your new address - it only takes effect once you open it.</p>
+
     <form method="post">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+        <div class="field">
+            <label for="current_password">Current password</label>
+            <input class="input" type="password" id="current_password" name="current_password" placeholder="Enter your current password" required>
+        </div>
+
         <div class="field">
             <label for="email">New email</label>
             <input class="input" type="email" id="email" name="email" placeholder="Enter an email" value="{{ request.form['email'] }}" required>
         </div>
-        <button class="btn btn--full" type="submit">Update Email</button>
+        <button class="btn btn--full" type="submit">Send confirmation link</button>
     </form>
 </div>
 {% endblock %}

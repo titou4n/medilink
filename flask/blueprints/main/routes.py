@@ -73,6 +73,25 @@ def conditions_uses():
     return render_template('main/conditions_uses.html')
 
 
+@bp.route('/mentions_legales')
+@bp.route('/mentions_legales/')
+def legal_notice():
+    return render_template('main/legal_notice.html')
+
+
+@bp.route('/conditions_vente')
+@bp.route('/conditions_vente/')
+def sale_terms():
+    product = ext.product_service.get_by_sku(ext.config.NFC_CARD_SKU)
+    return render_template(
+        'main/sale_terms.html',
+        product_name=product.name if product else ext.config.NFC_CARD_NAME,
+        product_description=product.description if product else ext.config.NFC_CARD_DESCRIPTION,
+        price_cents=product.price_cents if product else ext.config.NFC_CARD_PRICE_CENTS,
+        currency=product.currency if product else ext.config.SHOP_CURRENCY,
+    )
+
+
 @bp.route('/privacy_policy')
 @bp.route('/privacy_policy/')
 def privacy_policy():

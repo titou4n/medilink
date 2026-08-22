@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+{% block title %}Mentions légales - MediLink{% endblock %}
+{% block content %}
+
+<div class="page-header">
+    <h1>Mentions légales</h1>
+    <p class="page-subtitle">En vigueur au 20/08/2026</p>
+</div>
+
+<div class="card">
+
+    <div class="alert alert--warning">
+        L'éditeur exerce cette activité en tant que particulier, sans structure commerciale déclarée à ce jour.
+        Cette information est communiquée en toute transparence.
+    </div>
+
+    <h3>1. Éditeur du site</h3>
+    <p>
+        Le site https://medilink.ltjs.net/ (ci-après « le Site ») est édité par SIMON Titouan, particulier
+        domicilié en France.
+    </p>
+    <ul class="terms-list">
+        <li>Statut juridique : particulier — aucune structure commerciale déclarée à ce jour</li>
+        <li>Numéro SIRET : non applicable (aucune immatriculation à ce jour)</li>
+        <li>Adresse e-mail de contact : titouservice.mail@gmail.com</li>
+    </ul>
+
+    <h3>2. Directeur de la publication</h3>
+    <p>
+        Le directeur de la publication est SIMON Titouan.
+    </p>
+
+    <h3>3. Hébergement</h3>
+    <p>
+        Le Site est actuellement <strong>auto-hébergé en France</strong> par l'éditeur lui-même. L'exposition du
+        Site sur Internet (protection contre les attaques, terminaison TLS) est assurée par :
+    </p>
+    <ul class="terms-list">
+        <li>
+            <strong>Cloudflare, Inc.</strong> — 101 Townsend St, San Francisco, CA 94107, États-Unis —
+            <a href="https://www.cloudflare.com" target="_blank" rel="noopener">www.cloudflare.com</a>
+        </li>
+    </ul>
+
+    <h3>4. Propriété intellectuelle</h3>
+    <p>
+        L'ensemble des éléments du Site (textes, marques, logos, graphismes) est protégé par le Code de la
+        propriété intellectuelle. Toute reproduction ou représentation, totale ou partielle, sans autorisation
+        préalable de l'éditeur est interdite et constitutive de contrefaçon. Pour plus de détails, voir l'article
+        « Propriété intellectuelle » de nos
+        <a href="{{ url_for('main.conditions_uses') }}">Conditions Générales d'Utilisation</a>.
+    </p>
+
+    <h3>5. Contact</h3>
+    <p>
+        Pour toute question relative au Site ou à ces mentions légales, vous pouvez contacter l'éditeur à
+        l'adresse : titouservice.mail@gmail.com.
+    </p>
+
+    <hr>
+    <p class="terms-footer">
+        Voir aussi nos <a href="{{ url_for('main.conditions_uses') }}">Conditions Générales d'Utilisation</a>,
+        notre <a href="{{ url_for('main.privacy_policy') }}">Politique de confidentialité</a> et nos
+        <a href="{{ url_for('main.sale_terms') }}">Conditions Générales de Vente</a>.
+    </p>
+
+</div>
+{% endblock %}
