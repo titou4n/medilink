@@ -1,0 +1,15 @@
+{% extends 'base_login_register.html' %}
+{% block title_tag %}Confirm Email Change - MediLink{% endblock %}
+{% block content %}
+<div class="card card--narrow">
+    <h2>Confirm your new email</h2>
+    <p class="page-subtitle">Confirm the new email address for your MediLink account: <strong>{{ new_email }}</strong></p>
+
+    <form method="post">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button class="btn btn--full" type="submit">Confirm email change</button>
+
+        <p class="form-footer"><a href="{{ url_for('auth.login') }}">Back to Sign In</a></p>
+    </form>
+</div>
+{% endblock %}

@@ -362,6 +362,25 @@ class AccountRepository:
             conn.commit()
         logger.info("Account deleted: user_id=%d", user_id)
 
+    def delete_unverified_expired(self, ttl_minutes: int) -> None:
+        """Purge accounts that never completed email verification in time.
+
+        A row with ``email_verified = 0`` older than *ttl_minutes* is an
+        abandoned (or squatted) registration attempt: nobody has proven
+        ownership of that mailbox, so it is safe to reclaim the email for a
+        future registration or OAuth sign-in.
+        """
+        with self._db.connect() as conn:
+            conn.execute(
+                """
+                DELETE FROM account
+                WHERE email_verified = 0
+                  AND datetime(created_at) <= datetime('now', ?);
+                """,
+                (f"-{int(ttl_minutes)} minutes",),
+            )
+            conn.commit()
+
     # ------------------------------------------------------------------ #
     # Metadata
     # ------------------------------------------------------------------ #
@@ -392,6 +411,27 @@ class AccountRepository:
     def get_all_metadata(self) -> list[sqlite3.Row]:
         with self._db.connect() as conn:
             return conn.execute("SELECT * FROM metadata;").fetchall()
+
+    # ------------------------------------------------------------------ #
+    # Terms & Conditions consent
+    # ------------------------------------------------------------------ #
+
+    def record_terms_consent(
+        self,
+        user_id: int,
+        terms_version: str,
+        accepted_at: str,
+        ipv4: str,
+    ) -> None:
+        with self._db.connect() as conn:
+            conn.execute(
+                """
+                INSERT INTO terms_consents (user_id, terms_version, accepted_at, ipv4)
+                VALUES (?, ?, ?, ?);
+                """,
+                (user_id, terms_version, accepted_at, ipv4),
+            )
+            conn.commit()
 
     # ------------------------------------------------------------------ #
     # User preferences

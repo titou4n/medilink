@@ -25,13 +25,16 @@ services:
       PROXY_TRUSTED_HOP_COUNT: 2
       NEED_TO_RESET_DB_EXCEPT_ACCOUNT: "false"
       NEED_TO_RESET_ALL_DB: "false"
-      NEED_TO_RESET_ROLES_PERMISSIONS_TABLES: "true"
+      NEED_TO_RESET_ROLES_PERMISSIONS_TABLES: "false"
       CREATE_SEEDED_ACCOUNTS: "false"
       GOOGLE_CLIENT_ID: "628634609065-b6e7vpagmm6focbl1o7h1nkemqo1gon0.apps.googleusercontent.com"
+      STRIPE_PUBLISHABLE_KEY: ""
+      NFC_CARD_PRICE_CENTS: "500"
+      NFC_CARD_CURRENCY: "eur"
 
     volumes:
       - db-data:/app/Data/db
-      - folder-profile-picture:/app/static/img
+      - folder-profile-picture:/app/static/uploads/profile_pictures
 
     expose:
       - "5000"
@@ -47,6 +50,8 @@ services:
       - secret_key
       - email_app_password
       - google_client_secret
+      - stripe_secret_key
+      - stripe_webhook_secret
 
   redis:
     image: redis:7-alpine
@@ -119,3 +124,7 @@ secrets:
     file: ./secrets/cloudflare_tunnel_token.txt
   google_client_secret:
     file: ./secrets/google_client_secret.txt
+  stripe_secret_key:
+    file: ./secrets/stripe_secret_key.txt
+  stripe_webhook_secret:
+    file: ./secrets/stripe_webhook_secret.txt

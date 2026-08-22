@@ -44,10 +44,16 @@ class Config:
     if not EMAIL_APP_PASSWORD:
         raise RuntimeError("EMAIL_APP_PASSWORD is missing")
 
-    # Google Sign-In (OAuth 2.0 / OIDC).
+    # Google Sign-In (OAuth 2.0 / OIDC) - Optional
     GOOGLE_CLIENT_ID: str | None = os.getenv("GOOGLE_CLIENT_ID")
     GOOGLE_CLIENT_SECRET: str | None = read_secret("google_client_secret") if ENV_PROD else os.getenv("GOOGLE_CLIENT_SECRET")
     GOOGLE_OAUTH_ENABLED: bool = bool(GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET)
+
+    # Stripe - Optional
+    STRIPE_SECRET_KEY: str | None = read_secret("stripe_secret_key") if ENV_PROD else os.getenv("STRIPE_SECRET_KEY")
+    STRIPE_WEBHOOK_SECRET: str | None = read_secret("stripe_webhook_secret") if ENV_PROD else os.getenv("STRIPE_WEBHOOK_SECRET")
+    STRIPE_PUBLISHABLE_KEY: str | None = os.getenv("STRIPE_PUBLISHABLE_KEY")
+    STRIPE_ENABLED: bool = bool(STRIPE_SECRET_KEY and STRIPE_WEBHOOK_SECRET and STRIPE_PUBLISHABLE_KEY)
 
     # ──────────────────────────── Paths ─────────────────────────────────── #
 
@@ -67,10 +73,20 @@ class Config:
 
     PATH_DEFAULT_PROFILE_PICTURE: Path = BASE_DIR / "static" / "img" / "profile-default.png"
 
+    UPLOAD_PRODUCT_IMAGE_FOLDER: Path = UPLOAD_FOLDER / "product_images"
+    UPLOAD_PRODUCT_IMAGE_FOLDER.mkdir(parents=True, exist_ok=True)
+
     # ──────────────────────────── Uploads ───────────────────────────────── #
 
     MAX_CONTENT_LENGTH: int             = int(os.getenv("MAX_UPLOAD_SIZE_MB", "16")) * 1024 * 1024
     ALLOWED_EXTENSIONS_PROFILE_PICTURE: set[str] = {"png", "jpg", "jpeg"}
+    ALLOWED_EXTENSIONS_PRODUCT_IMAGE: set[str]   = {"png", "jpg", "jpeg"}
+    PRODUCT_IMAGE_MAX_SIZE: int         = 5 * 1024 * 1024
+
+    # Whitelist of selectable icons for a product card (see
+    # templates/shop/components/product_icons.html for the matching SVGs).
+    # None/empty/unknown -> falls back to the default "box" icon.
+    PRODUCT_ICON_CHOICES: list[str] = ["card", "pill", "heart", "shield", "cross"]
 
     # ──────────────────────── Flask-Session ─────────────────────────────── #
 
@@ -116,12 +132,25 @@ class Config:
     # Admin-triggered password reset link validity window
     PASSWORD_RESET_TOKEN_TIMELAPS_MINUTES: int = int(os.getenv("PASSWORD_RESET_TOKEN_TIMELAPS_MINUTES", "60"))
 
-    # Password generation
-    PASSWORD_GENERATION_LENGTH: int = 20
+    # Email-change confirmation link validity window. The new address only
+    # takes effect once this link is opened - proves the account owner
+    # actually controls the mailbox they're switching to.
+    EMAIL_CHANGE_TOKEN_TIMELAPS_MINUTES: int = int(os.getenv("EMAIL_CHANGE_TOKEN_TIMELAPS_MINUTES", "60"))
+
+    # How long an unverified account (email_verified = 0) is allowed to sit
+    # unclaimed before it's purged. Prevents "email squatting": someone
+    # registering with an email they don't own, never finishing verification,
+    # and permanently blocking the real owner from registering/using OAuth.
+    UNVERIFIED_ACCOUNT_TTL_MINUTES: int = int(os.getenv("UNVERIFIED_ACCOUNT_TTL_MINUTES", "30"))
 
     # Minimum length enforced server-side on registration and password change
     # (client-side/HTML validation alone is trivially bypassed with a direct POST).
     MIN_PASSWORD_LENGTH: int = int(os.getenv("MIN_PASSWORD_LENGTH", "10"))
+
+    # Version of the Terms & Conditions / Privacy Policy shown at registration.
+    # Bump this whenever the legal text changes so stored consents stay tied
+    # to the version the user actually accepted.
+    TERMS_VERSION: str = os.getenv("TERMS_VERSION", "1.0")
 
     # ─────────────────────── Database reset flags ───────────────────────── #
 
@@ -160,6 +189,27 @@ class Config:
     MAX_SHORT_FIELD: int    = 150
     MAX_PHONE_FIELD: int    = 30
     PUBLIC_RATE_LIMIT: int = 50
+
+    # ───────────────────────────── Shop ──────────────────────────────────── #
+    # The catalog lives in the `products` table (Data/schema/products.py) and
+    # is managed from the admin panel - prices are never trusted from the
+    # client, every Checkout Session amount is built server-side from a fresh
+    # DB read. SHOP_CURRENCY is fixed across the whole catalog because Stripe
+    # Checkout only supports a single currency per session: every product is
+    # created in this currency (see blueprints/shop/service.py::ProductService).
+    SHOP_CURRENCY: str = os.getenv("SHOP_CURRENCY", os.getenv("NFC_CARD_CURRENCY", "eur"))
+
+    # Seed values for the original MediLink NFC card product - used only once,
+    # by ProductsSeeder, to create its row on first boot. After that its price
+    # lives in the database and is editable from the admin panel.
+    NFC_CARD_SKU: str            = "medilink-nfc-card"
+    NFC_CARD_NAME: str           = "MediLink NFC Card"
+    NFC_CARD_DESCRIPTION: str    = "A durable NFC card that first responders can tap to instantly access your emergency medical information."
+    NFC_CARD_PRICE_CENTS: int    = int(os.getenv("NFC_CARD_PRICE_CENTS", "2999"))
+
+    # Countries Stripe Checkout is allowed to collect a shipping address for.
+    # France-only for launch - widen this list later without any data migration.
+    STRIPE_SHIPPING_ALLOWED_COUNTRIES: list[str] = ["FR"]
 
     # ──────────────────────────── Proxy Trust ───────────────────────────── #
 

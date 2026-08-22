@@ -16,24 +16,36 @@
         </a>
 
         {% if current_user.is_authenticated %}
+        {% set ep = request.endpoint %}
         <ul class="site-nav">
-          <li><a href="{{ url_for('main.home') }}">Home</a></li>
-          <li><a href="{{ url_for('settings.settings_home') }}">Settings</a></li>
+          <li><a class="{{ 'active' if ep == 'main.home' else '' }}" href="{{ url_for('main.home') }}">Home</a></li>
+          <li><a class="{{ 'active' if ep and ep.startswith('emergency_information.') and not ep.startswith('emergency_information.admin') else '' }}" href="{{ url_for('emergency_information.dashboard') }}">Emergency Information</a></li>
+          <li><a class="{{ 'active' if ep and ep.startswith('settings.') else '' }}" href="{{ url_for('settings.settings_home') }}">Settings</a></li>
           {% if nav_can_access_admin %}
-          <li><a href="{{ url_for('admin.admin_panel') }}">Admin Panel</a></li>
+          <li><a class="{{ 'active' if ep and (ep.startswith('admin.') or ep.startswith('emergency_information.admin') or ep == 'orders.admin_dashboard' or ep.startswith('shop.admin')) else '' }}" href="{{ url_for('admin.admin_panel') }}">Admin Panel</a></li>
           {% endif %}
         </ul>
 
         <div class="site-header__actions">
+          {% if current_user.has_permission('orders_access') %}
+          <a class="cart-link" href="{{ url_for('shop.cart_view') }}" title="Your cart" aria-label="Your cart, {{ cart_item_count }} item(s)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="9" cy="21" r="1"/>
+              <circle cx="20" cy="21" r="1"/>
+              <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+            </svg>
+            {% if cart_item_count %}<span class="cart-link__badge">{{ cart_item_count }}</span>{% endif %}
+          </a>
+          {% endif %}
           <a href="{{ url_for('settings.account_home') }}" title="Your account">
             <img class="profile-pic" src="{{ url_for('settings.profile_picture', user_id=current_user.id) }}" alt="Profile picture">
           </a>
-          <a class="btn btn--secondary btn--small" href="{{ url_for('main.logout') }}">Log Out</a>
+          <a class="btn btn--secondary btn--small" href="{{ url_for('main.logout') }}">Log out</a>
         </div>
         {% else %}
         <div class="site-header__actions">
-          <a class="btn btn--secondary btn--small" href="{{ url_for('auth.login') }}">Sign In</a>
-          <a class="btn btn--small" href="{{ url_for('auth.register') }}">Sign Up</a>
+          <a class="btn btn--secondary btn--small" href="{{ url_for('auth.login') }}">Sign in</a>
+          <a class="btn btn--small" href="{{ url_for('auth.register') }}">Sign up</a>
         </div>
         {% endif %}
       </div>
@@ -45,10 +57,14 @@
             {% if messages %}
               {% for category, message in messages %}
                 <div class="alert alert--{{ category }}">
-                  {% if category == 'success' %}✅
-                  {% elif category == 'error' %}❌
-                  {% elif category == 'warning' %}⚠️
-                  {% else %}ℹ️
+                  {% if category == 'success' %}
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                  {% elif category == 'error' %}
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+                  {% elif category == 'warning' %}
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                  {% else %}
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
                   {% endif %}
                   {{ message }}
                 </div>
@@ -61,7 +77,7 @@
     </div>
 
     <footer class="site-footer">
-      <p>&copy; 2026 MediLink. <a href="{{ url_for('main.conditions_uses') }}">Terms &amp; Conditions</a> · <a href="{{ url_for('main.privacy_policy') }}">Privacy Policy</a></p>
+      <p>&copy; 2026 MediLink. <a href="{{ url_for('main.conditions_uses') }}">Terms &amp; Conditions</a> · <a href="{{ url_for('main.sale_terms') }}">Sale Terms</a> · <a href="{{ url_for('main.privacy_policy') }}">Privacy Policy</a> · <a href="{{ url_for('main.legal_notice') }}">Legal Notice</a></p>
     </footer>
   </body>
 </html>

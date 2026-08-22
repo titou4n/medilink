@@ -1,0 +1,11 @@
+{% if record.doctor_name %}
+<div class="card" aria-label="Healthcare provider">
+  <h3 class="card__title">Healthcare provider</h3>
+  <div class="summary-grid">
+    <div><dt>Doctor</dt><dd>{{ record.doctor_name }}</dd></div>
+    {% if record.doctor_phone %}
+    <div><dt>Phone</dt><dd><a class="phone-link" href="tel:{{ record.doctor_phone }}">{{ record.doctor_phone }}</a></dd></div>
+    {% endif %}
+  </div>
+</div>
+{% endif %}

@@ -1,12 +1,12 @@
 {% extends 'base.html' %}
-{% block title %}Emergency Information — Admin — MediLink{% endblock %}
+{% block title %}Emergency Information - Admin - MediLink{% endblock %}
 {% block content %}
 
 {% include 'partials/admin_nav.html' %}
 
 <div class="page-header">
   <h1>Emergency Information</h1>
-  <p class="page-subtitle">{{ pagination.total }} {{ "profile" if pagination.total == 1 else "profiles" }} — manage access status and public visibility.</p>
+  <p class="page-subtitle">{{ pagination.total }} {{ "profile" if pagination.total == 1 else "profiles" }} - manage access status and public visibility.</p>
 </div>
 
 <div class="table-wrap">
@@ -34,8 +34,8 @@
             <span class="badge badge--danger">Disabled</span>
           {% endif %}
         </td>
-        <td>{{ format_datetime(record.last_public_access) if record.last_public_access else "—" }}</td>
-        <td>{{ format_datetime(record.updated_at) if record.updated_at else "—" }}</td>
+        <td>{{ format_datetime(record.last_public_access) if record.last_public_access else "-" }}</td>
+        <td>{{ format_datetime(record.updated_at) if record.updated_at else "-" }}</td>
         <td>
           <div class="row-actions">
             <a class="btn btn--secondary btn--small"
@@ -50,10 +50,9 @@
               </button>
             </form>
 
-            <form method="POST" action="{{ url_for('emergency_information.admin_delete', record_id=record.id) }}" class="inline-form"
-                  onsubmit="return confirm('This will permanently delete the profile. Continue?');">
+            <form method="POST" action="{{ url_for('emergency_information.admin_delete', record_id=record.id) }}" class="inline-form">
               <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-              <button type="submit" class="btn btn--danger btn--small" aria-label="Delete {{ record.full_name }}">Delete</button>
+              <button type="submit" class="btn btn--danger btn--small" aria-label="Delete {{ record.full_name }}" data-confirm-message="This will permanently delete the profile. Continue?">Delete</button>
             </form>
           </div>
         </td>
@@ -84,4 +83,5 @@
 </nav>
 {% endif %}
 
+<script src="{{ url_for('static', filename='js/confirm_dialog.js') }}" defer></script>
 {% endblock %}

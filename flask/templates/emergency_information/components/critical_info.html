@@ -1,0 +1,12 @@
+{% if record.critical_info %}
+<div class="card card--critical">
+  <h3 class="card__title">Critical information</h3>
+  <ul class="plain-list">
+    {% for item in record.critical_info.split('\n') if item.strip() %}
+      <li>{{ item.strip() }}</li>
+    {% else %}
+      <li>{{ record.critical_info }}</li>
+    {% endfor %}
+  </ul>
+</div>
+{% endif %}

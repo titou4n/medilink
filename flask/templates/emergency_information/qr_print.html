@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Print QR Code - MediLink</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body class="qr-print-body">
+
+<div class="qr-print-toolbar">
+  <a href="{{ url_for('emergency_information.dashboard') }}" class="btn btn--secondary btn--small">&larr; Back to dashboard</a>
+  <button type="button" class="btn btn--small" onclick="window.print()">Print</button>
+</div>
+
+<div class="qr-print-card">
+  <img class="qr-print-card__logo" src="{{ url_for('static', filename='img/medilink-logo.svg') }}" alt="MediLink">
+  <img class="qr-print-card__qr" src="{{ qr_data_uri }}" alt="QR code linking to my MediLink emergency profile" width="240" height="240">
+  <p class="qr-print-card__text">Scan to access my emergency medical profile</p>
+  <p class="qr-print-card__url">{{ public_url }}</p>
+</div>
+
+</body>
+</html>

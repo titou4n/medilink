@@ -37,7 +37,7 @@
                   <span class="avatar-upload__filename" id="avatar-upload-filename">No file selected</span>
               </div>
               <p class="field-hint">JPG, PNG or GIF. 5MB max.</p>
-              <button class="btn btn--secondary btn--small" type="submit">Upload Picture</button>
+              <button class="btn btn--secondary btn--small" type="submit">Upload picture</button>
           </div>
       </form>
 
@@ -71,11 +71,13 @@
         <p>This will permanently remove your account and all associated data. This action cannot be undone.</p>
         <form action="{{ url_for('settings.delete_account') }}" method="POST" class="inline-form">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-            <button class="btn btn--danger" type="submit" onclick="return confirm('Are you sure? This action cannot be undone.')">Delete Account</button>
+            <button class="btn btn--danger" type="submit" data-confirm-message="Are you sure? This action cannot be undone.">Delete account</button>
         </form>
     </div>
 
     <p class="terms-footer terms-footer--spaced">Read our <a href="{{ url_for('main.conditions_uses') }}" target="_blank">Terms &amp; Conditions</a></p>
 
 </div>
+
+<script src="{{ url_for('static', filename='js/confirm_dialog.js') }}" defer></script>
 {% endblock %}

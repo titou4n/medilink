@@ -110,6 +110,13 @@ class AccountsSeeder:
 
         self._accounts.create_preferences(user_id)
 
+        # The Super Admin account is bootstrapped by the application itself
+        # (gated on role_id above, never on a frontend-supplied email), so
+        # its email ownership is inherently trusted -> mark it verified
+        # immediately. Regular accounts still go through the normal
+        # email/2FA verification flow untouched.
+        self._accounts.update_email_verified(user_id, True)
+
         logger.warning(
             "\n"
             "================================================================\n"

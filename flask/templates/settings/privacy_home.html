@@ -13,7 +13,7 @@
     <p>Download a copy of the personal data associated with your account.</p>
     <form action="{{ url_for('settings.export_data') }}" method="post">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-        <button class="btn btn--secondary" type="submit">Export Data</button>
+        <button class="btn btn--secondary" type="submit">Export data</button>
     </form>
 
     <hr>

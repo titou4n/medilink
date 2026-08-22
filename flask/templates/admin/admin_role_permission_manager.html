@@ -13,12 +13,12 @@
   <div class="card">
     <h3 class="card__title">Assign a role</h3>
     <p>Give an existing role to an account by ID.</p>
-    <a class="btn btn--secondary" href="{{ url_for('admin.assign_role') }}">Assign Role</a>
+    <a class="btn btn--secondary" href="{{ url_for('admin.assign_role') }}">Assign role</a>
   </div>
   <div class="card">
     <h3 class="card__title">Create a role</h3>
     <p>Define a new role and select its permissions.</p>
-    <a class="btn btn--secondary" href="{{ url_for('admin.create_role') }}">Create Role</a>
+    <a class="btn btn--secondary" href="{{ url_for('admin.create_role') }}">Create role</a>
   </div>
 </div>
 
@@ -38,7 +38,7 @@
           <a class="btn btn--secondary btn--small" href="{{ url_for('admin.edit_role', role_name=role_name) }}">Edit</a>
           <form action="{{ url_for('admin.delete_role', role_name=role_name) }}" method="post" class="inline-form">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-            <button class="btn btn--danger btn--small" type="submit" onclick="return confirm('Are you sure? This action cannot be undone.');">Delete</button>
+            <button class="btn btn--danger btn--small" type="submit" data-confirm-message="Are you sure? This action cannot be undone.">Delete</button>
           </form>
         </div>
       </div>
@@ -52,4 +52,5 @@
 </div>
 {% endif %}
 
+<script src="{{ url_for('static', filename='js/confirm_dialog.js') }}" defer></script>
 {% endblock %}

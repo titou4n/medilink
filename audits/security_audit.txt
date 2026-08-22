@@ -1,0 +1,80 @@
+Tu es un expert Senior en cybersécurité, pentest, DevSecOps et développement sécurisé.
+
+Avant toute chose, lis CLAUDE.md à la racine du dépôt et le fichier audit_*.md le plus
+récent du dossier audits/ (trier par date, pas par nom). Utilise-les comme référence de
+l'état réel du projet et de son historique de sécurité :
+- Ne re-liste pas comme "nouveau" un constat déjà marqué RÉSOLU dans un audit antérieur ;
+  vérifie plutôt qu'il n'a pas régressé.
+- Si un constat antérieur est toujours ouvert, indique-le comme "confirmé, toujours ouvert"
+  plutôt que de le redécouvrir depuis zéro.
+- Signale explicitement toute régression par rapport au dernier audit.
+
+Réalise un audit de sécurité complet du projet par revue manuelle du code (il n'y a
+aucune suite de tests automatisés ni de linter configuré dans ce dépôt — l'audit doit
+donc reposer sur la lecture du code, des configurations et des dépendances, pas sur
+l'exécution d'outils d'analyse automatisés absents du projet).
+
+Vérifie notamment :
+
+- Authentification et gestion des mots de passe (y compris la 2FA par e-mail)
+- Gestion des sessions et cookies (sessions Redis, Flask-Session)
+- Contrôle d'accès, RBAC et permissions (5 rôles, permissions nommées dans permissions.py)
+- Vulnérabilités OWASP Top 10 (SQLi, XSS, CSRF, SSRF, IDOR, RCE, Path Traversal, etc.)
+- Validation et sanitisation des entrées utilisateur
+- Upload de fichiers (photo de profil, traitement Pillow)
+- API et endpoints exposés (endpoints JSON ponctuels, /health)
+- Gestion des secrets, tokens et variables d'environnement
+- Cryptographie et stockage des données sensibles
+- Configuration Docker Compose, Nginx et infrastructure
+- Dépendances vulnérables ou obsolètes (flask/requirements.txt)
+- Journalisation et gestion des erreurs
+- Exposition d'informations sensibles
+- Robustesse générale du code
+
+Pour chaque vulnérabilité trouvée, indique :
+
+- La gravité (Critique, Élevée, Moyenne, Faible)
+- L'impact potentiel
+- Le fichier concerné (chemin + ligne si possible)
+- L'explication du problème
+- Le correctif recommandé
+- Un exemple de code corrigé si nécessaire
+
+L'infrastructure réseau réelle du projet est la suivante (à vérifier dans
+docker-compose.yml et nginx/default.conf avant de faire des hypothèses) :
+
+Navigateur → Cloudflare (edge, WAF, TLS) → Cloudflare Tunnel (cloudflared, connexion
+sortante uniquement, aucun port publié sur l'hôte) → Nginx (image officielle nginx:latest,
+config montée en volume, TLS interne + en-têtes de sécurité) → Gunicorn/Flask
+
+Il n'y a ni Box/Routeur avec port exposé, ni Nginx Proxy Manager : ce point a déjà fait
+l'objet d'une correction (migration du 2026-07-05, commit 32dda22). Ne pars pas d'une
+autre topologie sans l'avoir d'abord vérifiée dans le code.
+
+Prends en compte cette architecture dans l'audit de sécurité, notamment pour :
+- les headers HTTP (voir nginx/default.conf),
+- la gestion des IP réelles (extensions.py::get_client_identifier, vérification CIDR),
+- le nombre de sauts de proxy de confiance (PROXY_TRUSTED_HOP_COUNT, ProxyFix),
+- Cloudflare et le tunnel sortant,
+- TLS/HTTPS,
+- les risques de bypass du reverse proxy,
+- les limitations de débit (Flask-Limiter + Redis),
+- les protections DDoS côté Cloudflare,
+- la configuration Nginx réellement utilisée (pas de Dockerfile Nginx custom).
+
+Le projet utilise deux modes de configuration :
+- Développement : fichier flask/.env (non versionné), calqué sur flask/.env.example.
+- Production : 4 secrets applicatifs obligatoires (SECRET_KEY, TWELVEDATA_API_KEY,
+  OMDB_API_KEY, EMAIL_APP_PASSWORD) + cloudflare_tunnel_token, lus depuis
+  /run/secrets/<nom> (Docker Secrets), et flask/prod.env pour les variables non sensibles.
+
+Vérifie que cette séparation est correctement respectée et qu'aucun secret de production
+n'est exposé dans la configuration, le code, l'historique Git ou les logs.
+
+Sois extrêmement rigoureux et critique. Considère qu'un attaquant possède des
+connaissances avancées. Fournis à la fin un résumé des risques, une note globale de
+sécurité sur 100 et une liste priorisée des corrections à effectuer.
+
+À la fin de l'audit, génère un rapport horodaté dans le dossier audits/ au format
+audit_YYYY-MM-DD.md. Si un fichier avec cette date existe déjà, incrémente un suffixe
+(_v2, _v3, ...) au lieu de l'écraser.

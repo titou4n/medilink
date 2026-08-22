@@ -14,6 +14,7 @@ from Data.connection import DatabaseConnection
 
 from Data.seeders.roles_permissions import RolesPermissionsSeeder
 from Data.seeders.accounts_seeder   import AccountsSeeder
+from Data.seeders.products_seeder   import ProductsSeeder
 
 from Data.repositories.account_repository           import AccountRepository
 from Data.repositories.role_repository              import RoleRepository
@@ -22,6 +23,10 @@ from Data.repositories.twofa_repository             import TwoFARepository
 from Data.repositories.oauth_identity_repository     import OAuthIdentityRepository
 from Data.repositories.emergency_information_repository import EmergencyInformationRepository
 from Data.repositories.password_reset_repository    import PasswordResetRepository
+from Data.repositories.email_change_repository       import EmailChangeRepository
+from Data.repositories.order_repository              import OrderRepository
+from Data.repositories.product_repository            import ProductRepository
+from Data.repositories.cart_repository               import CartRepository
 
 from config import Config
 from utils.utils import Utils
@@ -31,6 +36,8 @@ from utils.email_manager import EmailManager
 from utils.hash_manager import HashManager
 from utils.twofa_manager import TwofaManager
 from utils.password_reset_manager import PasswordResetManager
+from utils.email_change_manager import EmailChangeManager
+from utils.stripe_manager import StripeManager
 from utils.decorators import *
 
 from permissions import Permissions
@@ -87,14 +94,23 @@ db_twofa_repository: TwoFARepository = TwoFARepository(db_connection)
 db_emergency_information_repository: EmergencyInformationRepository = EmergencyInformationRepository(db_connection)
 db_oauth_identity_repository: OAuthIdentityRepository = OAuthIdentityRepository(db_connection)
 db_password_reset_repository: PasswordResetRepository = PasswordResetRepository(db_connection)
+db_email_change_repository: EmailChangeRepository = EmailChangeRepository(db_connection)
+db_order_repository: OrderRepository = OrderRepository(db_connection)
+db_product_repository: ProductRepository = ProductRepository(db_connection)
+db_cart_repository: CartRepository = CartRepository(db_connection)
 
 # ------------------------------------------------------------------ #
 # Service singletons
 # ------------------------------------------------------------------ #
 
 from blueprints.emergency_information.service import EmergencyInformationService
+from blueprints.orders.service import OrderService
+from blueprints.shop.service import ProductService, CartService
 
 emergency_information_service: EmergencyInformationService = EmergencyInformationService(db_emergency_information_repository)
+order_service: OrderService = OrderService(db_order_repository)
+product_service: ProductService = ProductService(db_product_repository)
+cart_service: CartService = CartService(db_cart_repository, db_product_repository)
 
 # Manager
 hash_manager = HashManager()
@@ -103,6 +119,8 @@ session_manager = SessionManager()
 permission_manager = PermissionsManager()
 twofa_manager = TwofaManager()
 password_reset_manager = PasswordResetManager()
+email_change_manager = EmailChangeManager()
+stripe_manager = StripeManager()
 
 # Utils/Tools
 utils = Utils()
@@ -130,3 +148,4 @@ _accounts_seeder = AccountsSeeder(
     role_repo=db_role_repository,
     hash_manager=hash_manager,
 )
+_products_seeder = ProductsSeeder()

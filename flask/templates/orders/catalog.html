@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% block title %}Buy a MediLink NFC Card - MediLink{% endblock %}
+{% block content %}
+
+{% include 'partials/orders_nav.html' %}
+
+<div class="page-header">
+  <h1>MediLink NFC Card</h1>
+  <p class="page-subtitle">Order a physical NFC card linked to your MediLink emergency profile.</p>
+</div>
+
+<div class="card card--narrow">
+  <div class="card--center">
+    <span class="icon-circle">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <rect x="2" y="5" width="20" height="14" rx="2"/>
+        <line x1="2" y1="10" x2="22" y2="10"/>
+        <path d="M17 14.5a2.5 2.5 0 0 0 0-3"/>
+        <path d="M19 16a5 5 0 0 0 0-6"/>
+      </svg>
+    </span>
+    <h2 class="card__title">{{ product_name }}</h2>
+    <p class="price-tag">{{ "%.2f"|format(price_cents / 100) }} {{ currency|upper }}</p>
+    <p>A durable NFC card that first responders can tap to instantly access your emergency medical information.</p>
+  </div>
+
+  <ul class="feature-list">
+    <li>Instant access to your emergency profile</li>
+    <li>Durable, water-resistant card</li>
+    <li>Works with any NFC-enabled smartphone</li>
+  </ul>
+
+  <form method="POST" action="{{ url_for('orders.create') }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <button class="btn btn--large btn--full" type="submit">Order now</button>
+  </form>
+
+  <p class="form-footer"><a href="{{ url_for('orders.mine') }}">View my orders</a></p>
+</div>
+
+{% endblock %}

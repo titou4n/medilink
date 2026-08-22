@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+{% from 'shop/components/product_icons.html' import render_product_icon %}
+{% block title %}Shop - MediLink{% endblock %}
+{% block content %}
+
+{% include 'partials/orders_nav.html' %}
+
+<div class="page-header">
+  <h1>Shop</h1>
+  <p class="page-subtitle">Order MediLink products linked to your emergency profile.</p>
+</div>
+
+{% if not products %}
+<div class="card card--center">
+  <span class="icon-circle">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <rect x="2" y="5" width="20" height="14" rx="2"/>
+      <line x1="2" y1="10" x2="22" y2="10"/>
+      <path d="M17 14.5a2.5 2.5 0 0 0 0-3"/>
+      <path d="M19 16a5 5 0 0 0 0-6"/>
+    </svg>
+  </span>
+  <h2 class="card__title">Nothing in stock right now</h2>
+  <p>Check back later - new products will show up here.</p>
+</div>
+{% else %}
+<div class="card-grid">
+  {% for product in products %}
+  <div class="card product-card">
+    <div class="product-card__media">
+      {% if product.image_path %}
+      <img src="{{ url_for('static', filename=product.image_path) }}" alt="{{ product.name }}" class="product-card__image">
+      {% else %}
+      {{ render_product_icon(product.icon_key) }}
+      {% endif %}
+    </div>
+
+    <div class="product-card__body">
+      <h2 class="product-card__name">{{ product.name }}</h2>
+      {% if product.description %}<p class="product-card__desc">{{ product.description }}</p>{% endif %}
+      <p class="price-tag">{{ "%.2f"|format(product.price_cents / 100) }} {{ product.currency|upper }}</p>
+    </div>
+
+    <form method="POST" action="{{ url_for('shop.cart_add') }}" class="product-card__footer">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <input type="hidden" name="sku" value="{{ product.sku }}">
+      <!--<input type="number" name="quantity" value="1" min="1" max="20" aria-label="Quantity" class="qty-input">-->
+      <button class="btn" type="submit">Add to cart</button>
+    </form>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+{% endblock %}

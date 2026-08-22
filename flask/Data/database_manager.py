@@ -10,7 +10,7 @@ Responsible for:
 import logging
 import extensions as ext
 from Data.connection import DatabaseConnection
-from Data.schema import accounts, auth, roles, emergency_information, oauth_identities, password_reset
+from Data.schema import accounts, auth, roles, emergency_information, oauth_identities, password_reset, email_change, orders, consents, products, cart
 from Data.seeders.roles_permissions import RolesPermissionsSeeder
 import sqlite3
 
@@ -56,6 +56,11 @@ class DatabaseManager:
             emergency_information,
             oauth_identities,
             password_reset,
+            email_change,
+            orders,
+            consents,
+            products,
+            cart,
         ]
         total = 0
         for module in all_ddl_modules:
@@ -63,6 +68,26 @@ class DatabaseManager:
                 conn.execute(statement)
                 total += 1
         logger.debug("Executed %d DDL statement(s).", total)
+
+        self._migrate_products_table(conn)
+
+    def _migrate_products_table(self, conn: sqlite3.Connection) -> None:
+        """
+        Additive migration for the ``products`` table.
+
+        ``CREATE TABLE IF NOT EXISTS`` (used above) never alters a table that
+        already exists, so databases created before the image/icon feature
+        was added are missing these columns. Both are nullable, so existing
+        products keep working unchanged (no image, no custom icon) once the
+        columns are added.
+        """
+        existing_columns = {row["name"] for row in conn.execute("PRAGMA table_info(products);").fetchall()}
+        if "image_path" not in existing_columns:
+            conn.execute("ALTER TABLE products ADD COLUMN image_path TEXT;")
+            logger.info("Migrated products table: added image_path column.")
+        if "icon_key" not in existing_columns:
+            conn.execute("ALTER TABLE products ADD COLUMN icon_key TEXT;")
+            logger.info("Migrated products table: added icon_key column.")
 
     def _run_seeders(self, conn:sqlite3.Connection) -> None:
         """Run all registered seeders inside the current connection."""

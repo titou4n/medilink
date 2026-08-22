@@ -1,0 +1,12 @@
+{% if record.current_medications %}
+<div class="card">
+  <h3 class="card__title">Current medications</h3>
+  <ul class="plain-list">
+    {% for item in record.current_medications.split('\n') if item.strip() %}
+      <li>{{ item.strip() }}</li>
+    {% else %}
+      <li>{{ record.current_medications }}</li>
+    {% endfor %}
+  </ul>
+</div>
+{% endif %}

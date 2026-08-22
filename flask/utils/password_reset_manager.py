@@ -8,11 +8,14 @@ logger = logging.getLogger(__name__)
 
 class PasswordResetManager:
     """
-    Admin-triggered password reset flow.
+    Single-use, time-limited token + link password reset flow, shared by
+    both entry points that can trigger it: an admin resetting another
+    user's password from the admin panel, and a user resetting their own
+    password via "Forgot my password".
 
-    An admin never sees or sets the user's password: a single-use,
-    time-limited token is generated, only its hash is stored, and a
-    reset link is emailed to the account's own address. The user picks
+    Neither the admin nor the app itself ever sees or sets the user's
+    password: a random token is generated, only its hash is stored, and
+    a reset link is emailed to the account's own address. The user picks
     their new password themselves via that link.
     """
 
@@ -23,14 +26,37 @@ class PasswordResetManager:
         self.hash_manager = ext.hash_manager
         self.config = ext.config
 
-    def request_reset(self, user_id: int) -> bool:
+    def request_reset(self, user_id: int, self_service: bool = False) -> bool:
         """
         Generate a reset token for *user_id* and email the reset link.
 
         Any previously pending token for this user is invalidated first,
-        so only the most recently requested link works. Returns True if
-        the email was sent successfully.
+        so only the most recently requested link works. *self_service*
+        selects the email wording: True for a user-initiated "Forgot my
+        password" request, False (default) for an admin-triggered reset.
+        Returns True if the email was sent successfully.
         """
+        token = self._create_token(user_id)
+
+        if self_service:
+            return self.email_manager.send_self_service_password_reset_link_email(user_id=user_id, token=token)
+        return self.email_manager.send_password_reset_link_email(user_id=user_id, token=token)
+
+    def request_account_setup(self, user_id: int) -> bool:
+        """
+        Generate a reset token for a newly admin-created account and email
+        a "set your password" link.
+
+        Same single-use token mechanism as request_reset, reusing the same
+        auth.reset_password route to consume it, but with wording suited to
+        a first-time setup rather than a password reset. The account is
+        created with an unusable random password hash, so this link is the
+        only way to make it usable. Returns True if the email was sent.
+        """
+        token = self._create_token(user_id)
+        return self.email_manager.send_account_setup_email(user_id=user_id, token=token)
+
+    def _create_token(self, user_id: int) -> str:
         token = self.hash_manager.generate_secure_token()
         token_hash = self.hash_manager.sha256(token)
 
@@ -40,8 +66,7 @@ class PasswordResetManager:
             token_hash=token_hash,
             created_at=ext.utils.get_datetime_isoformat(),
         )
-
-        return self.email_manager.send_password_reset_link_email(user_id=user_id, token=token)
+        return token
 
     def verify_token(self, token: str) -> int:
         """Return the user_id for a valid, unused, unexpired *token*."""

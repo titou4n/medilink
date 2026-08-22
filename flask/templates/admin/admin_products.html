@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+{% from 'shop/components/product_icons.html' import render_product_icon %}
+{% block title %}Products - Admin - MediLink{% endblock %}
+{% block content %}
+
+{% include 'partials/admin_nav.html' %}
+
+<div class="page-header page-header--split">
+  <div>
+    <h1>Products</h1>
+    <p class="page-subtitle">{{ pagination.total }} {{ "product" if pagination.total == 1 else "products" }} in the catalog.</p>
+  </div>
+  <a class="btn" href="{{ url_for('shop.admin_product_create') }}">Add product</a>
+</div>
+
+<div class="table-wrap">
+  <table aria-label="Products">
+    <thead>
+      <tr>
+        <th></th>
+        <th>SKU</th>
+        <th>Name</th>
+        <th>Price</th>
+        <th>Status</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+
+      {% for product in products %}
+      <tr>
+        <td>
+          <span class="admin-product-thumb">
+            {% if product.image_path %}
+            <img src="{{ url_for('static', filename=product.image_path) }}" alt="">
+            {% else %}
+            {{ render_product_icon(product.icon_key) }}
+            {% endif %}
+          </span>
+        </td>
+        <td>{{ product.sku }}</td>
+        <td>{{ product.name }}</td>
+        <td>{{ "%.2f"|format(product.price_cents / 100) }} {{ product.currency|upper }}</td>
+        <td>
+          {% if product.is_active %}
+            <span class="badge badge--success">Active</span>
+          {% else %}
+            <span class="badge badge--neutral">Inactive</span>
+          {% endif %}
+        </td>
+        <td class="row-actions">
+          <a class="btn btn--secondary btn--small" href="{{ url_for('shop.admin_product_edit', product_id=product.id) }}">Edit</a>
+          {% if product.is_active %}
+          <form method="POST" action="{{ url_for('shop.admin_product_deactivate', product_id=product.id) }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" class="btn btn--danger btn--small" data-confirm-message="Remove &quot;{{ product.name }}&quot; from the shop? Existing orders are not affected.">Deactivate</button>
+          </form>
+          {% else %}
+          <form method="POST" action="{{ url_for('shop.admin_product_activate', product_id=product.id) }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" class="btn btn--secondary btn--small">Activate</button>
+          </form>
+          {% endif %}
+        </td>
+      </tr>
+      {% else %}
+      <tr>
+        <td colspan="6">
+          <div class="empty-state">
+            <p>No products yet.</p>
+          </div>
+        </td>
+      </tr>
+      {% endfor %}
+
+    </tbody>
+  </table>
+</div>
+
+{% if pagination.pages > 1 %}
+<nav class="pagination" aria-label="Pagination">
+  {% if pagination.has_prev %}
+    <a href="?page={{ pagination.prev_num }}" rel="prev">← Previous</a>
+  {% endif %}
+  <span class="pagination__info">Page {{ pagination.page }} of {{ pagination.pages }}</span>
+  {% if pagination.has_next %}
+    <a href="?page={{ pagination.next_num }}" rel="next">Next →</a>
+  {% endif %}
+</nav>
+{% endif %}
+
+<script src="{{ url_for('static', filename='js/confirm_dialog.js') }}" defer></script>
+{% endblock %}

@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block title %}{% if record %}Edit{% else %}Create{% endif %} Emergency Profile — MediLink{% endblock %}
+{% block title %}{% if record %}Edit{% else %}Create{% endif %} Emergency Profile - MediLink{% endblock %}
 {% block content %}
 
 <div class="page-header">
@@ -9,13 +9,16 @@
 <div class="card">
 
   <div class="alert alert--info">
-    ℹ️ The information below (blood type, allergies, conditions, medications…) is considered
-    <strong>health data</strong> and is entirely optional. By saving this profile, you consent to
-    us storing it for the purpose of emergency access. Saving this profile immediately generates
-    a public emergency link — anyone holding that link will be able to view this profile without
-    logging in. You can edit or delete this profile at any time; deleting it also permanently
-    revokes the public link. See our
-    <a href="{{ url_for('main.privacy_policy') }}" target="_blank">Privacy Policy</a> for full details.
+    <svg class="alert__icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+    <div class="alert__content">
+      The information below (blood type, allergies, conditions, medications…) is considered
+      <strong>health data</strong> and is entirely optional. By saving this profile, you consent to
+      us storing it for the purpose of emergency access. Saving this profile immediately generates
+      a public emergency link - anyone holding that link will be able to view this profile without
+      logging in. You can edit or delete this profile at any time; deleting it also permanently
+      revokes the public link. See our
+      <a href="{{ url_for('main.privacy_policy') }}" target="_blank">Privacy Policy</a> for full details.
+    </div>
   </div>
 
   <form method="POST" action="{{ url_for('emergency_information.edit') }}">
@@ -48,7 +51,7 @@
         <div class="field">
           <label for="gender">Gender</label>
           <select id="gender" name="gender">
-            <option value="">— Select —</option>
+            <option value="">- Select -</option>
             {% for value, label in gender_options %}
               <option value="{{ value }}" {% if record and record.gender == value %}selected{% endif %}>{{ label }}</option>
             {% endfor %}
@@ -59,7 +62,7 @@
 
     {# ========================= PHYSICAL ========================= #}
     <fieldset class="form-section">
-      <legend class="form-section__title">Physical Information</legend>
+      <legend class="form-section__title">Physical information</legend>
 
       <div class="form-row form-row--3col">
         <div class="field">
@@ -75,7 +78,7 @@
         <div class="field">
           <label>Blood Type</label>
           <select name="blood_type">
-            <option value="">— Unknown —</option>
+            <option value="">- Unknown -</option>
             {% for bt in blood_types %}
               <option value="{{ bt }}" {% if record and record.blood_type == bt %}selected{% endif %}>{{ bt }}</option>
             {% endfor %}
@@ -86,7 +89,7 @@
 
     {# ========================= CRITICAL ========================= #}
     <fieldset class="form-section form-section--critical">
-      <legend class="form-section__title">Critical Information</legend>
+      <legend class="form-section__title">Critical information</legend>
       <p class="form-section__hint">Provide essential information clearly and concisely for emergency responders.</p>
 
       <div class="field">
@@ -104,7 +107,7 @@
 
     {# ========================= MEDICAL ========================= #}
     <fieldset class="form-section">
-      <legend class="form-section__title">Medical Information</legend>
+      <legend class="form-section__title">Medical information</legend>
 
       <div class="field">
         <label>Medical Conditions</label>
@@ -126,7 +129,7 @@
 
     {# ========================= EMERGENCY CONTACT ========================= #}
     <fieldset class="form-section">
-      <legend class="form-section__title">Emergency Contact</legend>
+      <legend class="form-section__title">Emergency contact</legend>
 
       <div class="form-row form-row--3col">
         <div class="field">
@@ -140,7 +143,7 @@
         <div class="field">
           <label>Relationship</label>
           <select name="emergency_contact_relation">
-            <option value="">— Select —</option>
+            <option value="">- Select -</option>
             {% for rel in relation_options %}
               <option value="{{ rel }}" {% if record and record.emergency_contact_relation == rel %}selected{% endif %}>{{ rel }}</option>
             {% endfor %}
@@ -151,7 +154,7 @@
 
     {# ========================= DOCTOR ========================= #}
     <fieldset class="form-section">
-      <legend class="form-section__title">Healthcare Provider</legend>
+      <legend class="form-section__title">Healthcare provider</legend>
 
       <div class="form-row form-row--2col">
         <div class="field">
@@ -167,7 +170,7 @@
 
     {# ========================= ORGAN DONATION ========================= #}
     <fieldset class="form-section">
-      <legend class="form-section__title">Organ Donation</legend>
+      <legend class="form-section__title">Organ donation</legend>
 
       <div class="checkbox-field">
         <input type="checkbox" id="organ_donor" name="organ_donor" value="1"
@@ -178,7 +181,7 @@
 
     {# ========================= ACTIONS ========================= #}
     <div class="form-actions">
-      <button type="submit" class="btn btn--large">Save Profile</button>
+      <button type="submit" class="btn btn--large">Save profile</button>
       <a href="{{ url_for('emergency_information.dashboard') }}" class="btn btn--ghost btn--large">Cancel</a>
     </div>
 

@@ -40,6 +40,7 @@ def account_home():
 @bp.route('/account/change_email/', methods=['GET', 'POST'])
 @login_required
 @require_permission("edit_own_profile")
+@ext.limiter.limit("5 per hour")
 def account_change_email():
     if request.method == 'GET':
         return render_template('settings/account_change_email.html',
@@ -47,20 +48,37 @@ def account_change_email():
                                user_has_email=(current_user.email is not None),
                                email=current_user.email)
 
+    current_password = request.form.get("current_password", "")
     email = request.form.get("email", "").strip().lower()
-    is_valid, error = ext.email_manager.validate_user_email(email)
 
+    stored_hash = ext.db_account_repository.get_password_hash(current_user.id)
+    if not ext.hash_manager.check_password(current_password, stored_hash):
+        flash('Password is not correct.', "error")
+        return redirect(url_for('settings.account_change_email'))
+
+    is_valid, error = ext.email_manager.validate_user_email(email)
     if not is_valid:
         flash(error, "error")
         return redirect(url_for('settings.account_change_email'))
 
-    if email != current_user.email and ext.db_account_repository.exists_by_email(email):
+    if email == current_user.email:
+        flash("This is already your current email.", "warning")
+        return redirect(url_for('settings.account_change_email'))
+
+    if ext.db_account_repository.exists_by_email(email):
         flash("This email is already used by another account.", "error")
         return redirect(url_for('settings.account_change_email'))
 
-    ext.db_account_repository.update_email(current_user.id, email)
-    ext.db_account_repository.update_email_verified(current_user.id, False)
-    flash('Your email has been updated')
+    # The address is only saved once its owner clicks the confirmation link
+    # sent below - it never overwrites account.email at this point, so this
+    # can't be used to squat someone else's mailbox or lock the current
+    # owner out (see EmailChangeManager for the full flow).
+    sent = ext.email_change_manager.request_change(user_id=current_user.id, new_email=email)
+    if not sent:
+        flash('Could not send the confirmation email. Please try again later.', "error")
+        return redirect(url_for('settings.account_change_email'))
+
+    flash(f'A confirmation link was sent to {email}. Open it to finish changing your email.')
     return redirect(url_for('settings.account_home'))
 
 
@@ -154,6 +172,9 @@ def upload_profile_picture():
 @bp.route('/profile_picture/<int:user_id>')
 @login_required
 def profile_picture(user_id: int):
+    if user_id != current_user.id and not current_user.has_permission("view_users"):
+        abort(403)
+
     path = ext.db_account_repository.get_profile_picture_path(user_id)
     if not path or not __import__('os').path.isfile(path):
         path = ext.config.PATH_DEFAULT_PROFILE_PICTURE
